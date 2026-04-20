@@ -1,9 +1,9 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
-using System.Linq;
+using System.Text;
 using System.Text.Json;
 using MonTableurApp.Models;
 
@@ -21,16 +21,24 @@ namespace MonTableurApp.ViewModels
         public List<string> Statuts { get; }
 
         public int TotalProjets => Projets.Count;
-        public int ProjetsEnCours => CountByStatut("En cours");
-        public int ProjetsEnAttente => CountByStatut("En attente");
-        public int ProjetsTermines => CountByStatut("Termine");
+        public int StatutsEnCours => CountStatusContaining("cours");
+        public int RapportsEnCours => CountStatusContaining("rapport");
+        public int ProjetsFaits => CountByStatut("fait");
 
         public MainViewModel()
         {
-            Clients = new List<string> { "Client A", "Client B", "Client C" };
-            Demandeurs = new List<string> { "Alice", "Bob", "Charlie" };
-            TypesActivite = new List<string> { "Analyse", "Dev", "Test" };
-            Statuts = new List<string> { "En cours", "Termine", "En attente" };
+            Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };
+            Demandeurs = new List<string> { "RUC", "JEN", "KYJ", "JLC", "JER", "JEL", "JYM", "XAL"};
+            TypesActivite = new List<string> { "Qualification", "Appel d'offre", "Investigation", "Caractérisation" };
+            Statuts = new List<string>
+            {
+                "À faire",
+                "Pré-qualification en cours",
+                "Qualification en cours",
+                "Rapport en cours",
+                "Rapport terminé",
+                "Fait"
+            };
 
             Projets = ChargerProjets();
             Projets.CollectionChanged += Projets_CollectionChanged;
@@ -92,21 +100,32 @@ namespace MonTableurApp.ViewModels
             NotifierResume();
         }
 
-        private int CountByStatut(string expectedStatus)
+        private int CountStatusContaining(string expectedPart)
         {
-            string expected = NormalizeStatus(expectedStatus);
-            return Projets.Count(projet => NormalizeStatus(projet.Statut) == expected);
+            string expected = NormalizeText(expectedPart);
+            return Projets.Count(projet => NormalizeText(projet.Statut).Contains(expected));
         }
 
-        private static string NormalizeStatus(string? value)
+        private int CountByStatut(string expectedStatus)
         {
-            return (value ?? string.Empty)
-                .Trim()
-                .ToLowerInvariant()
-                .Replace("é", "e")
-                .Replace("è", "e")
-                .Replace("ê", "e")
-                .Replace("à", "a");
+            string expected = NormalizeText(expectedStatus);
+            return Projets.Count(projet => NormalizeText(projet.Statut) == expected);
+        }
+
+        private static string NormalizeText(string? value)
+        {
+            string normalized = (value ?? string.Empty).Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder(normalized.Length);
+
+            foreach (char current in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(current) != UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(current);
+                }
+            }
+
+            return builder.ToString().Normalize(NormalizationForm.FormC);
         }
 
         private void Sauvegarder()
@@ -118,9 +137,9 @@ namespace MonTableurApp.ViewModels
         private void NotifierResume()
         {
             OnPropertyChanged(nameof(TotalProjets));
-            OnPropertyChanged(nameof(ProjetsEnCours));
-            OnPropertyChanged(nameof(ProjetsEnAttente));
-            OnPropertyChanged(nameof(ProjetsTermines));
+            OnPropertyChanged(nameof(StatutsEnCours));
+            OnPropertyChanged(nameof(RapportsEnCours));
+            OnPropertyChanged(nameof(ProjetsFaits));
         }
 
         private void OnPropertyChanged(string propertyName)

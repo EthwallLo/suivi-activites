@@ -7,12 +7,14 @@
             <Setter Property="Padding" Value="18"/>
             <Setter Property="Margin" Value="0,0,14,0"/>
             <Setter Property="CornerRadius" Value="22"/>
-            <Setter Property="Background" Value="#F4EEE3"/>
+            <Setter Property="Background" Value="#FFF2F8"/>
+            <Setter Property="BorderBrush" Value="#F5C8DD"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#E6DDD1"/>
-            <Setter Property="Foreground" Value="#2D3A37"/>
+            <Setter Property="Background" Value="#FFE6F1"/>
+            <Setter Property="Foreground" Value="#8D4D79"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="12,10"/>
@@ -20,16 +22,16 @@
         </Style>
 
         <Style TargetType="DataGridRow">
-            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinHeight" Value="46"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F9F5EE"/>
+                    <Setter Property="Background" Value="#FFF5FA"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#EADFCF"/>
-                    <Setter Property="Foreground" Value="#24312F"/>
+                    <Setter Property="Background" Value="#FFE8F4"/>
+                    <Setter Property="Foreground" Value="#6E4967"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -47,13 +49,13 @@
         </Grid.RowDefinitions>
 
         <StackPanel>
-            <TextBlock Text="Resume rapide"
-                       Foreground="#263532"
+            <TextBlock Text="Vue d'ensemble"
+                       Foreground="#8A4E78"
                        FontSize="24"
                        FontWeight="SemiBold"/>
-            <TextBlock Text="Les projets restent modifiables directement dans le tableau, avec un recap visuel en haut."
+            <TextBlock Text="Tout le tableau est éditable."
                        Margin="0,6,0,18"
-                       Foreground="#667671"
+                       Foreground="#A07A94"
                        FontSize="14"/>
 
             <Grid Margin="0,0,0,20">
@@ -67,11 +69,11 @@
                 <Border Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <TextBlock Text="Tous les projets"
-                                   Foreground="#667671"
+                                   Foreground="#A07A94"
                                    FontSize="13"/>
                         <TextBlock Text="{Binding TotalProjets}"
                                    Margin="0,10,0,0"
-                                   Foreground="#22312E"
+                                   Foreground="#8A4E78"
                                    FontSize="30"
                                    FontWeight="Bold"/>
                     </StackPanel>
@@ -79,14 +81,15 @@
 
                 <Border Grid.Column="1"
                         Style="{StaticResource SummaryCardStyle}"
-                        Background="#E1EFE8">
+                        Background="#FFF4D8"
+                        BorderBrush="#F1D89B">
                     <StackPanel>
                         <TextBlock Text="En cours"
-                                   Foreground="#45635B"
+                                   Foreground="#B5843E"
                                    FontSize="13"/>
-                        <TextBlock Text="{Binding ProjetsEnCours}"
+                        <TextBlock Text="{Binding StatutsEnCours}"
                                    Margin="0,10,0,0"
-                                   Foreground="#214640"
+                                   Foreground="#A8712A"
                                    FontSize="30"
                                    FontWeight="Bold"/>
                     </StackPanel>
@@ -94,14 +97,15 @@
 
                 <Border Grid.Column="2"
                         Style="{StaticResource SummaryCardStyle}"
-                        Background="#F8E9CF">
+                        Background="#EAF8F5"
+                        BorderBrush="#B8E4D9">
                     <StackPanel>
-                        <TextBlock Text="En attente"
-                                   Foreground="#8A6531"
+                        <TextBlock Text="Rapports en cours"
+                                   Foreground="#4B9A8A"
                                    FontSize="13"/>
-                        <TextBlock Text="{Binding ProjetsEnAttente}"
+                        <TextBlock Text="{Binding RapportsEnCours}"
                                    Margin="0,10,0,0"
-                                   Foreground="#7A5729"
+                                   Foreground="#3D897A"
                                    FontSize="30"
                                    FontWeight="Bold"/>
                     </StackPanel>
@@ -110,14 +114,15 @@
                 <Border Grid.Column="3"
                         Style="{StaticResource SummaryCardStyle}"
                         Margin="0"
-                        Background="#E2E7F3">
+                        Background="#F0EEFF"
+                        BorderBrush="#D3CEF8">
                     <StackPanel>
-                        <TextBlock Text="Termines"
-                                   Foreground="#55627E"
+                        <TextBlock Text="Faits"
+                                   Foreground="#7269C6"
                                    FontSize="13"/>
-                        <TextBlock Text="{Binding ProjetsTermines}"
+                        <TextBlock Text="{Binding ProjetsFaits}"
                                    Margin="0,10,0,0"
-                                   Foreground="#3C4B69"
+                                   Foreground="#625AB1"
                                    FontSize="30"
                                    FontWeight="Bold"/>
                     </StackPanel>
@@ -126,8 +131,8 @@
         </StackPanel>
 
         <Border Grid.Row="1"
-                Background="White"
-                BorderBrush="#E8DFD3"
+                Background="#FFFFFF"
+                BorderBrush="#F3D9E7"
                 BorderThickness="1"
                 CornerRadius="24"
                 Padding="10">
@@ -140,51 +145,55 @@
                       RowHeaderWidth="0"
                       BorderThickness="0"
                       Background="Transparent"
-                      AlternatingRowBackground="#FBF8F2"
+                      AlternatingRowBackground="#FFF9FC"
                       RowBackground="White"
                       SelectionMode="Single"
                       SelectionUnit="FullRow">
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Projet"
+                    <DataGridTextColumn Header="Numéro projet"
                                         Binding="{Binding NumeroProjet}"
-                                        Width="110"/>
-                    <DataGridTextColumn Header="Produit"
+                                        Width="120"/>
+                    <DataGridTextColumn Header="Nom produit"
                                         Binding="{Binding NomProduit}"
                                         Width="170"/>
 
                     <DataGridComboBoxColumn Header="Client"
                                             SelectedItemBinding="{Binding Client}"
-                                            Width="140"
+                                            Width="120"
                                             ItemsSource="{Binding DataContext.Clients, RelativeSource={RelativeSource AncestorType=Window}}"/>
 
                     <DataGridComboBoxColumn Header="Demandeur"
                                             SelectedItemBinding="{Binding Demandeur}"
-                                            Width="140"
+                                            Width="120"
                                             ItemsSource="{Binding DataContext.Demandeurs, RelativeSource={RelativeSource AncestorType=Window}}"/>
 
-                    <DataGridComboBoxColumn Header="Type"
+                    <DataGridComboBoxColumn Header="Type d'activité"
                                             SelectedItemBinding="{Binding TypeActivite}"
-                                            Width="130"
+                                            Width="150"
                                             ItemsSource="{Binding DataContext.TypesActivite, RelativeSource={RelativeSource AncestorType=Window}}"/>
+
+                    <DataGridTextColumn Header="Dossier racine"
+                                        Binding="{Binding DossierRacine}"
+                                        Width="260"/>
 
                     <DataGridComboBoxColumn Header="Statut"
                                             SelectedItemBinding="{Binding Statut}"
-                                            Width="130"
+                                            Width="190"
                                             ItemsSource="{Binding DataContext.Statuts, RelativeSource={RelativeSource AncestorType=Window}}"/>
 
-                    <DataGridTextColumn Header="Debut"
+                    <DataGridTextColumn Header="Date début"
                                         Binding="{Binding DateDebut}"
                                         Width="110"/>
-                    <DataGridTextColumn Header="Prevision"
+                    <DataGridTextColumn Header="Date prévisionnelle"
                                         Binding="{Binding DatePrevisionnelle}"
-                                        Width="110"/>
-                    <DataGridTextColumn Header="Fin"
+                                        Width="130"/>
+                    <DataGridTextColumn Header="Date fin"
                                         Binding="{Binding DateFin}"
                                         Width="110"/>
                     <DataGridTextColumn Header="Commentaires"
                                         Binding="{Binding Commentaires}"
-                                        Width="2*"/>
+                                        Width="210"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

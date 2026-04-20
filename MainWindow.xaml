@@ -1,27 +1,36 @@
-<Window x:Class="MonTableurApp.MainWindow"
+﻿<Window x:Class="MonTableurApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Suivi des activites"
-        Width="1440"
-        Height="900"
-        MinWidth="1200"
-        MinHeight="760"
+        Icon="logg.png"
+        Width="1480"
+        Height="920"
+        MinWidth="1260"
+        MinHeight="780"
         WindowStartupLocation="CenterScreen"
-        Background="#F4F1EA">
+        Background="#FFF6FB">
 
     <Window.Resources>
+        <LinearGradientBrush x:Key="WindowBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFF7FC" Offset="0"/>
+            <GradientStop Color="#FFF0F7" Offset="0.55"/>
+            <GradientStop Color="#FFF8EF" Offset="1"/>
+        </LinearGradientBrush>
+
         <LinearGradientBrush x:Key="SidebarBrush" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#1C3A35" Offset="0"/>
-            <GradientStop Color="#2A5750" Offset="1"/>
+            <GradientStop Color="#FFD7E8" Offset="0"/>
+            <GradientStop Color="#F6D8FF" Offset="1"/>
         </LinearGradientBrush>
 
         <Style x:Key="MenuButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="#F8F5EF"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#7B4D73"/>
+            <Setter Property="Background" Value="#FFFDFE"/>
+            <Setter Property="BorderBrush" Value="#F6BAD8"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="18,14"/>
             <Setter Property="Margin" Value="0,8,0,0"/>
             <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -30,18 +39,19 @@
                         <Border x:Name="ButtonBorder"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="16">
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#3C6A62"/>
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FFF0F8"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#EFA6CC"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#17332F"/>
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FFE7F4"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -50,13 +60,17 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="{StaticResource WindowBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="315"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Background="{StaticResource SidebarBrush}">
+        <Border Margin="18"
+                Background="{StaticResource SidebarBrush}"
+                CornerRadius="30"
+                BorderBrush="#F5B7D7"
+                BorderThickness="1">
             <Grid Margin="28">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -65,34 +79,30 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel>
-                    <Border Width="58"
-                            Height="58"
-                            Background="#F0B36D"
-                            CornerRadius="18"
+                    <Border Width="66"
+                            Height="66"
+                            Background="#FFF9FD"
+                            CornerRadius="22"
+                            BorderBrush="#F4B5D6"
+                            BorderThickness="1"
                             HorizontalAlignment="Left">
-                        <TextBlock Text="SA"
-                                   FontSize="24"
-                                   FontWeight="Bold"
-                                   Foreground="#1F2D2A"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+                        <Image Source="logg.png"
+                               Width="48"
+                               Height="48"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
                     </Border>
 
-                    <TextBlock Text="Suivi des activites"
+                    <TextBlock Text="Suivi des activités"
                                Margin="0,22,0,0"
-                               Foreground="#F8F5EF"
-                               FontSize="28"
+                               Foreground="#8B4B7C"
+                               FontSize="29"
                                FontWeight="SemiBold"/>
-
-                    <TextBlock Text="Une vue simple et agreable pour piloter les projets et les essais."
-                               Margin="0,10,0,0"
-                               Foreground="#D8E5E1"
-                               FontSize="14"
-                               TextWrapping="Wrap"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1"
-                            Margin="0,36,0,0">
+                            Margin="0,38,0,0">
                     <Button Content="Vue generale"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="VueGenerale_Click"/>
@@ -100,16 +110,18 @@
 
                 <Border Grid.Row="2"
                         Padding="18"
-                        Background="#214640"
-                        CornerRadius="20">
+                        Background="#FFF6FB"
+                        CornerRadius="22"
+                        BorderBrush="#F5BCD9"
+                        BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Objectif"
-                                   Foreground="#F0B36D"
+                        <TextBlock Text="Mode maquette"
+                                   Foreground="#E28AB9"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
-                        <TextBlock Text="Suivre chaque projet en un coup d'oeil, meme avec un acces limite au travail."
+                        <TextBlock Text="Les projets affichés sont des données mockées pour construire la vue générale."
                                    Margin="0,8,0,0"
-                                   Foreground="#F8F5EF"
+                                   Foreground="#8E617E"
                                    FontSize="15"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -118,7 +130,7 @@
         </Border>
 
         <Grid Grid.Column="1"
-              Margin="24">
+              Margin="24,22,24,22">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -131,32 +143,34 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="Vue generale des projets"
-                               FontSize="32"
+                    <TextBlock Text="Vue générale des projets"
+                               FontSize="33"
                                FontWeight="SemiBold"
-                               Foreground="#22312E"/>
-                    <TextBlock Text="Les infos importantes restent visibles, dans un espace plus confortable et plus lisible."
+                               Foreground="#8B4B7C"/>
+                    <TextBlock Text="Les infos essentielles, en un coup d'œil."
                                Margin="0,8,0,0"
-                               Foreground="#5D6E69"
+                               Foreground="#9B758A"
                                FontSize="15"/>
                 </StackPanel>
 
                 <Border Grid.Column="1"
                         Padding="18,12"
-                        Background="#E7DED2"
+                        Background="#FFF4D9"
+                        BorderBrush="#F5D59A"
+                        BorderThickness="1"
                         CornerRadius="18"
                         VerticalAlignment="Center">
-                    <TextBlock Text="Suivi simple des essais"
-                               Foreground="#3D4B48"
+                    <TextBlock Text="Vers. 0.1"
+                               Foreground="#B78641"
                                FontWeight="SemiBold"/>
                 </Border>
             </Grid>
 
             <Border Grid.Row="1"
-                    Background="#FCFBF8"
-                    CornerRadius="28"
+                    Background="#FFFCFE"
+                    CornerRadius="30"
                     Padding="18"
-                    BorderBrush="#E5DDD2"
+                    BorderBrush="#F4D4E5"
                     BorderThickness="1">
                 <ContentControl x:Name="MainContent"/>
             </Border>
