@@ -6,26 +6,109 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Windows.Data;
 using MonTableurApp.Models;
 
 namespace MonTableurApp.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        private static readonly string DataFilePath = Path.Combine(AppContext.BaseDirectory, "data.json");
+
+        private string? searchNomProduit;
+        private int totalProjets;
+        private int statutsEnCours;
+        private int rapportsEnCours;
+        private int projetsFaits;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<Projet> Projets { get; }
+        public ICollectionView ProjetsView { get; }
 
         public List<string> Clients { get; }
         public List<string> Demandeurs { get; }
         public List<string> TypesActivite { get; }
         public List<string> Statuts { get; }
 
-        public int TotalProjets => Projets.Count;
-        public int StatutsEnCours => CountStatusContaining("cours");
-        public int RapportsEnCours => CountStatusContaining("rapport");
-        public int ProjetsFaits => CountByStatut("fait");
+        public string? SearchNomProduit
+        {
+            get => searchNomProduit;
+            set
+            {
+                if (searchNomProduit == value)
+                {
+                    return;
+                }
+
+                searchNomProduit = value;
+                ProjetsView.Refresh();
+                OnPropertyChanged(nameof(SearchNomProduit));
+                RefreshStatistics();
+            }
+        }
+
+        public int TotalProjets
+        {
+            get => totalProjets;
+            private set
+            {
+                if (totalProjets == value)
+                {
+                    return;
+                }
+
+                totalProjets = value;
+                OnPropertyChanged(nameof(TotalProjets));
+            }
+        }
+
+        public int StatutsEnCours
+        {
+            get => statutsEnCours;
+            private set
+            {
+                if (statutsEnCours == value)
+                {
+                    return;
+                }
+
+                statutsEnCours = value;
+                OnPropertyChanged(nameof(StatutsEnCours));
+            }
+        }
+
+        public int RapportsEnCours
+        {
+            get => rapportsEnCours;
+            private set
+            {
+                if (rapportsEnCours == value)
+                {
+                    return;
+                }
+
+                rapportsEnCours = value;
+                OnPropertyChanged(nameof(RapportsEnCours));
+            }
+        }
+
+        public int ProjetsFaits
+        {
+            get => projetsFaits;
+            private set
+            {
+                if (projetsFaits == value)
+                {
+                    return;
+                }
+
+                projetsFaits = value;
+                OnPropertyChanged(nameof(ProjetsFaits));
+            }
+        }
 
         public MainViewModel()
         {
@@ -43,6 +126,8 @@ namespace MonTableurApp.ViewModels
             };
 
             Projets = ChargerProjets();
+            ProjetsView = CollectionViewSource.GetDefaultView(Projets);
+            ProjetsView.Filter = FilterProjet;
             Projets.CollectionChanged += Projets_CollectionChanged;
 
             foreach (Projet projet in Projets)
@@ -50,18 +135,33 @@ namespace MonTableurApp.ViewModels
                 AttacherProjet(projet);
             }
 
-            NotifierResume();
+            RefreshStatistics();
         }
 
         private ObservableCollection<Projet> ChargerProjets()
         {
-            if (!File.Exists("data.json"))
+            if (!File.Exists(DataFilePath))
             {
                 return new ObservableCollection<Projet>();
             }
 
-            string json = File.ReadAllText("data.json");
+            string json = File.ReadAllText(DataFilePath, Encoding.UTF8);
             return JsonSerializer.Deserialize<ObservableCollection<Projet>>(json) ?? new ObservableCollection<Projet>();
+        }
+
+        private bool FilterProjet(object obj)
+        {
+            if (obj is not Projet projet)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SearchNomProduit))
+            {
+                return true;
+            }
+
+            return NormalizeText(projet.NomProduit).Contains(NormalizeText(SearchNomProduit));
         }
 
         private void Projets_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -82,8 +182,9 @@ namespace MonTableurApp.ViewModels
                 }
             }
 
+            ProjetsView.Refresh();
             Sauvegarder();
-            NotifierResume();
+            RefreshStatistics();
         }
 
         private void AttacherProjet(Projet projet)
@@ -98,20 +199,38 @@ namespace MonTableurApp.ViewModels
 
         private void Projet_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(Projet.NomProduit))
+            {
+                ProjetsView.Refresh();
+            }
+
             Sauvegarder();
-            NotifierResume();
+            RefreshStatistics();
+        }
+
+        private IEnumerable<Projet> GetVisibleProjects()
+        {
+            return ProjetsView.Cast<Projet>();
+        }
+
+        private void RefreshStatistics()
+        {
+            TotalProjets = GetVisibleProjects().Count();
+            StatutsEnCours = CountStatusContaining("cours");
+            RapportsEnCours = CountStatusContaining("rapport");
+            ProjetsFaits = CountByStatut("fait");
         }
 
         private int CountStatusContaining(string expectedPart)
         {
             string expected = NormalizeText(expectedPart);
-            return Projets.Count(projet => NormalizeText(projet.Statut).Contains(expected));
+            return GetVisibleProjects().Count(projet => NormalizeText(projet.Statut).Contains(expected));
         }
 
         private int CountByStatut(string expectedStatus)
         {
             string expected = NormalizeText(expectedStatus);
-            return Projets.Count(projet => NormalizeText(projet.Statut) == expected);
+            return GetVisibleProjects().Count(projet => NormalizeText(projet.Statut) == expected);
         }
 
         private static string NormalizeText(string? value)
@@ -132,16 +251,15 @@ namespace MonTableurApp.ViewModels
 
         private void Sauvegarder()
         {
-            string json = JsonSerializer.Serialize(Projets, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText("data.json", json);
-        }
+            string json = JsonSerializer.Serialize(
+                Projets,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
 
-        private void NotifierResume()
-        {
-            OnPropertyChanged(nameof(TotalProjets));
-            OnPropertyChanged(nameof(StatutsEnCours));
-            OnPropertyChanged(nameof(RapportsEnCours));
-            OnPropertyChanged(nameof(ProjetsFaits));
+            File.WriteAllText(DataFilePath, json, new UTF8Encoding(false));
         }
 
         private void OnPropertyChanged(string propertyName)

@@ -4,21 +4,62 @@
 
     <UserControl.Resources>
         <Style x:Key="SummaryCardStyle" TargetType="Border">
-            <Setter Property="Padding" Value="18"/>
-            <Setter Property="Margin" Value="0,0,14,0"/>
-            <Setter Property="CornerRadius" Value="22"/>
-            <Setter Property="Background" Value="#FFF2F8"/>
-            <Setter Property="BorderBrush" Value="#F5C8DD"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#FFE6F1"/>
-            <Setter Property="Foreground" Value="#8D4D79"/>
+            <Setter Property="Background" Value="{DynamicResource DataGridHeaderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DataGridHeaderForegroundBrush}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridColumnHeader">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="DataGridRow">
@@ -27,11 +68,11 @@
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFF5FA"/>
+                    <Setter Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#FFE8F4"/>
-                    <Setter Property="Foreground" Value="#6E4967"/>
+                    <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DataGridSelectionForegroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -39,6 +80,95 @@
         <Style TargetType="DataGridCell">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="InvisibleRepeatButtonStyle" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Rectangle Fill="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CuteThumbStyle" TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="ThumbBorder"
+                                Background="{DynamicResource ScrollThumbBrush}"
+                                CornerRadius="8"
+                                Margin="1"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Border x:Name="TrackBorder"
+                                    Background="{DynamicResource ScrollTrackBrush}"
+                                    CornerRadius="8"/>
+                            <Track x:Name="PART_Track"
+                                   IsDirectionReversed="False">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton x:Name="DecreaseButton"
+                                                  Style="{StaticResource InvisibleRepeatButtonStyle}"
+                                                  Command="ScrollBar.PageLeftCommand"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource CuteThumbStyle}"/>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton x:Name="IncreaseButton"
+                                                  Style="{StaticResource InvisibleRepeatButtonStyle}"
+                                                  Command="ScrollBar.PageRightCommand"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter TargetName="TrackBorder" Property="Height" Value="12"/>
+                                <Setter TargetName="TrackBorder" Property="Margin" Value="0,10,0,2"/>
+                                <Setter Property="Height" Value="24"/>
+                            </Trigger>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter TargetName="TrackBorder" Property="Width" Value="12"/>
+                                <Setter TargetName="TrackBorder" Property="Margin" Value="2,0,0,0"/>
+                                <Setter Property="Width" Value="16"/>
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
+                                <Setter TargetName="DecreaseButton" Property="Command" Value="ScrollBar.PageUpCommand"/>
+                                <Setter TargetName="IncreaseButton" Property="Command" Value="ScrollBar.PageDownCommand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CenteredTextColumnElementStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="CenteredTextColumnEditingStyle" TargetType="TextBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="GridComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="MinHeight" Value="32"/>
         </Style>
     </UserControl.Resources>
 
@@ -50,12 +180,12 @@
 
         <StackPanel>
             <TextBlock Text="Vue d'ensemble"
-                       Foreground="#8A4E78"
+                       Foreground="{DynamicResource PrimaryTitleBrush}"
                        FontSize="24"
                        FontWeight="SemiBold"/>
             <TextBlock Text="Tout le tableau est editable."
                        Margin="0,6,0,18"
-                       Foreground="#A07A94"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
                        FontSize="14"/>
 
             <Grid Margin="0,0,0,20">
@@ -64,79 +194,101 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1.45*"/>
                 </Grid.ColumnDefinitions>
 
                 <Border Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <TextBlock Text="Tous les projets"
-                                   Foreground="#A07A94"
-                                   FontSize="13"/>
+                                   Foreground="{DynamicResource SummaryLabelBrush}"
+                                   FontSize="12"/>
                         <TextBlock Text="{Binding TotalProjets}"
-                                   Margin="0,10,0,0"
-                                   Foreground="#8A4E78"
-                                   FontSize="30"
+                                   Margin="0,8,0,0"
+                                   Foreground="{DynamicResource SummaryValueBrush}"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="1"
                         Style="{StaticResource SummaryCardStyle}"
-                        Background="#FFF4D8"
-                        BorderBrush="#F1D89B">
+                        Background="{DynamicResource SummaryWarmBackgroundBrush}"
+                        BorderBrush="{DynamicResource SummaryWarmBorderBrush}">
                     <StackPanel>
                         <TextBlock Text="En cours"
-                                   Foreground="#B5843E"
-                                   FontSize="13"/>
+                                   Foreground="{DynamicResource SummaryWarmForegroundBrush}"
+                                   FontSize="12"/>
                         <TextBlock Text="{Binding StatutsEnCours}"
-                                   Margin="0,10,0,0"
-                                   Foreground="#A8712A"
-                                   FontSize="30"
+                                   Margin="0,8,0,0"
+                                   Foreground="{DynamicResource SummaryWarmForegroundBrush}"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="2"
                         Style="{StaticResource SummaryCardStyle}"
-                        Background="#EAF8F5"
-                        BorderBrush="#B8E4D9">
+                        Background="{DynamicResource SummaryMintBackgroundBrush}"
+                        BorderBrush="{DynamicResource SummaryMintBorderBrush}">
                     <StackPanel>
                         <TextBlock Text="Rapports en cours"
-                                   Foreground="#4B9A8A"
-                                   FontSize="13"/>
+                                   Foreground="{DynamicResource SummaryMintForegroundBrush}"
+                                   FontSize="12"/>
                         <TextBlock Text="{Binding RapportsEnCours}"
-                                   Margin="0,10,0,0"
-                                   Foreground="#3D897A"
-                                   FontSize="30"
+                                   Margin="0,8,0,0"
+                                   Foreground="{DynamicResource SummaryMintForegroundBrush}"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="3"
                         Style="{StaticResource SummaryCardStyle}"
-                        Margin="0"
-                        Background="#F0EEFF"
-                        BorderBrush="#D3CEF8">
+                        Background="{DynamicResource SummaryLavenderBackgroundBrush}"
+                        BorderBrush="{DynamicResource SummaryLavenderBorderBrush}">
                     <StackPanel>
                         <TextBlock Text="Faits"
-                                   Foreground="#7269C6"
-                                   FontSize="13"/>
+                                   Foreground="{DynamicResource SummaryLavenderForegroundBrush}"
+                                   FontSize="12"/>
                         <TextBlock Text="{Binding ProjetsFaits}"
-                                   Margin="0,10,0,0"
-                                   Foreground="#625AB1"
-                                   FontSize="30"
+                                   Margin="0,8,0,0"
+                                   Foreground="{DynamicResource SummaryLavenderForegroundBrush}"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                     </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4"
+                        Style="{StaticResource SummaryCardStyle}"
+                        Margin="0"
+                        Background="{DynamicResource SearchCardBackgroundBrush}"
+                        BorderBrush="{DynamicResource SearchCardBorderBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Recherche produit"
+                                   Foreground="{DynamicResource SummaryLabelBrush}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"/>
+                        <TextBox Grid.Row="1"
+                                 Margin="0,8,0,0"
+                                 Style="{StaticResource RoundedTextBoxStyle}"
+                                 Text="{Binding SearchNomProduit, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
                 </Border>
             </Grid>
         </StackPanel>
 
         <Border Grid.Row="1"
                 Background="#FFFFFF"
-                BorderBrush="#F3D9E7"
+                BorderBrush="{DynamicResource DataGridSurfaceBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="24"
                 Padding="10">
-            <DataGrid ItemsSource="{Binding Projets}"
+            <DataGrid ItemsSource="{Binding ProjetsView}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="True"
                       CanUserDeleteRows="True"
@@ -145,29 +297,42 @@
                       RowHeaderWidth="0"
                       BorderThickness="0"
                       Background="Transparent"
-                      AlternatingRowBackground="#FFF9FC"
+                      AlternatingRowBackground="{DynamicResource DataGridAltRowBrush}"
                       RowBackground="White"
                       SelectionMode="Single"
-                      SelectionUnit="FullRow">
+                      SelectionUnit="FullRow"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Numero projet"
                                         Binding="{Binding NumeroProjet}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="120"/>
                     <DataGridTextColumn Header="Nom produit"
                                         Binding="{Binding NomProduit}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="170"/>
 
                     <DataGridTemplateColumn Header="Client"
                                             Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Client}" VerticalAlignment="Center"/>
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock Text="{Binding Client}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="▾"
+                                               Margin="6,0,0,0"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DockPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.Clients, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          Style="{StaticResource GridComboBoxStyle}"
                                           SelectedItem="{Binding Client, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -177,12 +342,19 @@
                                             Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Demandeur}" VerticalAlignment="Center"/>
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock Text="{Binding Demandeur}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="▾"
+                                               Margin="6,0,0,0"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DockPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.Demandeurs, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          Style="{StaticResource GridComboBoxStyle}"
                                           SelectedItem="{Binding Demandeur, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -192,12 +364,19 @@
                                             Width="170">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding TypeActivite}" VerticalAlignment="Center"/>
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock Text="{Binding TypeActivite}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="▾"
+                                               Margin="6,0,0,0"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DockPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.TypesActivite, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          Style="{StaticResource GridComboBoxStyle}"
                                           SelectedItem="{Binding TypeActivite, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -205,18 +384,27 @@
 
                     <DataGridTextColumn Header="Dossier racine"
                                         Binding="{Binding DossierRacine}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="260"/>
 
                     <DataGridTemplateColumn Header="Statut"
                                             Width="190">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Statut}" VerticalAlignment="Center"/>
+                                <DockPanel LastChildFill="False">
+                                    <TextBlock Text="{Binding Statut}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="▾"
+                                               Margin="6,0,0,0"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DockPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.Statuts, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          Style="{StaticResource GridComboBoxStyle}"
                                           SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -224,15 +412,23 @@
 
                     <DataGridTextColumn Header="Date debut"
                                         Binding="{Binding DateDebut}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="110"/>
                     <DataGridTextColumn Header="Date previsionnelle"
                                         Binding="{Binding DatePrevisionnelle}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="130"/>
                     <DataGridTextColumn Header="Date fin"
                                         Binding="{Binding DateFin}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="110"/>
                     <DataGridTextColumn Header="Commentaires"
                                         Binding="{Binding Commentaires}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="210"/>
                 </DataGrid.Columns>
             </DataGrid>

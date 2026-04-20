@@ -3,40 +3,87 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Application.Resources>
+        <LinearGradientBrush x:Key="WindowBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFF7FC" Offset="0"/>
+            <GradientStop Color="#FFF0F7" Offset="0.55"/>
+            <GradientStop Color="#FFF8EF" Offset="1"/>
+        </LinearGradientBrush>
 
-        <SolidColorBrush x:Key="PrimaryColor" Color="#F7B9D7"/>
-        <SolidColorBrush x:Key="SecondaryColor" Color="#EBD9FF"/>
-        <SolidColorBrush x:Key="BackgroundColor" Color="#FFF7FC"/>
-        <SolidColorBrush x:Key="TextColor" Color="#7C4F73"/>
+        <LinearGradientBrush x:Key="SidebarBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FFD7E8" Offset="0"/>
+            <GradientStop Color="#F6D8FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="SidebarBorderBrush" Color="#F5B7D7"/>
+        <SolidColorBrush x:Key="LogoChipBackgroundBrush" Color="#FFF9FD"/>
+        <SolidColorBrush x:Key="LogoChipBorderBrush" Color="#F4B5D6"/>
+        <SolidColorBrush x:Key="PrimaryTitleBrush" Color="#8B4B7C"/>
+        <SolidColorBrush x:Key="SecondaryTextBrush" Color="#9B758A"/>
+
+        <SolidColorBrush x:Key="MenuButtonBackgroundBrush" Color="#FFFDFE"/>
+        <SolidColorBrush x:Key="MenuButtonBorderBrush" Color="#F6BAD8"/>
+        <SolidColorBrush x:Key="MenuButtonForegroundBrush" Color="#7B4D73"/>
+        <SolidColorBrush x:Key="MenuButtonHoverBackgroundBrush" Color="#FFF0F8"/>
+        <SolidColorBrush x:Key="MenuButtonHoverBorderBrush" Color="#EFA6CC"/>
+        <SolidColorBrush x:Key="MenuButtonPressedBackgroundBrush" Color="#FFE7F4"/>
+
+        <SolidColorBrush x:Key="VersionBadgeBackgroundBrush" Color="#FFF4D9"/>
+        <SolidColorBrush x:Key="VersionBadgeBorderBrush" Color="#F5D59A"/>
+        <SolidColorBrush x:Key="VersionBadgeForegroundBrush" Color="#B78641"/>
+
+        <SolidColorBrush x:Key="ThemeButtonBackgroundBrush" Color="#FFFDFE"/>
+        <SolidColorBrush x:Key="ThemeButtonBorderBrush" Color="#E7CEE4"/>
+        <SolidColorBrush x:Key="ThemeButtonForegroundBrush" Color="#7B4D73"/>
+
+        <SolidColorBrush x:Key="InfoCardBackgroundBrush" Color="#FFF6FB"/>
+        <SolidColorBrush x:Key="InfoCardBorderBrush" Color="#F5BCD9"/>
+        <SolidColorBrush x:Key="InfoCardAccentBrush" Color="#E28AB9"/>
+
+        <SolidColorBrush x:Key="ContentBackgroundBrush" Color="#FFFCFE"/>
+        <SolidColorBrush x:Key="ContentBorderBrush" Color="#F4D4E5"/>
+
+        <SolidColorBrush x:Key="SummaryCardBackgroundBrush" Color="#FFF2F8"/>
+        <SolidColorBrush x:Key="SummaryCardBorderBrush" Color="#F5C8DD"/>
+        <SolidColorBrush x:Key="SummaryLabelBrush" Color="#A07A94"/>
+        <SolidColorBrush x:Key="SummaryValueBrush" Color="#8A4E78"/>
+
+        <SolidColorBrush x:Key="SummaryWarmBackgroundBrush" Color="#FFF4D8"/>
+        <SolidColorBrush x:Key="SummaryWarmBorderBrush" Color="#F1D89B"/>
+        <SolidColorBrush x:Key="SummaryWarmForegroundBrush" Color="#A8712A"/>
+
+        <SolidColorBrush x:Key="SummaryMintBackgroundBrush" Color="#EAF8F5"/>
+        <SolidColorBrush x:Key="SummaryMintBorderBrush" Color="#B8E4D9"/>
+        <SolidColorBrush x:Key="SummaryMintForegroundBrush" Color="#3D897A"/>
+
+        <SolidColorBrush x:Key="SummaryLavenderBackgroundBrush" Color="#F0EEFF"/>
+        <SolidColorBrush x:Key="SummaryLavenderBorderBrush" Color="#D3CEF8"/>
+        <SolidColorBrush x:Key="SummaryLavenderForegroundBrush" Color="#625AB1"/>
+
+        <SolidColorBrush x:Key="SearchCardBackgroundBrush" Color="#FFF9FC"/>
+        <SolidColorBrush x:Key="SearchCardBorderBrush" Color="#F5C8DD"/>
+        <SolidColorBrush x:Key="SearchInputBackgroundBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SearchInputBorderBrush" Color="#EFC3DA"/>
+        <SolidColorBrush x:Key="SearchInputForegroundBrush" Color="#7A5B72"/>
+
+        <SolidColorBrush x:Key="DataGridHeaderBrush" Color="#FFE6F1"/>
+        <SolidColorBrush x:Key="DataGridHeaderForegroundBrush" Color="#8D4D79"/>
+        <SolidColorBrush x:Key="DataGridRowHoverBrush" Color="#FFF5FA"/>
+        <SolidColorBrush x:Key="DataGridRowSelectedBrush" Color="#FFE8F4"/>
+        <SolidColorBrush x:Key="DataGridSelectionForegroundBrush" Color="#6E4967"/>
+        <SolidColorBrush x:Key="DataGridAltRowBrush" Color="#FFF9FC"/>
+        <SolidColorBrush x:Key="DataGridSurfaceBorderBrush" Color="#F3D9E7"/>
+
+        <SolidColorBrush x:Key="ScrollTrackBrush" Color="#F7DDEB"/>
+        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#E9A8CC"/>
+        <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#D98FB8"/>
 
         <Style TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="Margin" Value="10"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="15">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FFD7EA"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F6C1DE"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
-
     </Application.Resources>
 </Application>
