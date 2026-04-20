@@ -3,14 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Suivi des activités"
         Icon="logg.png"
-        Width="1660"
-        Height="980"
-        MinWidth="1660"
-        MinHeight="980"
-        MaxWidth="1660"
-        MaxHeight="980"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="Manual"
+        Loaded="MainWindow_Loaded">
 
     <Window.Resources>
         <Style x:Key="MenuButtonStyle" TargetType="Button">
@@ -228,6 +223,18 @@
                             x:Name="SuiviEssaisButton"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="SuiviEssais_Click"/>
+                    <Button Content="Ajouter un projet"
+                            x:Name="AjouterProjetButton"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="AjouterProjet_Click"/>
+                    <Button Content="En cours"
+                            x:Name="EnCoursButton"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="EnCours_Click"/>
+                    <Button Content="Agenda"
+                            x:Name="AgendaButton"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="Agenda_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

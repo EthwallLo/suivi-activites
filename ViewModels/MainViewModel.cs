@@ -21,34 +21,40 @@ namespace MonTableurApp.ViewModels
         private const string QuickFilterInProgress = "in-progress";
         private const string QuickFilterReports = "reports";
         private const string QuickFilterDone = "done";
+        private const string EssaiFilterAll = "all";
+        private const string EssaiFilterToProcess = "to-process";
+        private const string EssaiFilterInProgress = "in-progress";
+        private const string EssaiFilterDone = "done";
 
         private static readonly Dictionary<string, List<string>> StatutsParEssai = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Cyclage thermique"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Traité", "Non concern\u00E9" },
-            ["Traction 100m"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["OTDR"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "Mesures en cours", "Courbes \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Statique Bending"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Vieillissement"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En vieillissement", "\u00C0 traiter", "Traité", "Non concern\u00E9" },
-            ["Dimensionnel"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "Mesures en cours", "Mesures \u00E0 valider", "Traité", "Non concern\u00E9" },
-            ["Crush"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Cut through"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Kink"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Repeated bending"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Torsion"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Abrasion marquage"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" },
-            ["Abrasion gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" },
-            ["Friction gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" },
-            ["Traction pince"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["Traction spiral\u00E9"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
-            ["P\u00E9n\u00E9tration d'eau"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 observer", "Traité", "Non concern\u00E9" },
-            ["Petite flamme"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 analyser", "Traité", "Non concern\u00E9" },
-            ["Vibration \u00E9olienne"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 analyser", "Traité", "Non concern\u00E9" },
-            ["Collage"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" }
+            ["Cyclage thermique"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Fait", "Non concern\u00E9" },
+            ["Traction 100m"] = new List<string> { "\u00C0 faire", "En cours", "Fait", "Non concern\u00E9" },
+            ["OTDR"] = new List<string> { "\u00C0 faire", "En cours", "Fait", "Non concern\u00E9" },
+            ["Statique Bending"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
+            ["Vieillissement"] = new List<string> { "\u00C0 faire", "En cours", "Fait", "Non concern\u00E9" },
+            ["Dimensionnel"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
+            ["Crush"] = new List<string> { "\u00C0 faire", "En cours", "Photos à faire", "Fait", "Non concern\u00E9" },
+            ["Cut through"] = new List<string> { "\u00C0 faire", "En cours", "Photos à faire", "Fait", "Non concern\u00E9" },
+            ["Kink"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
+            ["Repeated bending"] = new List<string> { "\u00C0 faire", "En cours", "Photos à faire", "Fait", "Non concern\u00E9" },
+            ["Torsion"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
+            ["Abrasion marquage"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
+            ["Abrasion gaine"] = new List<string> { "\u00C0 faire", "Photos à faire", "Fait", "Non concern\u00E9" },
+            ["Friction gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
+            ["Traction pince"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
+            ["Traction spiral\u00E9"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
+            ["P\u00E9n\u00E9tration d'eau"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
+            ["Petite flamme"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
+            ["Vibration \u00E9olienne"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
+            ["Collage"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
         };
 
         private string? searchNomProduit;
         private string? searchNomProduitEssais;
+        private string selectedProjetSearchFieldKey = "NomProduit";
         private string activeQuickFilter = QuickFilterAll;
+        private string activeEssaiFilter = EssaiFilterAll;
         private int totalProjets;
         private int statutsEnCours;
         private int rapportsEnCours;
@@ -70,6 +76,7 @@ namespace MonTableurApp.ViewModels
         public List<string> TypesActivite { get; }
         public List<string> Statuts { get; }
         public List<string> NomsEssais { get; }
+        public List<SearchFieldOption> ProjetSearchFields { get; }
 
         public string? SearchNomProduit
         {
@@ -84,6 +91,23 @@ namespace MonTableurApp.ViewModels
                 searchNomProduit = value;
                 ProjetsView.Refresh();
                 OnPropertyChanged(nameof(SearchNomProduit));
+                RefreshStatistics();
+            }
+        }
+
+        public string SelectedProjetSearchFieldKey
+        {
+            get => selectedProjetSearchFieldKey;
+            set
+            {
+                if (selectedProjetSearchFieldKey == value)
+                {
+                    return;
+                }
+
+                selectedProjetSearchFieldKey = value;
+                ProjetsView.Refresh();
+                OnPropertyChanged(nameof(SelectedProjetSearchFieldKey));
                 RefreshStatistics();
             }
         }
@@ -109,6 +133,9 @@ namespace MonTableurApp.ViewModels
         public bool IsInProgressFilterActive => activeQuickFilter == QuickFilterInProgress;
         public bool IsReportsFilterActive => activeQuickFilter == QuickFilterReports;
         public bool IsDoneFilterActive => activeQuickFilter == QuickFilterDone;
+        public bool IsEssaiToProcessFilterActive => activeEssaiFilter == EssaiFilterToProcess;
+        public bool IsEssaiInProgressFilterActive => activeEssaiFilter == EssaiFilterInProgress;
+        public bool IsEssaiDoneFilterActive => activeEssaiFilter == EssaiFilterDone;
 
         public Projet? SelectedProjetEssais
         {
@@ -123,6 +150,7 @@ namespace MonTableurApp.ViewModels
                 selectedProjetEssais = value;
                 OnPropertyChanged(nameof(SelectedProjetEssais));
                 RefreshSelectedProjectStatistics();
+                RefreshEssaiCollections();
             }
         }
 
@@ -246,6 +274,12 @@ namespace MonTableurApp.ViewModels
             }
         }
 
+        public IEnumerable<EssaiSuivi> EssaisPreQualificationFiltres =>
+            GetFilteredEssais(SelectedProjetEssais?.EssaisPreQualification ?? Enumerable.Empty<EssaiSuivi>());
+
+        public IEnumerable<EssaiSuivi> EssaisQualificationFiltres =>
+            GetFilteredEssais(SelectedProjetEssais?.EssaisQualification ?? Enumerable.Empty<EssaiSuivi>());
+
         public MainViewModel()
         {
             Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };
@@ -282,6 +316,11 @@ namespace MonTableurApp.ViewModels
                 "Petite flamme",
                 "Vibration \u00E9olienne",
                 "Collage"
+            };
+            ProjetSearchFields = new List<SearchFieldOption>
+            {
+                new("NomProduit", "Produit"),
+                new("NumeroProjet", "Projet")
             };
 
             Projets = ChargerProjets();
@@ -474,18 +513,16 @@ namespace MonTableurApp.ViewModels
                 EssaisSelectionEnCours = 0;
                 EssaisSelectionATraiter = 0;
                 EssaisSelectionTermines = 0;
+                RefreshEssaiCollections();
                 return;
             }
 
             IEnumerable<EssaiSuivi> essaisConcernes = SelectedProjetEssais.Essais.Where(essai => essai.EstConcerne);
             EssaisSelectionTotal = essaisConcernes.Count();
-            EssaisSelectionEnCours = essaisConcernes.Count(essai => NormalizeText(essai.Statut).Contains("cours"));
-            EssaisSelectionATraiter = essaisConcernes.Count(essai =>
-            {
-                string statut = NormalizeText(essai.Statut);
-                return statut.Contains("trait") && statut != "traite";
-            });
-            EssaisSelectionTermines = essaisConcernes.Count(essai => essai.ProgressionPourcentage == 100);
+            EssaisSelectionATraiter = essaisConcernes.Count(IsEssaiToProcess);
+            EssaisSelectionEnCours = essaisConcernes.Count(IsEssaiInProgress);
+            EssaisSelectionTermines = essaisConcernes.Count(IsEssaiDone);
+            RefreshEssaiCollections();
         }
 
         private int CountStatusContaining(string expectedPart)
@@ -520,6 +557,21 @@ namespace MonTableurApp.ViewModels
             SetQuickFilter(QuickFilterDone);
         }
 
+        public void SetEssaiFilterToToProcess()
+        {
+            SetEssaiFilter(EssaiFilterToProcess);
+        }
+
+        public void SetEssaiFilterToInProgress()
+        {
+            SetEssaiFilter(EssaiFilterInProgress);
+        }
+
+        public void SetEssaiFilterToDone()
+        {
+            SetEssaiFilter(EssaiFilterDone);
+        }
+
         private void SetQuickFilter(string filter)
         {
             if (activeQuickFilter == filter)
@@ -535,6 +587,20 @@ namespace MonTableurApp.ViewModels
             RefreshStatistics();
         }
 
+        private void SetEssaiFilter(string filter)
+        {
+            if (activeEssaiFilter == filter)
+            {
+                activeEssaiFilter = EssaiFilterAll;
+            }
+            else
+            {
+                activeEssaiFilter = filter;
+            }
+
+            RefreshEssaiCollections();
+        }
+
         private bool MatchesSearch(Projet projet)
         {
             if (string.IsNullOrWhiteSpace(SearchNomProduit))
@@ -542,7 +608,19 @@ namespace MonTableurApp.ViewModels
                 return true;
             }
 
-            return NormalizeText(projet.NomProduit).Contains(NormalizeText(SearchNomProduit));
+            string searchValue = NormalizeText(SearchNomProduit);
+
+            return SelectedProjetSearchFieldKey switch
+            {
+                "NumeroProjet" => NormalizeText(projet.NumeroProjet).Contains(searchValue),
+                "Client" => NormalizeText(projet.Client).Contains(searchValue),
+                "Demandeur" => NormalizeText(projet.Demandeur).Contains(searchValue),
+                "TypeActivite" => NormalizeText(projet.TypeActivite).Contains(searchValue),
+                "Statut" => NormalizeText(projet.Statut).Contains(searchValue),
+                "DossierRacine" => NormalizeText(projet.DossierRacine).Contains(searchValue),
+                "Commentaires" => NormalizeText(projet.Commentaires).Contains(searchValue),
+                _ => NormalizeText(projet.NomProduit).Contains(searchValue)
+            };
         }
 
         private bool MatchesQuickFilter(Projet projet)
@@ -597,7 +675,7 @@ namespace MonTableurApp.ViewModels
 
             if (!StatutsParEssai.TryGetValue(key, out List<string>? statuts))
             {
-                statuts = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Traité", "Non concern\u00E9" };
+                statuts = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Fait", "Non concern\u00E9" };
             }
 
             var result = new List<string>(statuts);
@@ -619,6 +697,53 @@ namespace MonTableurApp.ViewModels
             }
 
             SelectedProjetEssais = ProjetsEssaisView.Cast<Projet>().FirstOrDefault();
+        }
+
+        private IEnumerable<EssaiSuivi> GetFilteredEssais(IEnumerable<EssaiSuivi> essais)
+        {
+            return essais.Where(MatchesEssaiFilter).ToList();
+        }
+
+        private bool MatchesEssaiFilter(EssaiSuivi essai)
+        {
+            return activeEssaiFilter switch
+            {
+                EssaiFilterToProcess => IsEssaiToProcess(essai),
+                EssaiFilterInProgress => IsEssaiInProgress(essai),
+                EssaiFilterDone => IsEssaiDone(essai),
+                _ => true
+            };
+        }
+
+        private static bool IsEssaiToProcess(EssaiSuivi essai)
+        {
+            string statut = NormalizeText(essai.Statut);
+            return statut.Contains("trait") && statut != "traite";
+        }
+
+        private static bool IsEssaiDone(EssaiSuivi essai)
+        {
+            return essai.EstConcerne && essai.ProgressionPourcentage == 100;
+        }
+
+        private static bool IsEssaiInProgress(EssaiSuivi essai)
+        {
+            if (!essai.EstConcerne || IsEssaiDone(essai) || IsEssaiToProcess(essai))
+            {
+                return false;
+            }
+
+            string statut = NormalizeText(essai.Statut);
+            return !string.IsNullOrWhiteSpace(statut) && statut != "a faire";
+        }
+
+        private void RefreshEssaiCollections()
+        {
+            OnPropertyChanged(nameof(EssaisPreQualificationFiltres));
+            OnPropertyChanged(nameof(EssaisQualificationFiltres));
+            OnPropertyChanged(nameof(IsEssaiToProcessFilterActive));
+            OnPropertyChanged(nameof(IsEssaiInProgressFilterActive));
+            OnPropertyChanged(nameof(IsEssaiDoneFilterActive));
         }
 
         private static string NormalizeText(string? value)
@@ -653,6 +778,19 @@ namespace MonTableurApp.ViewModels
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public sealed class SearchFieldOption
+        {
+            public SearchFieldOption(string key, string label)
+            {
+                Key = key;
+                Label = label;
+            }
+
+            public string Key { get; }
+
+            public string Label { get; }
         }
     }
 }

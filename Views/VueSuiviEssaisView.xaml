@@ -174,6 +174,10 @@
             </Setter>
         </Style>
 
+        <Style x:Key="EssaiResultatComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource EssaiStatusComboBoxStyle}">
+            <Setter Property="MinWidth" Value="88"/>
+        </Style>
+
         <Style TargetType="ComboBoxItem">
             <Setter Property="Padding" Value="10,7"/>
             <Setter Property="Template">
@@ -243,6 +247,38 @@
             <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="MetricFilterButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="CardBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CardBorder" Property="Opacity" Value="0.92"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="CardBorder" Property="Opacity" Value="0.84"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="EssaiProgressBarStyle" TargetType="ProgressBar">
@@ -328,9 +364,20 @@
                         </WrapPanel>
 
                         <WrapPanel Margin="0,18,0,0">
-                            <Border Style="{StaticResource MetricPillStyle}"
-                                    Background="{DynamicResource SummaryMintBackgroundBrush}"
-                                    BorderBrush="{DynamicResource SummaryMintBorderBrush}">
+                            <Button Click="EssaisATraiter_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MetricFilterButtonStyle}">
+                                        <Setter Property="Background" Value="{DynamicResource SummaryMintBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SummaryMintBorderBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsEssaiToProcessFilterActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
                                 <StackPanel>
                                     <TextBlock Text="À traiter"
                                                FontSize="12"
@@ -341,11 +388,22 @@
                                                FontWeight="Bold"
                                                Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
                                 </StackPanel>
-                            </Border>
+                            </Button>
 
-                            <Border Style="{StaticResource MetricPillStyle}"
-                                    Background="{DynamicResource SummaryWarmBackgroundBrush}"
-                                    BorderBrush="{DynamicResource SummaryWarmBorderBrush}">
+                            <Button Click="EssaisEnCours_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MetricFilterButtonStyle}">
+                                        <Setter Property="Background" Value="{DynamicResource SummaryWarmBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SummaryWarmBorderBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsEssaiInProgressFilterActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
                                 <StackPanel>
                                     <TextBlock Text="Essais en cours"
                                                FontSize="12"
@@ -356,11 +414,22 @@
                                                FontWeight="Bold"
                                                Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
                                 </StackPanel>
-                            </Border>
+                            </Button>
                             
-                            <Border Style="{StaticResource MetricPillStyle}"
-                                    Background="{DynamicResource SummaryLavenderBackgroundBrush}"
-                                    BorderBrush="{DynamicResource SummaryLavenderBorderBrush}">
+                            <Button Click="EssaisTermines_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MetricFilterButtonStyle}">
+                                        <Setter Property="Background" Value="{DynamicResource SummaryLavenderBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SummaryLavenderBorderBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsEssaiDoneFilterActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                                <Setter Property="BorderThickness" Value="2"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
                                 <StackPanel>
                                     <TextBlock Text="Essais terminés"
                                                FontSize="12"
@@ -371,7 +440,7 @@
                                                FontWeight="Bold"
                                                Foreground="{DynamicResource SummaryLavenderForegroundBrush}"/>
                                 </StackPanel>
-                            </Border>
+                            </Button>
 
                             
                             <Border Style="{StaticResource MetricPillStyle}">
@@ -405,66 +474,214 @@
                                        FontSize="20"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                            <TextBlock Text="Chaque essai a sa liste déroulante, avec une progression automatique."
-                                       Margin="0,6,0,0"
-                                       FontSize="14"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
                         </StackPanel>
 
                         <ScrollViewer Grid.Row="1"
                                       Margin="0,18,0,0"
                                       VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding Essais}"
-                                          Margin="0,8,0,0">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="3"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Width="240"
-                                                Margin="0,0,14,14"
-                                                Padding="16"
-                                                Background="{DynamicResource SearchCardBackgroundBrush}"
-                                                BorderBrush="{DynamicResource SearchCardBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="20">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding NomEssai}"
-                                                           TextWrapping="Wrap"
-                                                           FontSize="15"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                            <StackPanel Margin="0,8,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Pré-qualification"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                <Grid Margin="0,12,0,0">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
+                                    <ItemsControl ItemsSource="{Binding DataContext.EssaisPreQualificationFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  Margin="0,14,0,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="4"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="0,0,12,12"
+                                                        MinHeight="138"
+                                                        Padding="14"
+                                                        Background="{DynamicResource SearchCardBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="20">
+                                                    <StackPanel>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
 
-                                                    <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
-                                                                 Style="{StaticResource EssaiProgressBarStyle}"/>
+                                                            <TextBlock Text="{Binding NomEssai}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="15"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                    <TextBlock Grid.Column="1"
-                                                               Margin="10,-4,0,0"
-                                                               Text="{Binding ProgressionTexte}"
-                                                               FontSize="12"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{DynamicResource SummaryValueBrush}"
-                                                               VerticalAlignment="Center"/>
-                                                </Grid>
+                                                            <Ellipse Grid.Column="1"
+                                                                     Width="12"
+                                                                     Height="12"
+                                                                     Margin="10,2,0,0"
+                                                                     Fill="{Binding CouleurIndicateurEtat}"
+                                                                     Stroke="#FFFFFFFF"
+                                                                     StrokeThickness="1"
+                                                                     VerticalAlignment="Top"
+                                                                     Visibility="{Binding AfficheIndicateurEtat}"/>
+                                                        </Grid>
 
-                                                <ComboBox Margin="0,14,0,0"
-                                                          ItemsSource="{Binding StatutsDisponibles}"
-                                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                                                        <Grid Margin="0,12,0,0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
+                                                                         Style="{StaticResource EssaiProgressBarStyle}"/>
+
+                                                            <TextBlock Grid.Column="1"
+                                                                       Margin="10,-4,0,0"
+                                                                       Text="{Binding ProgressionTexte}"
+                                                                       FontSize="12"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource SummaryValueBrush}"
+                                                                       VerticalAlignment="Center"/>
+                                                        </Grid>
+
+                                                        <Grid Margin="0,14,0,0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <ComboBox Grid.Column="0"
+                                                                      ItemsSource="{Binding StatutsDisponibles}"
+                                                                      SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                      Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                            <ComboBox Grid.Column="1"
+                                                                      Margin="10,0,0,0"
+                                                                      ItemsSource="{Binding ResultatsTraitementDisponibles}"
+                                                                      SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                <ComboBox.Style>
+                                                                    <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding EstFait}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </ComboBox.Style>
+                                                            </ComboBox>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <Border Height="1"
+                                        Margin="0,10,0,18"
+                                        Background="{DynamicResource DataGridSurfaceBorderBrush}"
+                                        Opacity="0.75"/>
+
+                                <StackPanel>
+                                    <TextBlock Text="Qualification"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                    <ItemsControl ItemsSource="{Binding DataContext.EssaisQualificationFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  Margin="0,14,0,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="4"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="0,0,12,12"
+                                                        MinHeight="138"
+                                                        Padding="14"
+                                                        Background="{DynamicResource SearchCardBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="20">
+                                                    <StackPanel>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Text="{Binding NomEssai}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="15"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                                            <Ellipse Grid.Column="1"
+                                                                     Width="12"
+                                                                     Height="12"
+                                                                     Margin="10,2,0,0"
+                                                                     Fill="{Binding CouleurIndicateurEtat}"
+                                                                     Stroke="#FFFFFFFF"
+                                                                     StrokeThickness="1"
+                                                                     VerticalAlignment="Top"
+                                                                     Visibility="{Binding AfficheIndicateurEtat}"/>
+                                                        </Grid>
+
+                                                        <Grid Margin="0,12,0,0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
+                                                                         Style="{StaticResource EssaiProgressBarStyle}"/>
+
+                                                            <TextBlock Grid.Column="1"
+                                                                       Margin="10,-4,0,0"
+                                                                       Text="{Binding ProgressionTexte}"
+                                                                       FontSize="12"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource SummaryValueBrush}"
+                                                                       VerticalAlignment="Center"/>
+                                                        </Grid>
+
+                                                        <Grid Margin="0,14,0,0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <ComboBox Grid.Column="0"
+                                                                      ItemsSource="{Binding StatutsDisponibles}"
+                                                                      SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                      Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                            <ComboBox Grid.Column="1"
+                                                                      Margin="10,0,0,0"
+                                                                      ItemsSource="{Binding ResultatsTraitementDisponibles}"
+                                                                      SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                <ComboBox.Style>
+                                                                    <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding EstFait}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </ComboBox.Style>
+                                                            </ComboBox>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Border>
@@ -491,7 +708,7 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="340"/>
+                <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="18"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>

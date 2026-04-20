@@ -1,7 +1,11 @@
-using System.IO;
+﻿using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
+using Microsoft.Win32;
 using MonTableurApp.ViewModels;
 using MonTableurApp.Views;
 
@@ -16,6 +20,11 @@ namespace MonTableurApp
         private readonly MainViewModel viewModel = new MainViewModel();
         private readonly VueGeneraleView vueGenerale;
         private readonly VueSuiviEssaisView vueSuiviEssais;
+        private readonly VueAjouterProjetView vueAjouterProjet;
+        private readonly VueEnCoursView vueEnCours;
+        private readonly VueAgendaView vueAgenda;
+        private bool isUpdatingWindowBounds;
+        private string? currentScreenDeviceName;
         private bool isBlueTheme;
 
         public MainWindow()
@@ -24,11 +33,16 @@ namespace MonTableurApp
             DataContext = viewModel;
             vueGenerale = new VueGeneraleView { DataContext = viewModel };
             vueSuiviEssais = new VueSuiviEssaisView { DataContext = viewModel };
+            vueAjouterProjet = new VueAjouterProjetView();
+            vueEnCours = new VueEnCoursView();
+            vueAgenda = new VueAgendaView();
 
             isBlueTheme = LoadSavedTheme() == ThemeBlue;
             ApplyCurrentTheme();
             AfficherVueGenerale();
             Closing += MainWindow_Closing;
+            LocationChanged += MainWindow_LocationChanged;
+            SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
         }
 
         private void VueGenerale_Click(object sender, RoutedEventArgs e)
@@ -36,9 +50,29 @@ namespace MonTableurApp
             AfficherVueGenerale();
         }
 
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            ApplyCurrentScreenBounds(forceReposition: true);
+        }
+
         private void SuiviEssais_Click(object sender, RoutedEventArgs e)
         {
             AfficherVueSuiviEssais();
+        }
+
+        private void AjouterProjet_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherVueAjouterProjet();
+        }
+
+        private void EnCours_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherVueEnCours();
+        }
+
+        private void Agenda_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherVueAgenda();
         }
 
         private void ThemeToggle_Click(object sender, RoutedEventArgs e)
@@ -49,25 +83,168 @@ namespace MonTableurApp
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
+            LocationChanged -= MainWindow_LocationChanged;
+            SystemEvents.DisplaySettingsChanged -= SystemEvents_DisplaySettingsChanged;
             SaveTheme();
+        }
+
+        private void MainWindow_LocationChanged(object? sender, EventArgs e)
+        {
+            ApplyCurrentScreenBounds();
+        }
+
+        private void SystemEvents_DisplaySettingsChanged(object? sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() => ApplyCurrentScreenBounds(forceReposition: true));
         }
 
         private void AfficherVueGenerale()
         {
-            PageTitleText.Text = "Vue g\u00E9n\u00E9rale des projets";
-            PageSubtitleText.Text = "Les infos essentielles, en un coup d'oeil.";
-            VueGeneraleButton.Tag = "Active";
-            SuiviEssaisButton.Tag = null;
-            MainContent.Content = vueGenerale;
+            ShowView(
+                vueGenerale,
+                "Vue générale des projets",
+                "Les infos essentielles, en un coup d'oeil.",
+                VueGeneraleButton);
         }
 
         private void AfficherVueSuiviEssais()
         {
-            PageTitleText.Text = "Suivi des essais";
-            PageSubtitleText.Text = "Pilote les statuts essai par essai, produit par produit.";
+            ShowView(
+                vueSuiviEssais,
+                "Suivi des essais",
+                "Pilote les statuts essai par essai, produit par produit.",
+                SuiviEssaisButton);
+        }
+
+        private void AfficherVueAjouterProjet()
+        {
+            ShowView(
+                vueAjouterProjet,
+                "Ajouter un projet",
+                "Un espace prêt pour la future création de projets.",
+                AjouterProjetButton);
+        }
+
+        private void AfficherVueEnCours()
+        {
+            ShowView(
+                vueEnCours,
+                "En cours",
+                "Cette vue accueillera bientôt les projets et essais en mouvement.",
+                EnCoursButton);
+        }
+
+        private void AfficherVueAgenda()
+        {
+            ShowView(
+                vueAgenda,
+                "Agenda",
+                "Une page vide pour préparer le planning et les échéances.",
+                AgendaButton);
+        }
+
+        private void ShowView(UserControl view, string title, string subtitle, Button activeButton)
+        {
+            PageTitleText.Text = title;
+            PageSubtitleText.Text = subtitle;
+            SetActiveButton(activeButton);
+            MainContent.Content = view;
+        }
+
+        private void SetActiveButton(Button activeButton)
+        {
             VueGeneraleButton.Tag = null;
-            SuiviEssaisButton.Tag = "Active";
-            MainContent.Content = vueSuiviEssais;
+            SuiviEssaisButton.Tag = null;
+            AjouterProjetButton.Tag = null;
+            EnCoursButton.Tag = null;
+            AgendaButton.Tag = null;
+            activeButton.Tag = "Active";
+        }
+
+        private void ApplyCurrentScreenBounds(bool forceReposition = false)
+        {
+            if (isUpdatingWindowBounds)
+            {
+                return;
+            }
+
+            var handle = new WindowInteropHelper(this).Handle;
+            if (handle == IntPtr.Zero)
+            {
+                return;
+            }
+
+            IntPtr monitor = MonitorFromWindow(handle, MonitorDefaultToNearest);
+            if (monitor == IntPtr.Zero)
+            {
+                return;
+            }
+
+            MONITORINFO monitorInfo = new()
+            {
+                cbSize = Marshal.SizeOf<MONITORINFO>()
+            };
+
+            if (!GetMonitorInfo(monitor, ref monitorInfo))
+            {
+                return;
+            }
+
+            string deviceName = monitorInfo.szDevice ?? string.Empty;
+            if (!forceReposition && deviceName == currentScreenDeviceName)
+            {
+                return;
+            }
+
+            RECT area = monitorInfo.rcWork;
+
+            isUpdatingWindowBounds = true;
+            try
+            {
+                currentScreenDeviceName = deviceName;
+                Left = area.Left;
+                Top = area.Top;
+                Width = area.Right - area.Left;
+                Height = area.Bottom - area.Top;
+                MinWidth = area.Right - area.Left;
+                MinHeight = area.Bottom - area.Top;
+                MaxWidth = area.Right - area.Left;
+                MaxHeight = area.Bottom - area.Top;
+            }
+            finally
+            {
+                isUpdatingWindowBounds = false;
+            }
+        }
+
+        private const int MonitorDefaultToNearest = 2;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string? szDevice;
         }
 
         private void ApplyCurrentTheme()
@@ -188,70 +365,70 @@ namespace MonTableurApp
         {
             ResourceDictionary resources = Application.Current.Resources;
 
-            resources["WindowBackgroundBrush"] = CreateGradient("#F5FBFF", "#EEF6FF", "#F5F3FF");
-            resources["SidebarBrush"] = CreateGradient("#D9ECFF", "#DDE5FF");
-            resources["SidebarBorderBrush"] = CreateBrush("#B8D4F5");
+            resources["WindowBackgroundBrush"] = CreateGradient("#F2F8FF", "#E7F1FF", "#F4F1FF");
+            resources["SidebarBrush"] = CreateGradient("#CFE4FF", "#D4D8FF", "#E7DBFF");
+            resources["SidebarBorderBrush"] = CreateBrush("#9CBDF0");
             resources["LogoChipBackgroundBrush"] = CreateBrush("#FDFEFF");
-            resources["LogoChipBorderBrush"] = CreateBrush("#BBD6F7");
-            resources["PrimaryTitleBrush"] = CreateBrush("#4B6E9E");
-            resources["SecondaryTextBrush"] = CreateBrush("#6D83A7");
+            resources["LogoChipBorderBrush"] = CreateBrush("#A8C8F3");
+            resources["PrimaryTitleBrush"] = CreateBrush("#3F5FA6");
+            resources["SecondaryTextBrush"] = CreateBrush("#657FB3");
 
             resources["MenuButtonBackgroundBrush"] = CreateBrush("#FCFEFF");
-            resources["MenuButtonBorderBrush"] = CreateBrush("#C5DAF8");
-            resources["MenuButtonForegroundBrush"] = CreateBrush("#4E6C97");
-            resources["MenuButtonHoverBackgroundBrush"] = CreateBrush("#EEF7FF");
-            resources["MenuButtonHoverBorderBrush"] = CreateBrush("#AACAF0");
-            resources["MenuButtonPressedBackgroundBrush"] = CreateBrush("#E1F0FF");
+            resources["MenuButtonBorderBrush"] = CreateBrush("#B9D1F7");
+            resources["MenuButtonForegroundBrush"] = CreateBrush("#4865A7");
+            resources["MenuButtonHoverBackgroundBrush"] = CreateBrush("#E6F0FF");
+            resources["MenuButtonHoverBorderBrush"] = CreateBrush("#7EA5E8");
+            resources["MenuButtonPressedBackgroundBrush"] = CreateBrush("#D6E7FF");
 
-            resources["VersionBadgeBackgroundBrush"] = CreateBrush("#EAF4FF");
-            resources["VersionBadgeBorderBrush"] = CreateBrush("#BDD6F3");
-            resources["VersionBadgeForegroundBrush"] = CreateBrush("#5B82B8");
+            resources["VersionBadgeBackgroundBrush"] = CreateBrush("#EAF1FF");
+            resources["VersionBadgeBorderBrush"] = CreateBrush("#ABC5EE");
+            resources["VersionBadgeForegroundBrush"] = CreateBrush("#5474BC");
 
             resources["ThemeButtonBackgroundBrush"] = CreateBrush("#FCFEFF");
-            resources["ThemeButtonBorderBrush"] = CreateBrush("#CDDDF6");
-            resources["ThemeButtonForegroundBrush"] = CreateBrush("#4E6C97");
+            resources["ThemeButtonBorderBrush"] = CreateBrush("#BFD2F5");
+            resources["ThemeButtonForegroundBrush"] = CreateBrush("#4763A5");
 
-            resources["InfoCardBackgroundBrush"] = CreateBrush("#F7FBFF");
-            resources["InfoCardBorderBrush"] = CreateBrush("#C8DBF4");
-            resources["InfoCardAccentBrush"] = CreateBrush("#78A5DD");
+            resources["InfoCardBackgroundBrush"] = CreateBrush("#F2F7FF");
+            resources["InfoCardBorderBrush"] = CreateBrush("#B9D0F3");
+            resources["InfoCardAccentBrush"] = CreateBrush("#5F8DE5");
 
             resources["ContentBackgroundBrush"] = CreateBrush("#FCFEFF");
-            resources["ContentBorderBrush"] = CreateBrush("#D5E3F8");
+            resources["ContentBorderBrush"] = CreateBrush("#C7D9F5");
 
-            resources["SummaryCardBackgroundBrush"] = CreateBrush("#F2F8FF");
-            resources["SummaryCardBorderBrush"] = CreateBrush("#C9DCF5");
-            resources["SummaryLabelBrush"] = CreateBrush("#7C8FAF");
-            resources["SummaryValueBrush"] = CreateBrush("#5574A4");
+            resources["SummaryCardBackgroundBrush"] = CreateBrush("#EEF5FF");
+            resources["SummaryCardBorderBrush"] = CreateBrush("#BED1F1");
+            resources["SummaryLabelBrush"] = CreateBrush("#6F84B2");
+            resources["SummaryValueBrush"] = CreateBrush("#4265AF");
 
-            resources["SummaryWarmBackgroundBrush"] = CreateBrush("#EDF5FF");
-            resources["SummaryWarmBorderBrush"] = CreateBrush("#C5DCF6");
-            resources["SummaryWarmForegroundBrush"] = CreateBrush("#5A80B0");
+            resources["SummaryWarmBackgroundBrush"] = CreateBrush("#E5F2FF");
+            resources["SummaryWarmBorderBrush"] = CreateBrush("#AED0F6");
+            resources["SummaryWarmForegroundBrush"] = CreateBrush("#4470BA");
 
-            resources["SummaryMintBackgroundBrush"] = CreateBrush("#EAFBFF");
-            resources["SummaryMintBorderBrush"] = CreateBrush("#C3EAF4");
-            resources["SummaryMintForegroundBrush"] = CreateBrush("#4A8CA5");
+            resources["SummaryMintBackgroundBrush"] = CreateBrush("#E5FAFF");
+            resources["SummaryMintBorderBrush"] = CreateBrush("#A7DDF2");
+            resources["SummaryMintForegroundBrush"] = CreateBrush("#2F86A6");
 
-            resources["SummaryLavenderBackgroundBrush"] = CreateBrush("#EEF0FF");
-            resources["SummaryLavenderBorderBrush"] = CreateBrush("#CCD3FA");
-            resources["SummaryLavenderForegroundBrush"] = CreateBrush("#5D6EC4");
+            resources["SummaryLavenderBackgroundBrush"] = CreateBrush("#ECEBFF");
+            resources["SummaryLavenderBorderBrush"] = CreateBrush("#BFC4F7");
+            resources["SummaryLavenderForegroundBrush"] = CreateBrush("#5864C8");
 
-            resources["SearchCardBackgroundBrush"] = CreateBrush("#F7FBFF");
-            resources["SearchCardBorderBrush"] = CreateBrush("#C8DBF4");
+            resources["SearchCardBackgroundBrush"] = CreateBrush("#F5F9FF");
+            resources["SearchCardBorderBrush"] = CreateBrush("#BED1F1");
             resources["SearchInputBackgroundBrush"] = CreateBrush("#FFFFFF");
-            resources["SearchInputBorderBrush"] = CreateBrush("#C7DBF6");
-            resources["SearchInputForegroundBrush"] = CreateBrush("#5D7499");
+            resources["SearchInputBorderBrush"] = CreateBrush("#B7CEF3");
+            resources["SearchInputForegroundBrush"] = CreateBrush("#506C9F");
 
-            resources["DataGridHeaderBrush"] = CreateBrush("#E8F3FF");
-            resources["DataGridHeaderForegroundBrush"] = CreateBrush("#5877A8");
-            resources["DataGridRowHoverBrush"] = CreateBrush("#F3F8FF");
-            resources["DataGridRowSelectedBrush"] = CreateBrush("#E5F0FF");
-            resources["DataGridSelectionForegroundBrush"] = CreateBrush("#4B638B");
-            resources["DataGridAltRowBrush"] = CreateBrush("#F9FBFF");
-            resources["DataGridSurfaceBorderBrush"] = CreateBrush("#D8E5F8");
+            resources["DataGridHeaderBrush"] = CreateBrush("#DAEBFF");
+            resources["DataGridHeaderForegroundBrush"] = CreateBrush("#4666AA");
+            resources["DataGridRowHoverBrush"] = CreateBrush("#EFF5FF");
+            resources["DataGridRowSelectedBrush"] = CreateBrush("#DCEBFF");
+            resources["DataGridSelectionForegroundBrush"] = CreateBrush("#3D5793");
+            resources["DataGridAltRowBrush"] = CreateBrush("#F7FAFF");
+            resources["DataGridSurfaceBorderBrush"] = CreateBrush("#C8D8F0");
 
-            resources["ScrollTrackBrush"] = CreateBrush("#DDEAF8");
-            resources["ScrollThumbBrush"] = CreateBrush("#9FC2EB");
-            resources["ScrollThumbHoverBrush"] = CreateBrush("#84AFDF");
+            resources["ScrollTrackBrush"] = CreateBrush("#D6E3F8");
+            resources["ScrollThumbBrush"] = CreateBrush("#7EA5E8");
+            resources["ScrollThumbHoverBrush"] = CreateBrush("#5E88D7");
         }
 
         private static SolidColorBrush CreateBrush(string color)

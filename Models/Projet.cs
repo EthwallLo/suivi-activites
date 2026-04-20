@@ -1,10 +1,21 @@
-using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace MonTableurApp.Models
 {
     public class Projet : INotifyPropertyChanged
     {
+        private static readonly string[] EssaisPreQualificationNames =
+        {
+            "Traction 100m",
+            "Cyclage thermique",
+            "Statique Bending",
+            "Vieillissement"
+        };
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string name)
@@ -97,7 +108,17 @@ namespace MonTableurApp.Models
             {
                 essais = value ?? new ObservableCollection<EssaiSuivi>();
                 OnPropertyChanged(nameof(Essais));
+                OnPropertyChanged(nameof(EssaisPreQualification));
+                OnPropertyChanged(nameof(EssaisQualification));
             }
         }
+
+        [JsonIgnore]
+        public IEnumerable<EssaiSuivi> EssaisPreQualification =>
+            Essais.Where(essai => EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty));
+
+        [JsonIgnore]
+        public IEnumerable<EssaiSuivi> EssaisQualification =>
+            Essais.Where(essai => !EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty));
     }
 }
