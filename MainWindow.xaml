@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Suivi des activités"
         Icon="logg.png"
-        Width="1480"
+        Width="1600"
         Height="920"
-        MinWidth="1260"
+        MinWidth="1360"
         MinHeight="780"
         WindowStartupLocation="CenterScreen">
 
@@ -30,6 +30,11 @@
                                 <TranslateTransform X="0"
                                                     Y="0"/>
                             </Grid.RenderTransform>
+                            <Border x:Name="ActiveBackground"
+                                    Margin="2,2,8,2"
+                                    Background="Transparent"
+                                    CornerRadius="18"
+                                    Opacity="0"/>
                             <Grid Margin="{TemplateBinding Padding}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -91,6 +96,17 @@
                                                             Y="0"/>
                                     </Setter.Value>
                                 </Setter>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Active">
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                <Setter TargetName="AccentDot" Property="Opacity" Value="1"/>
+                                <Setter TargetName="AccentDot" Property="Background" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                <Setter TargetName="Underline" Property="Opacity" Value="1"/>
+                                <Setter TargetName="Underline" Property="Width" Value="98"/>
+                                <Setter TargetName="Underline" Property="Height" Value="4"/>
+                                <Setter TargetName="Underline" Property="Background" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                <Setter TargetName="ActiveBackground" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                                <Setter TargetName="ActiveBackground" Property="Opacity" Value="0.9"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -202,9 +218,11 @@
                 <StackPanel Grid.Row="1"
                             Margin="0,38,0,0">
                     <Button Content="Vue générale"
+                            x:Name="VueGeneraleButton"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="VueGenerale_Click"/>
                     <Button Content="Suivi des essais"
+                            x:Name="SuiviEssaisButton"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="SuiviEssais_Click"/>
                 </StackPanel>

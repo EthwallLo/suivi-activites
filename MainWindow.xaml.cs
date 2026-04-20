@@ -14,12 +14,16 @@ namespace MonTableurApp
         private static readonly string ThemeSettingsPath = Path.Combine(AppContext.BaseDirectory, "ui-settings.json");
 
         private readonly MainViewModel viewModel = new MainViewModel();
+        private readonly VueGeneraleView vueGenerale;
+        private readonly VueSuiviEssaisView vueSuiviEssais;
         private bool isBlueTheme;
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = viewModel;
+            vueGenerale = new VueGeneraleView { DataContext = viewModel };
+            vueSuiviEssais = new VueSuiviEssaisView { DataContext = viewModel };
 
             isBlueTheme = LoadSavedTheme() == ThemeBlue;
             ApplyCurrentTheme();
@@ -50,23 +54,20 @@ namespace MonTableurApp
 
         private void AfficherVueGenerale()
         {
-            PageTitleText.Text = "Vue générale des projets";
+            PageTitleText.Text = "Vue g\u00E9n\u00E9rale des projets";
             PageSubtitleText.Text = "Les infos essentielles, en un coup d'oeil.";
-
-            var vue = new VueGeneraleView
-            {
-                DataContext = viewModel
-            };
-
-            MainContent.Content = vue;
+            VueGeneraleButton.Tag = "Active";
+            SuiviEssaisButton.Tag = null;
+            MainContent.Content = vueGenerale;
         }
 
         private void AfficherVueSuiviEssais()
         {
             PageTitleText.Text = "Suivi des essais";
-            PageSubtitleText.Text = "La page arrive ensuite, l'onglet est déjà prêt.";
-
-            MainContent.Content = new VueSuiviEssaisView();
+            PageSubtitleText.Text = "Pilote les statuts essai par essai, produit par produit.";
+            VueGeneraleButton.Tag = null;
+            SuiviEssaisButton.Tag = "Active";
+            MainContent.Content = vueSuiviEssais;
         }
 
         private void ApplyCurrentTheme()

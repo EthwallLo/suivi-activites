@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace MonTableurApp.Models
 {
@@ -86,6 +87,17 @@ namespace MonTableurApp.Models
         {
             get => commentaires;
             set { commentaires = value; OnPropertyChanged(nameof(Commentaires)); }
+        }
+
+        private ObservableCollection<EssaiSuivi> essais = new ObservableCollection<EssaiSuivi>();
+        public ObservableCollection<EssaiSuivi> Essais
+        {
+            get => essais;
+            set
+            {
+                essais = value ?? new ObservableCollection<EssaiSuivi>();
+                OnPropertyChanged(nameof(Essais));
+            }
         }
     }
 }
