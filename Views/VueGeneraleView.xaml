@@ -53,7 +53,7 @@
                        Foreground="#8A4E78"
                        FontSize="24"
                        FontWeight="SemiBold"/>
-            <TextBlock Text="Tout le tableau est éditable."
+            <TextBlock Text="Tout le tableau est editable."
                        Margin="0,6,0,18"
                        Foreground="#A07A94"
                        FontSize="14"/>
@@ -151,41 +151,81 @@
                       SelectionUnit="FullRow">
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Numéro projet"
+                    <DataGridTextColumn Header="Numero projet"
                                         Binding="{Binding NumeroProjet}"
                                         Width="120"/>
                     <DataGridTextColumn Header="Nom produit"
                                         Binding="{Binding NomProduit}"
                                         Width="170"/>
 
-                    <DataGridComboBoxColumn Header="Client"
-                                            SelectedItemBinding="{Binding Client}"
-                                            Width="120"
-                                            ItemsSource="{Binding DataContext.Clients, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <DataGridTemplateColumn Header="Client"
+                                            Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Client}" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.Clients, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          SelectedItem="{Binding Client, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
 
-                    <DataGridComboBoxColumn Header="Demandeur"
-                                            SelectedItemBinding="{Binding Demandeur}"
-                                            Width="120"
-                                            ItemsSource="{Binding DataContext.Demandeurs, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <DataGridTemplateColumn Header="Demandeur"
+                                            Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Demandeur}" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.Demandeurs, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          SelectedItem="{Binding Demandeur, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
 
-                    <DataGridComboBoxColumn Header="Type d'activité"
-                                            SelectedItemBinding="{Binding TypeActivite}"
-                                            Width="150"
-                                            ItemsSource="{Binding DataContext.TypesActivite, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <DataGridTemplateColumn Header="Type d'activite"
+                                            Width="170">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TypeActivite}" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.TypesActivite, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          SelectedItem="{Binding TypeActivite, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
 
                     <DataGridTextColumn Header="Dossier racine"
                                         Binding="{Binding DossierRacine}"
                                         Width="260"/>
 
-                    <DataGridComboBoxColumn Header="Statut"
-                                            SelectedItemBinding="{Binding Statut}"
-                                            Width="190"
-                                            ItemsSource="{Binding DataContext.Statuts, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <DataGridTemplateColumn Header="Statut"
+                                            Width="190">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Statut}" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.Statuts, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
 
-                    <DataGridTextColumn Header="Date début"
+                    <DataGridTextColumn Header="Date debut"
                                         Binding="{Binding DateDebut}"
                                         Width="110"/>
-                    <DataGridTextColumn Header="Date prévisionnelle"
+                    <DataGridTextColumn Header="Date previsionnelle"
                                         Binding="{Binding DatePrevisionnelle}"
                                         Width="130"/>
                     <DataGridTextColumn Header="Date fin"

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using MonTableurApp.ViewModels;
 using MonTableurApp.Views;
 
@@ -6,21 +6,28 @@ namespace MonTableurApp
 {
     public partial class MainWindow : Window
     {
-        private MainViewModel viewModel = new MainViewModel();
+        private readonly MainViewModel viewModel = new MainViewModel();
 
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = viewModel;
 
-            var vue = new VueGeneraleView();
-            vue.DataContext = viewModel;
-            MainContent.Content = vue;
+            AfficherVueGenerale();
         }
 
         private void VueGenerale_Click(object sender, RoutedEventArgs e)
         {
-            var vue = new VueGeneraleView();
-            vue.DataContext = viewModel;
+            AfficherVueGenerale();
+        }
+
+        private void AfficherVueGenerale()
+        {
+            var vue = new VueGeneraleView
+            {
+                DataContext = viewModel
+            };
+
             MainContent.Content = vue;
         }
     }

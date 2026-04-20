@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using MonTableurApp.Models;
@@ -28,15 +30,15 @@ namespace MonTableurApp.ViewModels
         public MainViewModel()
         {
             Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };
-            Demandeurs = new List<string> { "RUC", "JEN", "KYJ", "JLC", "JER", "JEL", "JYM", "XAL"};
-            TypesActivite = new List<string> { "Qualification", "Appel d'offre", "Investigation", "Caractérisation" };
+            Demandeurs = new List<string> { "RUC", "JEN", "KYJ", "JLC", "JER", "JEL", "JYM", "XAL" };
+            TypesActivite = new List<string> { "Qualification", "Appel d'offre", "Investigation", "Caract\u00E9risation" };
             Statuts = new List<string>
             {
-                "À faire",
-                "Pré-qualification en cours",
+                "\u00C0 faire",
+                "Pr\u00E9-qualification en cours",
                 "Qualification en cours",
                 "Rapport en cours",
-                "Rapport terminé",
+                "Rapport termin\u00E9",
                 "Fait"
             };
 

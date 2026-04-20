@@ -2,7 +2,7 @@
   {
     "NumeroProjet": "DC_107",
     "NomProduit": "LM053DSR",
-    "Client": "free",
+    "Client": "Free",
     "Demandeur": "RUC",
     "TypeActivite": "Qualification",
     "DossierRacine": "W:\\C\\u00E2bles (activit\\u00E9s)\\00_CABLES DROP TELENCO\\LM053DSR (DC107)",
@@ -15,9 +15,9 @@
   {
     "NumeroProjet": "AO_2604",
     "NomProduit": "AO_Bouygues",
-    "Client": "bouygues",
+    "Client": "Bouygues",
     "Demandeur": "RUC",
-    "TypeActivite": "Appel d'offre",
+    "TypeActivite": "Appel d\u0027offre",
     "DossierRacine": "W:\\BE\\00 Assistanat\\Assistanat AO (clients)\\AO2604_ AO Bouygues 2026",
     "Statut": "Qualification en cours",
     "DateDebut": "09/04/2026",
@@ -31,7 +31,7 @@
     "Client": "N/A",
     "Demandeur": "RUC",
     "TypeActivite": "Investigation",
-    "DossierRacine": "\\\\SRV-C3D\\Concept'3D\\C\\u00E2bles (activit\\u00E9s)\\00_CABLES DROP TELENCO\\LX030\\TELGO\\PU\\DC100_LX030PU-TPE",
+    "DossierRacine": "\\\\SRV-C3D\\Concept\u00273D\\C\\u00E2bles (activit\\u00E9s)\\00_CABLES DROP TELENCO\\LX030\\TELGO\\PU\\DC100_LX030PU-TPE",
     "Statut": "Fait",
     "DateDebut": "",
     "DatePrevisionnelle": "",
@@ -41,7 +41,7 @@
   {
     "NumeroProjet": "25LB_048",
     "NomProduit": "Invisible cable",
-    "Client": "dtag",
+    "Client": "DTAG",
     "Demandeur": "XAL",
     "TypeActivite": "Qualification",
     "DossierRacine": "W:\\BE\\00 Assistanat\\Assistanat Labo\\25LB_048 Test Temp 90C (OTDR) sur Cable autocollant transparent Veivot (et Haufe)",
