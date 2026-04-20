@@ -1,7 +1,7 @@
-<Window x:Class="MonTableurApp.MainWindow"
+﻿<Window x:Class="MonTableurApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Suivi des activites"
+        Title="Suivi des activités"
         Icon="logg.png"
         Width="1480"
         Height="920"
@@ -12,10 +12,10 @@
     <Window.Resources>
         <Style x:Key="MenuButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource MenuButtonForegroundBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource MenuButtonBackgroundBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource MenuButtonBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="18,14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,12,10,14"/>
             <Setter Property="Margin" Value="0,8,0,0"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -24,22 +24,73 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="18">
-                            <ContentPresenter Margin="{TemplateBinding Padding}"
-                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="Center"/>
-                        </Border>
+                        <Grid x:Name="ButtonRoot"
+                              RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <TranslateTransform X="0"
+                                                    Y="0"/>
+                            </Grid.RenderTransform>
+                            <Grid Margin="{TemplateBinding Padding}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Border x:Name="AccentDot"
+                                        Width="12"
+                                        Height="12"
+                                        Margin="0,0,12,0"
+                                        Background="{DynamicResource InfoCardAccentBrush}"
+                                        CornerRadius="6"
+                                        Opacity="0.3"
+                                        VerticalAlignment="Center"/>
+
+                                <ContentPresenter Grid.Column="1"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="Center"/>
+
+                                <Border x:Name="Underline"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Width="0"
+                                        Height="3"
+                                        Margin="0,8,14,0"
+                                        Background="{DynamicResource MenuButtonHoverBorderBrush}"
+                                        CornerRadius="3"
+                                        HorizontalAlignment="Left"
+                                        Opacity="0"/>
+                            </Grid>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                <Setter TargetName="AccentDot" Property="Opacity" Value="0.95"/>
+                                <Setter TargetName="Underline" Property="Opacity" Value="1"/>
+                                <Setter TargetName="Underline" Property="Width" Value="78"/>
+                                <Setter TargetName="Underline" Property="Height" Value="4"/>
+                                <Setter TargetName="ButtonRoot" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="3"
+                                                            Y="0"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                <Setter TargetName="AccentDot" Property="Opacity" Value="1"/>
+                                <Setter TargetName="Underline" Property="Opacity" Value="1"/>
+                                <Setter TargetName="Underline" Property="Width" Value="88"/>
+                                <Setter TargetName="Underline" Property="Background" Value="{DynamicResource InfoCardAccentBrush}"/>
+                                <Setter TargetName="ButtonRoot" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="1"
+                                                            Y="0"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -102,39 +153,60 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel>
-                    <Border Width="66"
-                            Height="66"
-                            Background="{DynamicResource LogoChipBackgroundBrush}"
-                            CornerRadius="22"
-                            BorderBrush="{DynamicResource LogoChipBorderBrush}"
-                            BorderThickness="1"
-                            HorizontalAlignment="Left">
-                        <Image Source="logg.png"
-                               Width="48"
-                               Height="48"
-                               Stretch="Uniform"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                    </Border>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Suivi des activites"
+                        <Border Width="84"
+                                Height="84"
+                                Background="{DynamicResource LogoChipBackgroundBrush}"
+                                CornerRadius="26"
+                                BorderBrush="{DynamicResource LogoChipBorderBrush}"
+                                BorderThickness="1"
+                                HorizontalAlignment="Left">
+                            <Image Source="logg.png"
+                                   Width="64"
+                                   Height="64"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="Fant"
+                                   SnapsToDevicePixels="True"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1"
+                                    Margin="16,10,0,0"
+                                    VerticalAlignment="Top">
+                            <TextBlock Text="Bienvenue,"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="tinouille !"
+                                       Margin="0,3,0,0"
+                                       Foreground="{DynamicResource PrimaryTitleBrush}"
+                                       FontSize="19"
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Suivi des&#x0a;activités"
                                Margin="0,22,0,0"
                                Foreground="{DynamicResource PrimaryTitleBrush}"
                                FontSize="29"
-                               FontWeight="SemiBold"/>
-
-                    <TextBlock Text="Un mini cockpit pastel pour suivre les projets et les essais."
-                               Margin="0,10,0,0"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               FontSize="14"
+                               FontWeight="SemiBold"
                                TextWrapping="Wrap"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1"
                             Margin="0,38,0,0">
-                    <Button Content="Vue generale"
+                    <Button Content="Vue générale"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="VueGenerale_Click"/>
+                    <Button Content="Suivi des essais"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="SuiviEssais_Click"/>
                 </StackPanel>
 
                 <Border Grid.Row="2"
@@ -148,7 +220,7 @@
                                    Foreground="{DynamicResource InfoCardAccentBrush}"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
-                        <TextBlock Text="Les projets affiches sont des donnees mockees pour construire la vue generale."
+                        <TextBlock Text="Les projets affichés sont des données mockées pour construire la vue générale."
                                    Margin="0,8,0,0"
                                    Foreground="{DynamicResource SecondaryTextBrush}"
                                    FontSize="15"
@@ -172,11 +244,13 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="Vue generale des projets"
+                    <TextBlock x:Name="PageTitleText"
+                               Text="Vue générale des projets"
                                FontSize="33"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                    <TextBlock Text="Les infos essentielles, en un coup d'oeil."
+                    <TextBlock x:Name="PageSubtitleText"
+                               Text="Les infos essentielles, en un coup d'oeil."
                                Margin="0,8,0,0"
                                Foreground="{DynamicResource SecondaryTextBrush}"
                                FontSize="15"/>

@@ -32,6 +32,11 @@ namespace MonTableurApp
             AfficherVueGenerale();
         }
 
+        private void SuiviEssais_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherVueSuiviEssais();
+        }
+
         private void ThemeToggle_Click(object sender, RoutedEventArgs e)
         {
             isBlueTheme = !isBlueTheme;
@@ -45,12 +50,23 @@ namespace MonTableurApp
 
         private void AfficherVueGenerale()
         {
+            PageTitleText.Text = "Vue générale des projets";
+            PageSubtitleText.Text = "Les infos essentielles, en un coup d'oeil.";
+
             var vue = new VueGeneraleView
             {
                 DataContext = viewModel
             };
 
             MainContent.Content = vue;
+        }
+
+        private void AfficherVueSuiviEssais()
+        {
+            PageTitleText.Text = "Suivi des essais";
+            PageSubtitleText.Text = "La page arrive ensuite, l'onglet est déjà prêt.";
+
+            MainContent.Content = new VueSuiviEssaisView();
         }
 
         private void ApplyCurrentTheme()
@@ -157,7 +173,7 @@ namespace MonTableurApp
             resources["DataGridHeaderBrush"] = CreateBrush("#FFE6F1");
             resources["DataGridHeaderForegroundBrush"] = CreateBrush("#8D4D79");
             resources["DataGridRowHoverBrush"] = CreateBrush("#FFF5FA");
-            resources["DataGridRowSelectedBrush"] = CreateBrush("#FFE8F4");
+            resources["DataGridRowSelectedBrush"] = CreateBrush("#FFEAF3");
             resources["DataGridSelectionForegroundBrush"] = CreateBrush("#6E4967");
             resources["DataGridAltRowBrush"] = CreateBrush("#FFF9FC");
             resources["DataGridSurfaceBorderBrush"] = CreateBrush("#F3D9E7");
@@ -227,7 +243,7 @@ namespace MonTableurApp
             resources["DataGridHeaderBrush"] = CreateBrush("#E8F3FF");
             resources["DataGridHeaderForegroundBrush"] = CreateBrush("#5877A8");
             resources["DataGridRowHoverBrush"] = CreateBrush("#F3F8FF");
-            resources["DataGridRowSelectedBrush"] = CreateBrush("#E4F0FF");
+            resources["DataGridRowSelectedBrush"] = CreateBrush("#E5F0FF");
             resources["DataGridSelectionForegroundBrush"] = CreateBrush("#4B638B");
             resources["DataGridAltRowBrush"] = CreateBrush("#F9FBFF");
             resources["DataGridSurfaceBorderBrush"] = CreateBrush("#D8E5F8");

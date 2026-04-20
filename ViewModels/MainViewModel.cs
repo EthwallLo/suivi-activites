@@ -16,8 +16,13 @@ namespace MonTableurApp.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         private static readonly string DataFilePath = Path.Combine(AppContext.BaseDirectory, "data.json");
+        private const string QuickFilterAll = "all";
+        private const string QuickFilterInProgress = "in-progress";
+        private const string QuickFilterReports = "reports";
+        private const string QuickFilterDone = "done";
 
         private string? searchNomProduit;
+        private string activeQuickFilter = QuickFilterAll;
         private int totalProjets;
         private int statutsEnCours;
         private int rapportsEnCours;
@@ -49,6 +54,11 @@ namespace MonTableurApp.ViewModels
                 RefreshStatistics();
             }
         }
+
+        public bool IsAllFilterActive => activeQuickFilter == QuickFilterAll;
+        public bool IsInProgressFilterActive => activeQuickFilter == QuickFilterInProgress;
+        public bool IsReportsFilterActive => activeQuickFilter == QuickFilterReports;
+        public bool IsDoneFilterActive => activeQuickFilter == QuickFilterDone;
 
         public int TotalProjets
         {
@@ -156,12 +166,12 @@ namespace MonTableurApp.ViewModels
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(SearchNomProduit))
+            if (!MatchesSearch(projet))
             {
-                return true;
+                return false;
             }
 
-            return NormalizeText(projet.NomProduit).Contains(NormalizeText(SearchNomProduit));
+            return MatchesQuickFilter(projet);
         }
 
         private void Projets_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -199,7 +209,7 @@ namespace MonTableurApp.ViewModels
 
         private void Projet_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Projet.NomProduit))
+            if (e.PropertyName == nameof(Projet.NomProduit) || e.PropertyName == nameof(Projet.Statut))
             {
                 ProjetsView.Refresh();
             }
@@ -213,24 +223,91 @@ namespace MonTableurApp.ViewModels
             return ProjetsView.Cast<Projet>();
         }
 
+        private IEnumerable<Projet> GetSearchScopedProjects()
+        {
+            return Projets.Where(MatchesSearch);
+        }
+
         private void RefreshStatistics()
         {
-            TotalProjets = GetVisibleProjects().Count();
+            TotalProjets = GetSearchScopedProjects().Count();
             StatutsEnCours = CountStatusContaining("cours");
             RapportsEnCours = CountStatusContaining("rapport");
             ProjetsFaits = CountByStatut("fait");
+            OnPropertyChanged(nameof(IsAllFilterActive));
+            OnPropertyChanged(nameof(IsInProgressFilterActive));
+            OnPropertyChanged(nameof(IsReportsFilterActive));
+            OnPropertyChanged(nameof(IsDoneFilterActive));
         }
 
         private int CountStatusContaining(string expectedPart)
         {
             string expected = NormalizeText(expectedPart);
-            return GetVisibleProjects().Count(projet => NormalizeText(projet.Statut).Contains(expected));
+            return GetSearchScopedProjects().Count(projet => NormalizeText(projet.Statut).Contains(expected));
         }
 
         private int CountByStatut(string expectedStatus)
         {
             string expected = NormalizeText(expectedStatus);
-            return GetVisibleProjects().Count(projet => NormalizeText(projet.Statut) == expected);
+            return GetSearchScopedProjects().Count(projet => NormalizeText(projet.Statut) == expected);
+        }
+
+        public void SetQuickFilterToAll()
+        {
+            SetQuickFilter(QuickFilterAll);
+        }
+
+        public void SetQuickFilterToInProgress()
+        {
+            SetQuickFilter(QuickFilterInProgress);
+        }
+
+        public void SetQuickFilterToReports()
+        {
+            SetQuickFilter(QuickFilterReports);
+        }
+
+        public void SetQuickFilterToDone()
+        {
+            SetQuickFilter(QuickFilterDone);
+        }
+
+        private void SetQuickFilter(string filter)
+        {
+            if (activeQuickFilter == filter)
+            {
+                activeQuickFilter = QuickFilterAll;
+            }
+            else
+            {
+                activeQuickFilter = filter;
+            }
+
+            ProjetsView.Refresh();
+            RefreshStatistics();
+        }
+
+        private bool MatchesSearch(Projet projet)
+        {
+            if (string.IsNullOrWhiteSpace(SearchNomProduit))
+            {
+                return true;
+            }
+
+            return NormalizeText(projet.NomProduit).Contains(NormalizeText(SearchNomProduit));
+        }
+
+        private bool MatchesQuickFilter(Projet projet)
+        {
+            string statut = NormalizeText(projet.Statut);
+
+            return activeQuickFilter switch
+            {
+                QuickFilterInProgress => statut.Contains("cours"),
+                QuickFilterReports => statut.Contains("rapport"),
+                QuickFilterDone => statut == "fait",
+                _ => true
+            };
         }
 
         private static string NormalizeText(string? value)

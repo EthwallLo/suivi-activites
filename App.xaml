@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Application.Resources>
+        <FontFamily x:Key="AppFontFamily">Candara</FontFamily>
+
         <LinearGradientBrush x:Key="WindowBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#FFF7FC" Offset="0"/>
             <GradientStop Color="#FFF0F7" Offset="0.55"/>
@@ -76,6 +78,14 @@
         <SolidColorBrush x:Key="ScrollTrackBrush" Color="#F7DDEB"/>
         <SolidColorBrush x:Key="ScrollThumbBrush" Color="#E9A8CC"/>
         <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#D98FB8"/>
+
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+
+        <Style TargetType="UserControl">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
 
         <Style TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>

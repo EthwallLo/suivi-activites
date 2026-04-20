@@ -1,0 +1,24 @@
+<UserControl x:Class="MonTableurApp.Views.VueSuiviEssaisView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border Background="#FFFFFF"
+            BorderBrush="{DynamicResource DataGridSurfaceBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="24"
+            Padding="28">
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+            <TextBlock Text="Suivi des essais"
+                       Foreground="{DynamicResource PrimaryTitleBrush}"
+                       FontSize="28"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="Onglet créé. On pourra construire la page juste après."
+                       Margin="0,12,0,0"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       FontSize="15"
+                       TextAlignment="Center"/>
+        </StackPanel>
+    </Border>
+</UserControl>
