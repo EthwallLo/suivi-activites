@@ -4,16 +4,17 @@
 
     <UserControl.Resources>
         <Style x:Key="SummaryCardStyle" TargetType="Border">
-            <Setter Property="Padding" Value="14"/>
+            <Setter Property="Padding" Value="18,16"/>
             <Setter Property="Margin" Value="0,0,12,0"/>
             <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="MinHeight" Value="106"/>
             <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
         <Style x:Key="SummaryCardButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Padding" Value="18,16"/>
             <Setter Property="Margin" Value="0,0,12,0"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
@@ -21,7 +22,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="MinHeight" Value="88"/>
+            <Setter Property="MinHeight" Value="106"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -66,6 +67,41 @@
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"/>
                         </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ExportButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,9"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ExportBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ExportBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                                <Setter TargetName="ExportBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ExportBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -343,16 +379,26 @@
         </Grid.RowDefinitions>
 
         <StackPanel>
-            <TextBlock Text="Vue d'ensemble"
-                       Foreground="{DynamicResource PrimaryTitleBrush}"
-                       FontSize="24"
-                       FontWeight="SemiBold"/>
-            <TextBlock Text="Tout le tableau est éditable."
-                       Margin="0,6,0,18"
-                       Foreground="{DynamicResource SecondaryTextBrush}"
-                       FontSize="14"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <Grid Margin="0,0,0,20">
+                <TextBlock Text="Vue d'ensemble"
+                           Foreground="{DynamicResource PrimaryTitleBrush}"
+                           FontSize="24"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+
+                <Button Grid.Column="1"
+                        Content="Exporter vers Excel"
+                        Style="{StaticResource ExportButtonStyle}"
+                        Click="ExporterTableau_Click"
+                        VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid Margin="0,18,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -382,12 +428,12 @@
                         <TextBlock Text="Tous les projets"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="13"/>
+                                   FontSize="14"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding TotalProjets}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="28"
+                                   FontSize="32"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
@@ -416,12 +462,12 @@
                         <TextBlock Text="En cours"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="13"/>
+                                   FontSize="14"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding StatutsEnCours}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="28"
+                                   FontSize="32"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
@@ -450,12 +496,12 @@
                         <TextBlock Text="Rapports en cours"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="13"/>
+                                   FontSize="14"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding RapportsEnCours}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="28"
+                                   FontSize="32"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
@@ -484,21 +530,24 @@
                         <TextBlock Text="Faits"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="13"/>
+                                   FontSize="14"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding ProjetsFaits}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="28"
+                                   FontSize="32"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
 
                 <Border Grid.Column="4"
-                        Style="{StaticResource SummaryCardStyle}"
                         Margin="0"
+                        Padding="14"
+                        MinHeight="88"
+                        CornerRadius="18"
                         Background="{DynamicResource SearchCardBackgroundBrush}"
-                        BorderBrush="{DynamicResource SearchCardBorderBrush}">
+                        BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                        BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -509,10 +558,12 @@
                                    Foreground="{DynamicResource SummaryLabelBrush}"
                                    FontSize="12"
                                    FontWeight="SemiBold"/>
-                        <TextBox Grid.Row="1"
-                                 Margin="0,8,0,0"
-                                 Style="{StaticResource RoundedTextBoxStyle}"
-                                 Text="{Binding SearchNomProduit, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <Grid Grid.Row="1"
+                              Margin="0,8,0,0">
+                            <TextBox Style="{StaticResource RoundedTextBoxStyle}"
+                                     Text="{Binding SearchNomProduit, UpdateSourceTrigger=PropertyChanged}"/>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
