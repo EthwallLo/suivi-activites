@@ -382,12 +382,12 @@
                         <TextBlock Text="Tous les projets"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="12"/>
+                                   FontSize="13"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding TotalProjets}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="24"
+                                   FontSize="28"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
@@ -416,12 +416,12 @@
                         <TextBlock Text="En cours"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="12"/>
+                                   FontSize="13"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding StatutsEnCours}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="24"
+                                   FontSize="28"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
@@ -450,12 +450,12 @@
                         <TextBlock Text="Rapports en cours"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="12"/>
+                                   FontSize="13"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding RapportsEnCours}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="24"
+                                   FontSize="28"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>
@@ -484,12 +484,12 @@
                         <TextBlock Text="Faits"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                    Opacity="0.82"
-                                   FontSize="12"/>
+                                   FontSize="13"/>
                         <TextBlock Grid.Row="1"
                                    Text="{Binding ProjetsFaits}"
                                    Margin="0,8,0,0"
                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                   FontSize="24"
+                                   FontSize="28"
                                    FontWeight="Bold"/>
                     </Grid>
                 </Button>

@@ -24,26 +24,26 @@ namespace MonTableurApp.ViewModels
 
         private static readonly Dictionary<string, List<string>> StatutsParEssai = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["Cyclage thermique"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Non concern\u00E9" },
-            ["Traction 100m"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["OTDR"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "Mesures en cours", "Courbes \u00E0 traiter", "Non concern\u00E9" },
-            ["Statique Bending"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Vieillissement"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En vieillissement", "\u00C0 traiter", "Non concern\u00E9" },
-            ["Dimensionnel"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "Mesures en cours", "Mesures \u00E0 valider", "Non concern\u00E9" },
-            ["Crush"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Cut through"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Kink"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Repeated bending"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Torsion"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Abrasion marquage"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Non concern\u00E9" },
-            ["Abrasion gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Non concern\u00E9" },
-            ["Friction gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Non concern\u00E9" },
-            ["Traction pince"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["Traction spiral\u00E9"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Non concern\u00E9" },
-            ["P\u00E9n\u00E9tration d'eau"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 observer", "Non concern\u00E9" },
-            ["Petite flamme"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 analyser", "Non concern\u00E9" },
-            ["Vibration \u00E9olienne"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 analyser", "Non concern\u00E9" },
-            ["Collage"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Non concern\u00E9" }
+            ["Cyclage thermique"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Traité", "Non concern\u00E9" },
+            ["Traction 100m"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["OTDR"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "Mesures en cours", "Courbes \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Statique Bending"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Vieillissement"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En vieillissement", "\u00C0 traiter", "Traité", "Non concern\u00E9" },
+            ["Dimensionnel"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "Mesures en cours", "Mesures \u00E0 valider", "Traité", "Non concern\u00E9" },
+            ["Crush"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Cut through"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Kink"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Repeated bending"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Torsion"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Abrasion marquage"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" },
+            ["Abrasion gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" },
+            ["Friction gaine"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" },
+            ["Traction pince"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["Traction spiral\u00E9"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "R\u00E9sultats \u00E0 traiter", "Traité", "Non concern\u00E9" },
+            ["P\u00E9n\u00E9tration d'eau"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 observer", "Traité", "Non concern\u00E9" },
+            ["Petite flamme"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 analyser", "Traité", "Non concern\u00E9" },
+            ["Vibration \u00E9olienne"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 analyser", "Traité", "Non concern\u00E9" },
+            ["Collage"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 contr\u00F4ler", "Traité", "Non concern\u00E9" }
         };
 
         private string? searchNomProduit;
@@ -56,6 +56,7 @@ namespace MonTableurApp.ViewModels
         private Projet? selectedProjetEssais;
         private int essaisSelectionATraiter;
         private int essaisSelectionEnCours;
+        private int essaisSelectionTermines;
         private int essaisSelectionTotal;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -212,6 +213,21 @@ namespace MonTableurApp.ViewModels
 
                 essaisSelectionEnCours = value;
                 OnPropertyChanged(nameof(EssaisSelectionEnCours));
+            }
+        }
+
+        public int EssaisSelectionTermines
+        {
+            get => essaisSelectionTermines;
+            private set
+            {
+                if (essaisSelectionTermines == value)
+                {
+                    return;
+                }
+
+                essaisSelectionTermines = value;
+                OnPropertyChanged(nameof(EssaisSelectionTermines));
             }
         }
 
@@ -457,12 +473,19 @@ namespace MonTableurApp.ViewModels
                 EssaisSelectionTotal = 0;
                 EssaisSelectionEnCours = 0;
                 EssaisSelectionATraiter = 0;
+                EssaisSelectionTermines = 0;
                 return;
             }
 
-            EssaisSelectionTotal = SelectedProjetEssais.Essais.Count;
-            EssaisSelectionEnCours = SelectedProjetEssais.Essais.Count(essai => NormalizeText(essai.Statut).Contains("cours"));
-            EssaisSelectionATraiter = SelectedProjetEssais.Essais.Count(essai => NormalizeText(essai.Statut).Contains("trait"));
+            IEnumerable<EssaiSuivi> essaisConcernes = SelectedProjetEssais.Essais.Where(essai => essai.EstConcerne);
+            EssaisSelectionTotal = essaisConcernes.Count();
+            EssaisSelectionEnCours = essaisConcernes.Count(essai => NormalizeText(essai.Statut).Contains("cours"));
+            EssaisSelectionATraiter = essaisConcernes.Count(essai =>
+            {
+                string statut = NormalizeText(essai.Statut);
+                return statut.Contains("trait") && statut != "traite";
+            });
+            EssaisSelectionTermines = essaisConcernes.Count(essai => essai.ProgressionPourcentage == 100);
         }
 
         private int CountStatusContaining(string expectedPart)
@@ -574,7 +597,7 @@ namespace MonTableurApp.ViewModels
 
             if (!StatutsParEssai.TryGetValue(key, out List<string>? statuts))
             {
-                statuts = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Non concern\u00E9" };
+                statuts = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "\u00C0 traiter", "Traité", "Non concern\u00E9" };
             }
 
             var result = new List<string>(statuts);

@@ -1,6 +1,7 @@
 using System.ComponentModel;
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace MonTableurApp.Models
 {
@@ -39,6 +40,9 @@ namespace MonTableurApp.Models
 
                 statut = value;
                 OnPropertyChanged(nameof(Statut));
+                OnPropertyChanged(nameof(EstConcerne));
+                OnPropertyChanged(nameof(ProgressionPourcentage));
+                OnPropertyChanged(nameof(ProgressionTexte));
             }
         }
 
@@ -50,8 +54,47 @@ namespace MonTableurApp.Models
             {
                 statutsDisponibles = value ?? new List<string>();
                 OnPropertyChanged(nameof(StatutsDisponibles));
+                OnPropertyChanged(nameof(ProgressionPourcentage));
+                OnPropertyChanged(nameof(ProgressionTexte));
             }
         }
+
+        [JsonIgnore]
+        public bool EstConcerne => !string.Equals(Statut, "Non concerné", System.StringComparison.OrdinalIgnoreCase);
+
+        [JsonIgnore]
+        public int ProgressionPourcentage
+        {
+            get
+            {
+                if (!EstConcerne)
+                {
+                    return 0;
+                }
+
+                List<string> statutsApplicables = StatutsDisponibles
+                    .Where(statutDisponible => !string.Equals(statutDisponible, "Non concerné", System.StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (statutsApplicables.Count <= 1)
+                {
+                    return 0;
+                }
+
+                int index = statutsApplicables.FindIndex(statutDisponible =>
+                    string.Equals(statutDisponible, Statut, System.StringComparison.OrdinalIgnoreCase));
+
+                if (index < 0)
+                {
+                    return 0;
+                }
+
+                return (int)System.Math.Round(index * 100.0 / (statutsApplicables.Count - 1));
+            }
+        }
+
+        [JsonIgnore]
+        public string ProgressionTexte => EstConcerne ? $"{ProgressionPourcentage} %" : "NC";
 
         private void OnPropertyChanged(string propertyName)
         {
