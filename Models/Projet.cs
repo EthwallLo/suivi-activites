@@ -37,6 +37,13 @@ namespace MonTableurApp.Models
             set { nomProduit = value; OnPropertyChanged(nameof(NomProduit)); }
         }
 
+        private string? familleProduit;
+        public string? FamilleProduit
+        {
+            get => familleProduit;
+            set { familleProduit = value; OnPropertyChanged(nameof(FamilleProduit)); }
+        }
+
         private string? client;
         public string? Client
         {

@@ -73,6 +73,7 @@ namespace MonTableurApp.ViewModels
 
         public List<string> Clients { get; }
         public List<string> Demandeurs { get; }
+        public List<string> FamillesProduit { get; }
         public List<string> TypesActivite { get; }
         public List<string> Statuts { get; }
         public List<string> NomsEssais { get; }
@@ -301,6 +302,7 @@ namespace MonTableurApp.ViewModels
         {
             Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };
             Demandeurs = new List<string> { "RUC", "JEN", "KYJ", "JLC", "JER", "JEL", "JYM", "XAL" };
+            FamillesProduit = new List<string> { "Câble", "Cordon", "Autre" };
             TypesActivite = new List<string> { "Qualification", "Appel d'offre", "Investigation", "Caract\u00E9risation" };
             Statuts = new List<string>
             {
@@ -495,12 +497,30 @@ namespace MonTableurApp.ViewModels
                 }
             }
 
+            if (sender is ObservableCollection<EssaiSuivi> essaisCollection)
+            {
+                Projet? projet = Projets.FirstOrDefault(item => ReferenceEquals(item.Essais, essaisCollection));
+                if (projet != null)
+                {
+                    UpdateProjectStatusFromEssais(projet);
+                }
+            }
+
             Sauvegarder();
             RefreshSelectedProjectStatistics();
         }
 
         private void Essai_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (sender is EssaiSuivi essai)
+            {
+                Projet? projet = Projets.FirstOrDefault(item => item.Essais.Contains(essai));
+                if (projet != null)
+                {
+                    UpdateProjectStatusFromEssais(projet);
+                }
+            }
+
             Sauvegarder();
             RefreshSelectedProjectStatistics();
         }
@@ -743,6 +763,11 @@ namespace MonTableurApp.ViewModels
             return essai.EstConcerne && essai.ProgressionPourcentage == 100;
         }
 
+        private static bool IsEssaiDoneAndOk(EssaiSuivi essai)
+        {
+            return IsEssaiDone(essai) && NormalizeText(essai.ResultatTraitement) == "ok";
+        }
+
         private static bool IsEssaiInProgress(EssaiSuivi essai)
         {
             if (!essai.EstConcerne || IsEssaiDone(essai) || IsEssaiToProcess(essai))
@@ -761,6 +786,42 @@ namespace MonTableurApp.ViewModels
             OnPropertyChanged(nameof(IsEssaiToProcessFilterActive));
             OnPropertyChanged(nameof(IsEssaiInProgressFilterActive));
             OnPropertyChanged(nameof(IsEssaiDoneFilterActive));
+        }
+
+        private void UpdateProjectStatusFromEssais(Projet projet)
+        {
+            string statutProjet = NormalizeText(projet.Statut);
+            bool isPreQualificationInProgress =
+                statutProjet.Contains("pre") &&
+                statutProjet.Contains("qualification") &&
+                statutProjet.Contains("cours");
+            bool isQualificationInProgress =
+                !statutProjet.Contains("pre") &&
+                statutProjet.Contains("qualification") &&
+                statutProjet.Contains("cours");
+
+            if (!isPreQualificationInProgress && !isQualificationInProgress)
+            {
+                return;
+            }
+
+            List<EssaiSuivi> essaisPreQualification = projet.EssaisPreQualification.ToList();
+            if (essaisPreQualification.Count == 0)
+            {
+                return;
+            }
+
+            bool allPreQualificationEssaisCompleted = essaisPreQualification.All(essai =>
+                !essai.EstConcerne || IsEssaiDoneAndOk(essai));
+
+            if (allPreQualificationEssaisCompleted && isPreQualificationInProgress)
+            {
+                projet.Statut = "Qualification en cours";
+            }
+            else if (!allPreQualificationEssaisCompleted && isQualificationInProgress)
+            {
+                projet.Statut = "Pré-qualification en cours";
+            }
         }
 
         private static string NormalizeText(string? value)
