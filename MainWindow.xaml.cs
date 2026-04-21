@@ -33,7 +33,7 @@ namespace MonTableurApp
             DataContext = viewModel;
             vueGenerale = new VueGeneraleView { DataContext = viewModel };
             vueSuiviEssais = new VueSuiviEssaisView { DataContext = viewModel };
-            vueAjouterProjet = new VueAjouterProjetView();
+            vueAjouterProjet = new VueAjouterProjetView { DataContext = viewModel };
             vueEnCours = new VueEnCoursView();
             vueAgenda = new VueAgendaView();
 

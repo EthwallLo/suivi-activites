@@ -280,6 +280,23 @@ namespace MonTableurApp.ViewModels
         public IEnumerable<EssaiSuivi> EssaisQualificationFiltres =>
             GetFilteredEssais(SelectedProjetEssais?.EssaisQualification ?? Enumerable.Empty<EssaiSuivi>());
 
+        public void AjouterProjet(Projet projet)
+        {
+            EnsureEssaisForProject(projet);
+            Projets.Add(projet);
+            SelectedProjetEssais = projet;
+        }
+
+        public bool ProjetExiste(string? numeroProjet, string? nomProduit)
+        {
+            string numeroNormalise = NormalizeText(numeroProjet);
+            string produitNormalise = NormalizeText(nomProduit);
+
+            return Projets.Any(projet =>
+                NormalizeText(projet.NumeroProjet) == numeroNormalise &&
+                NormalizeText(projet.NomProduit) == produitNormalise);
+        }
+
         public MainViewModel()
         {
             Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };
