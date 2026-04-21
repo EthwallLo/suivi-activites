@@ -288,6 +288,39 @@
             <Setter Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
         </Style>
 
+        <Style x:Key="ProductManageButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <DataTemplate x:Key="EmptySelectionTemplate">
             <Border Style="{StaticResource SectionCardStyle}"
                     Padding="38">
@@ -317,10 +350,35 @@
                 <Border Style="{StaticResource SectionCardStyle}"
                         Padding="26">
                     <StackPanel>
-                        <TextBlock Text="{Binding NomProduit}"
-                                   FontSize="28"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="{Binding NomProduit}"
+                                           FontSize="28"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                <TextBlock Text="Infos du produit et actions rapides"
+                                           Margin="0,6,0,0"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource ProductManageButtonStyle}"
+                                    Click="ModifierProduit_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Modifier le produit"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock Margin="8,0,0,0"
+                                               Text="✎"
+                                               FontSize="14"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
 
                         <WrapPanel Margin="0,12,0,0">
                             <Border Style="{StaticResource MetricPillStyle}">

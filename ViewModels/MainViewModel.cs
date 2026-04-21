@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Windows;
 using System.Windows.Data;
 using MonTableurApp.Models;
 
@@ -25,6 +26,32 @@ namespace MonTableurApp.ViewModels
         private const string EssaiFilterToProcess = "to-process";
         private const string EssaiFilterInProgress = "in-progress";
         private const string EssaiFilterDone = "done";
+        private const double AgendaHoursPerDay = 8.0;
+        private const double AgendaHourSlotHeight = 48.0;
+        private static readonly TimeSpan AgendaDisplayStartTime = TimeSpan.FromHours(7);
+        private static readonly TimeSpan AgendaDisplayEndTime = TimeSpan.FromHours(18);
+
+        private static readonly Dictionary<string, double> AgendaDureesEssais = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Cyclage thermique"] = 4,
+            ["Traction 100m"] = 0.25,
+            ["Statique Bending"] = 0.25,
+            ["Dimensionnel"] = 0.25,
+            ["Crush"] = 2,
+            ["Cut through"] = 2,
+            ["Kink"] = 0.25,
+            ["Repeated bending"] = 0.5,
+            ["Torsion"] = 0.25,
+            ["Abrasion marquage"] = 0.25,
+            ["Abrasion gaine"] = 0.25,
+            ["Friction gaine"] = 0.5,
+            ["Traction pince"] = 2,
+            ["Traction spiralé"] = 2,
+            ["Pénétration d'eau"] = 7,
+            ["Petite flamme"] = 0.25,
+            ["Vibration éolienne"] = 14,
+            ["Collage"] = 0.25
+        };
 
         private static readonly Dictionary<string, List<string>> StatutsParEssai = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -64,6 +91,9 @@ namespace MonTableurApp.ViewModels
         private int essaisSelectionEnCours;
         private int essaisSelectionTermines;
         private int essaisSelectionTotal;
+        private string agendaWeekTitle = string.Empty;
+        private readonly Stack<AgendaUndoSnapshot> agendaUndoSnapshots = new();
+        private bool isRestoringAgendaState;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -78,6 +108,8 @@ namespace MonTableurApp.ViewModels
         public List<string> Statuts { get; }
         public List<string> NomsEssais { get; }
         public List<SearchFieldOption> ProjetSearchFields { get; }
+        public ObservableCollection<AgendaTaskItem> AgendaBacklogTasks { get; }
+        public ObservableCollection<AgendaWorkDay> AgendaWeekDays { get; }
 
         public string? SearchNomProduit
         {
@@ -281,6 +313,62 @@ namespace MonTableurApp.ViewModels
         public IEnumerable<EssaiSuivi> EssaisQualificationFiltres =>
             GetFilteredEssais(SelectedProjetEssais?.EssaisQualification ?? Enumerable.Empty<EssaiSuivi>());
 
+        public string AgendaWeekTitle
+        {
+            get => agendaWeekTitle;
+            private set
+            {
+                if (agendaWeekTitle == value)
+                {
+                    return;
+                }
+
+                agendaWeekTitle = value;
+                OnPropertyChanged(nameof(AgendaWeekTitle));
+            }
+        }
+
+        public IEnumerable<AgendaTaskItem> AgendaBacklogVisibleTasks =>
+            AgendaBacklogTasks
+                .Where(task => !AgendaWeekDays.Any(day =>
+                    day.PlannedTasks.Any(planned => string.Equals(planned.TaskKey, task.TaskKey, StringComparison.OrdinalIgnoreCase))))
+                .ToList();
+
+        public bool CanUndoAgenda => agendaUndoSnapshots.Count > 0;
+
+        public int AgendaBacklogVisibleCount => AgendaBacklogVisibleTasks.Count();
+
+        public IEnumerable<AgendaHourMarker> AgendaDisplayHourMarkers
+        {
+            get
+            {
+                TimeSpan current = AgendaDisplayStartTime;
+                double offset = 0;
+
+                while (current <= AgendaDisplayEndTime)
+                {
+                    yield return new AgendaHourMarker($"{current:hh\\:mm}", offset);
+                    current = current.Add(TimeSpan.FromHours(1));
+                    offset += AgendaHourSlotHeight;
+                }
+            }
+        }
+
+        public IEnumerable<string> AgendaDisplayGridSlots
+        {
+            get
+            {
+                TimeSpan current = AgendaDisplayStartTime;
+                while (current < AgendaDisplayEndTime)
+                {
+                    yield return $"{current:hh\\:mm}";
+                    current = current.Add(TimeSpan.FromHours(1));
+                }
+            }
+        }
+
+        public double AgendaTimelineHeight => (AgendaDisplayEndTime - AgendaDisplayStartTime).TotalHours * AgendaHourSlotHeight;
+
         public void AjouterProjet(Projet projet)
         {
             EnsureEssaisForProject(projet);
@@ -296,6 +384,32 @@ namespace MonTableurApp.ViewModels
             return Projets.Any(projet =>
                 NormalizeText(projet.NumeroProjet) == numeroNormalise &&
                 NormalizeText(projet.NomProduit) == produitNormalise);
+        }
+
+        public bool ProjetExisteAutre(Projet projetCourant, string? numeroProjet, string? nomProduit)
+        {
+            string numeroNormalise = NormalizeText(numeroProjet);
+            string produitNormalise = NormalizeText(nomProduit);
+
+            return Projets.Any(projet =>
+                !ReferenceEquals(projet, projetCourant) &&
+                NormalizeText(projet.NumeroProjet) == numeroNormalise &&
+                NormalizeText(projet.NomProduit) == produitNormalise);
+        }
+
+        public void SupprimerProjet(Projet projet)
+        {
+            if (!Projets.Contains(projet))
+            {
+                return;
+            }
+
+            if (ReferenceEquals(SelectedProjetEssais, projet))
+            {
+                SelectedProjetEssais = null;
+            }
+
+            Projets.Remove(projet);
         }
 
         public MainViewModel()
@@ -341,6 +455,8 @@ namespace MonTableurApp.ViewModels
                 new("NomProduit", "Produit"),
                 new("NumeroProjet", "Projet")
             };
+            AgendaBacklogTasks = new ObservableCollection<AgendaTaskItem>();
+            AgendaWeekDays = CreateAgendaWeekDays();
 
             Projets = ChargerProjets();
 
@@ -364,6 +480,7 @@ namespace MonTableurApp.ViewModels
 
             RefreshStatistics();
             EnsureSelectedProjetEssais();
+            RefreshAgendaTasks();
         }
 
         private ObservableCollection<Projet> ChargerProjets()
@@ -430,6 +547,7 @@ namespace MonTableurApp.ViewModels
             Sauvegarder();
             RefreshStatistics();
             EnsureSelectedProjetEssais();
+            RefreshAgendaTasks();
         }
 
         private void AttacherProjet(Projet projet)
@@ -467,6 +585,7 @@ namespace MonTableurApp.ViewModels
             Sauvegarder();
             RefreshStatistics();
             RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
         }
 
         private void AttacherEssai(EssaiSuivi essai)
@@ -508,6 +627,7 @@ namespace MonTableurApp.ViewModels
 
             Sauvegarder();
             RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
         }
 
         private void Essai_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -523,6 +643,7 @@ namespace MonTableurApp.ViewModels
 
             Sauvegarder();
             RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
         }
 
         private IEnumerable<Projet> GetSearchScopedProjects()
@@ -824,6 +945,663 @@ namespace MonTableurApp.ViewModels
             }
         }
 
+        public void MoveAgendaTaskToDay(AgendaTaskItem task, AgendaWorkDay targetDay, double? dropY = null)
+        {
+            SaveAgendaUndoSnapshot();
+            RemoveAgendaTaskFromAllBuckets(task);
+            task.ScheduledStartMinutes = GetScheduledStartMinutes(targetDay, task, dropY);
+            targetDay.PlannedTasks.Add(task);
+            RecalculateAgendaWeek();
+            RefreshAgendaCollections();
+        }
+
+        public void MoveAgendaTaskToBacklog(AgendaTaskItem task)
+        {
+            SaveAgendaUndoSnapshot();
+            RemoveAgendaTaskFromAllBuckets(task);
+            ResetAgendaTaskLayout(task);
+            AgendaBacklogTasks.Add(task);
+            RecalculateAgendaWeek();
+            RefreshAgendaCollections();
+        }
+
+        public void UndoAgendaLastAction()
+        {
+            if (agendaUndoSnapshots.Count == 0)
+            {
+                return;
+            }
+
+            AgendaUndoSnapshot snapshot = agendaUndoSnapshots.Pop();
+            RestoreAgendaSnapshot(snapshot);
+            OnPropertyChanged(nameof(CanUndoAgenda));
+        }
+
+        private ObservableCollection<AgendaWorkDay> CreateAgendaWeekDays()
+        {
+            var result = new ObservableCollection<AgendaWorkDay>();
+            DateTime today = DateTime.Today;
+            int offset = ((int)today.DayOfWeek + 6) % 7;
+            DateTime monday = today.AddDays(-offset);
+            string[] labels = { "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi" };
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                var day = new AgendaWorkDay(labels[i], monday.AddDays(i));
+                day.PropertyChanged += AgendaWorkDay_PropertyChanged;
+                day.PlannedTasks.CollectionChanged += AgendaPlannedTasks_CollectionChanged;
+                result.Add(day);
+            }
+
+            AgendaWeekTitle = $"Semaine du {monday:dd/MM} au {monday.AddDays(4):dd/MM}";
+            return result;
+        }
+
+        private void AgendaWorkDay_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (isRestoringAgendaState)
+            {
+                return;
+            }
+
+            if (sender is AgendaWorkDay day)
+            {
+                RecalculateAgendaWeek();
+            }
+        }
+
+        private void AgendaPlannedTasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (isRestoringAgendaState)
+            {
+                return;
+            }
+
+            if (sender is not ObservableCollection<AgendaTaskItem> plannedTasks)
+            {
+                return;
+            }
+
+            AgendaWorkDay? day = AgendaWeekDays.FirstOrDefault(item => ReferenceEquals(item.PlannedTasks, plannedTasks));
+            if (day != null)
+            {
+                RecalculateAgendaWeek();
+            }
+        }
+
+        private void RefreshAgendaTasks()
+        {
+            Dictionary<string, AgendaTaskItem> existingTasks = AgendaBacklogTasks
+                .Concat(AgendaWeekDays.SelectMany(day => day.PlannedTasks))
+                .ToDictionary(task => task.TaskKey, StringComparer.OrdinalIgnoreCase);
+
+            HashSet<string> validKeys = new(StringComparer.OrdinalIgnoreCase);
+
+            foreach (Projet projet in Projets)
+            {
+                foreach (EssaiSuivi essai in projet.Essais.Where(ShouldAppearInAgenda))
+                {
+                    string key = BuildAgendaTaskKey(projet, essai);
+                    validKeys.Add(key);
+
+                    if (!existingTasks.TryGetValue(key, out AgendaTaskItem? task))
+                    {
+                        task = new AgendaTaskItem { TaskKey = key };
+                        AgendaBacklogTasks.Add(task);
+                    }
+
+                    double dureeJours = AgendaDureesEssais.TryGetValue(essai.NomEssai ?? string.Empty, out double value)
+                        ? value
+                        : 0.25;
+
+                    task.NumeroProjet = projet.NumeroProjet ?? string.Empty;
+                    task.NomProduit = projet.NomProduit ?? string.Empty;
+                    task.NomEssai = essai.NomEssai ?? string.Empty;
+                    task.DureeJours = dureeJours;
+                    task.DureeHeures = dureeJours * AgendaHoursPerDay;
+                }
+            }
+
+            foreach (AgendaTaskItem obsolete in existingTasks.Values.Where(task => !validKeys.Contains(task.TaskKey)).ToList())
+            {
+                RemoveAgendaTaskFromAllBuckets(obsolete);
+            }
+
+            EnsureAgendaBacklogConsistency();
+
+            RecalculateAgendaWeek();
+
+            RefreshAgendaCollections();
+        }
+
+        private void SaveAgendaUndoSnapshot()
+        {
+            AgendaUndoSnapshot snapshot = CaptureAgendaSnapshot();
+            agendaUndoSnapshots.Push(snapshot);
+
+            while (agendaUndoSnapshots.Count > 30)
+            {
+                AgendaUndoSnapshot[] preserved = agendaUndoSnapshots.Reverse().Take(30).ToArray();
+                agendaUndoSnapshots.Clear();
+
+                for (int i = preserved.Length - 1; i >= 0; i--)
+                {
+                    agendaUndoSnapshots.Push(preserved[i]);
+                }
+            }
+
+            OnPropertyChanged(nameof(CanUndoAgenda));
+        }
+
+        private AgendaUndoSnapshot CaptureAgendaSnapshot()
+        {
+            var placements = new List<AgendaTaskPlacementSnapshot>();
+
+            foreach (AgendaTaskItem task in AgendaBacklogTasks)
+            {
+                placements.Add(new AgendaTaskPlacementSnapshot(task.TaskKey, null, null, null));
+            }
+
+            for (int dayIndex = 0; dayIndex < AgendaWeekDays.Count; dayIndex++)
+            {
+                AgendaWorkDay day = AgendaWeekDays[dayIndex];
+                for (int orderIndex = 0; orderIndex < day.PlannedTasks.Count; orderIndex++)
+                {
+                    AgendaTaskItem task = day.PlannedTasks[orderIndex];
+                    placements.Add(new AgendaTaskPlacementSnapshot(task.TaskKey, dayIndex, task.ScheduledStartMinutes, orderIndex));
+                }
+            }
+
+            return new AgendaUndoSnapshot(placements);
+        }
+
+        private void RestoreAgendaSnapshot(AgendaUndoSnapshot snapshot)
+        {
+            Dictionary<string, AgendaTaskItem> tasksByKey = AgendaBacklogTasks
+                .Concat(AgendaWeekDays.SelectMany(day => day.PlannedTasks))
+                .ToDictionary(task => task.TaskKey, StringComparer.OrdinalIgnoreCase);
+
+            isRestoringAgendaState = true;
+
+            try
+            {
+                AgendaBacklogTasks.Clear();
+
+                foreach (AgendaWorkDay day in AgendaWeekDays)
+                {
+                    day.PlannedTasks.Clear();
+                }
+
+                foreach (AgendaTaskPlacementSnapshot placement in snapshot.Placements
+                             .OrderBy(item => item.DayIndex ?? int.MaxValue)
+                             .ThenBy(item => item.OrderIndex ?? int.MaxValue))
+                {
+                    if (!tasksByKey.TryGetValue(placement.TaskKey, out AgendaTaskItem? task))
+                    {
+                        continue;
+                    }
+
+                    if (placement.DayIndex.HasValue &&
+                        placement.DayIndex.Value >= 0 &&
+                        placement.DayIndex.Value < AgendaWeekDays.Count)
+                    {
+                        task.ScheduledStartMinutes = placement.ScheduledStartMinutes;
+                        AgendaWeekDays[placement.DayIndex.Value].PlannedTasks.Add(task);
+                    }
+                    else
+                    {
+                        ResetAgendaTaskLayout(task);
+                        AgendaBacklogTasks.Add(task);
+                    }
+                }
+            }
+            finally
+            {
+                isRestoringAgendaState = false;
+            }
+
+            RecalculateAgendaWeek();
+            RefreshAgendaCollections();
+        }
+
+        private static bool ShouldAppearInAgenda(EssaiSuivi essai)
+        {
+            return essai.EstConcerne && !IsEssaiDone(essai);
+        }
+
+        private static string BuildAgendaTaskKey(Projet projet, EssaiSuivi essai)
+        {
+            return $"{projet.NumeroProjet}|{projet.NomProduit}|{essai.NomEssai}";
+        }
+
+        private void RemoveAgendaTaskFromAllBuckets(AgendaTaskItem task)
+        {
+            AgendaBacklogTasks.Remove(task);
+
+            foreach (AgendaWorkDay day in AgendaWeekDays)
+            {
+                day.PlannedTasks.Remove(task);
+            }
+        }
+
+        private void EnsureAgendaBacklogConsistency()
+        {
+            HashSet<string> plannedKeys = AgendaWeekDays
+                .SelectMany(day => day.PlannedTasks)
+                .Select(task => task.TaskKey)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (AgendaTaskItem duplicate in AgendaBacklogTasks
+                         .Where(task => plannedKeys.Contains(task.TaskKey))
+                         .ToList())
+            {
+                AgendaBacklogTasks.Remove(duplicate);
+            }
+        }
+
+        private void RecalculateAgendaDay(AgendaWorkDay day)
+        {
+            if (!TryParseTime(day.StartTimeText, out TimeSpan startTime) ||
+                !TryParseTime(day.EndTimeText, out TimeSpan endTime) ||
+                endTime <= startTime)
+            {
+                PopulateHourSlots(day, TimeSpan.FromHours(8), TimeSpan.FromHours(16));
+
+                foreach (AgendaTaskItem task in day.PlannedTasks)
+                {
+                    task.TimeRangeLabel = "Horaires invalides";
+                    task.IsOverflow = true;
+                    task.TimelineTop = 0;
+                    task.BlockHeight = 52;
+                    task.TimelineMargin = new Thickness(10, 0, 10, 0);
+                }
+
+                return;
+            }
+
+            TimeSpan lunchStart = TimeSpan.Zero;
+            TimeSpan lunchEnd = TimeSpan.Zero;
+
+            bool hasLunchBreak =
+                TryParseTime(day.LunchStartText, out lunchStart) &&
+                TryParseTime(day.LunchEndText, out lunchEnd) &&
+                lunchEnd > lunchStart &&
+                lunchStart >= startTime &&
+                lunchEnd <= endTime;
+
+            if (!hasLunchBreak)
+            {
+                lunchStart = TimeSpan.Zero;
+                lunchEnd = TimeSpan.Zero;
+            }
+
+            TimeSpan displayStart = RoundDownToHour(startTime);
+            TimeSpan displayEnd = RoundUpToHour(endTime);
+            if (displayEnd <= displayStart)
+            {
+                displayEnd = displayStart.Add(TimeSpan.FromHours(1));
+            }
+
+            PopulateHourSlots(day, displayStart, displayEnd);
+
+            TimeSpan current = startTime;
+
+            foreach (AgendaTaskItem task in day.PlannedTasks.OrderBy(item => item.ScheduledStartMinutes ?? int.MaxValue))
+            {
+                TimeSpan taskStart = task.ScheduledStartMinutes.HasValue
+                    ? TimeSpan.FromMinutes(task.ScheduledStartMinutes.Value)
+                    : current;
+
+                if (taskStart < startTime)
+                {
+                    taskStart = startTime;
+                }
+
+                if (hasLunchBreak && taskStart >= lunchStart && taskStart < lunchEnd)
+                {
+                    taskStart = lunchEnd;
+                }
+                TimeSpan taskEnd = ComputeTaskEndTime(taskStart, task.DureeHeures, lunchStart, lunchEnd, hasLunchBreak);
+
+                task.TimeRangeLabel = day.IsWorkingDay
+                    ? $"{taskStart:hh\\:mm} - {taskEnd:hh\\:mm}"
+                    : "Journée non travaillée";
+                task.IsOverflow = taskEnd > endTime;
+                task.TimelineTop = Math.Max(0, (taskStart - displayStart).TotalHours * AgendaHourSlotHeight);
+                task.BlockHeight = Math.Max(30, ((taskEnd - taskStart).TotalHours * AgendaHourSlotHeight) - 4);
+                task.TimelineMargin = new Thickness(10, task.TimelineTop, 10, 0);
+
+                if (!task.ScheduledStartMinutes.HasValue)
+                {
+                    current = taskEnd;
+                }
+            }
+        }
+
+        private void RecalculateAgendaWeek()
+        {
+            foreach (AgendaWorkDay day in AgendaWeekDays)
+            {
+                day.DisplaySegments.Clear();
+
+                if (!TryGetAgendaDayLayout(day, out _, out _, out _, out _, out TimeSpan displayStart, out TimeSpan displayEnd))
+                {
+                    PopulateHourSlots(day, TimeSpan.FromHours(8), TimeSpan.FromHours(16));
+                    continue;
+                }
+
+                PopulateHourSlots(day, displayStart, displayEnd);
+            }
+
+            for (int dayIndex = 0; dayIndex < AgendaWeekDays.Count; dayIndex++)
+            {
+                AgendaWorkDay anchorDay = AgendaWeekDays[dayIndex];
+
+                foreach (AgendaTaskItem task in anchorDay.PlannedTasks.OrderBy(item => item.ScheduledStartMinutes ?? int.MaxValue))
+                {
+                    PlaceTaskAcrossWeek(dayIndex, task);
+                }
+            }
+        }
+
+        private void PlaceTaskAcrossWeek(int startDayIndex, AgendaTaskItem task)
+        {
+            double remainingHours = task.DureeHeures;
+            bool firstSegment = true;
+            AgendaTaskSegment? lastSegment = null;
+
+            for (int currentDayIndex = startDayIndex; currentDayIndex < AgendaWeekDays.Count && remainingHours > 0; currentDayIndex++)
+            {
+                AgendaWorkDay currentDay = AgendaWeekDays[currentDayIndex];
+
+                if (!TryGetAgendaDayLayout(currentDay, out TimeSpan startTime, out TimeSpan endTime, out TimeSpan lunchStart, out TimeSpan lunchEnd, out TimeSpan displayStart, out _))
+                {
+                    continue;
+                }
+
+                if (!currentDay.IsWorkingDay)
+                {
+                    continue;
+                }
+
+                TimeSpan segmentStart = firstSegment && task.ScheduledStartMinutes.HasValue
+                    ? TimeSpan.FromMinutes(task.ScheduledStartMinutes.Value)
+                    : startTime;
+
+                if (segmentStart < startTime)
+                {
+                    segmentStart = startTime;
+                }
+
+                if (segmentStart >= endTime)
+                {
+                    continue;
+                }
+
+                if (segmentStart >= lunchStart && segmentStart < lunchEnd)
+                {
+                    segmentStart = lunchEnd;
+                }
+
+                double availableHours = GetWorkingHoursBetween(segmentStart, endTime, lunchStart, lunchEnd);
+                if (availableHours <= 0)
+                {
+                    continue;
+                }
+
+                double segmentHours = Math.Min(remainingHours, availableHours);
+                TimeSpan segmentEnd = ComputeTaskEndTime(segmentStart, segmentHours, lunchStart, lunchEnd, lunchEnd > lunchStart);
+                double timelineTop = Math.Max(0, (segmentStart - displayStart).TotalHours * AgendaHourSlotHeight);
+                double blockHeight = Math.Max(30, ((segmentEnd - segmentStart).TotalHours * AgendaHourSlotHeight) - 4);
+
+                lastSegment = new AgendaTaskSegment
+                {
+                    SourceTask = task,
+                    NomEssai = firstSegment ? task.NomEssai : $"{task.NomEssai} (suite)",
+                    NumeroProjet = task.NumeroProjet,
+                    NomProduit = task.NomProduit,
+                    DureeLabel = $"{segmentHours / AgendaHoursPerDay:0.##} j",
+                    TimeRangeLabel = $"{segmentStart:hh\\:mm} - {segmentEnd:hh\\:mm}",
+                    IsOverflow = false,
+                    BlockHeight = blockHeight,
+                    TimelineMargin = new Thickness(10, timelineTop, 10, 0),
+                    IsContinuation = !firstSegment
+                };
+
+                currentDay.DisplaySegments.Add(lastSegment);
+
+                if (firstSegment)
+                {
+                    task.TimeRangeLabel = lastSegment.TimeRangeLabel;
+                    task.IsOverflow = false;
+                    task.TimelineTop = timelineTop;
+                    task.BlockHeight = blockHeight;
+                    task.TimelineMargin = lastSegment.TimelineMargin;
+                }
+
+                remainingHours -= segmentHours;
+                firstSegment = false;
+            }
+
+            if (remainingHours > 0)
+            {
+                if (lastSegment != null)
+                {
+                    lastSegment.IsOverflow = true;
+                }
+
+                task.IsOverflow = true;
+            }
+            else if (firstSegment)
+            {
+                task.TimeRangeLabel = "Journée non travaillée";
+                task.IsOverflow = true;
+                task.TimelineTop = 0;
+                task.BlockHeight = 52;
+                task.TimelineMargin = new Thickness(10, 0, 10, 0);
+            }
+        }
+
+        private bool TryGetAgendaDayLayout(
+            AgendaWorkDay day,
+            out TimeSpan startTime,
+            out TimeSpan endTime,
+            out TimeSpan lunchStart,
+            out TimeSpan lunchEnd,
+            out TimeSpan displayStart,
+            out TimeSpan displayEnd)
+        {
+            displayStart = TimeSpan.FromHours(8);
+            displayEnd = TimeSpan.FromHours(16);
+            lunchStart = TimeSpan.Zero;
+            lunchEnd = TimeSpan.Zero;
+
+            if (!TryParseTime(day.StartTimeText, out startTime) ||
+                !TryParseTime(day.EndTimeText, out endTime) ||
+                endTime <= startTime)
+            {
+                startTime = TimeSpan.FromHours(8);
+                endTime = TimeSpan.FromHours(16);
+                return false;
+            }
+
+            bool hasLunchBreak =
+                TryParseTime(day.LunchStartText, out lunchStart) &&
+                TryParseTime(day.LunchEndText, out lunchEnd) &&
+                lunchEnd > lunchStart &&
+                lunchStart >= startTime &&
+                lunchEnd <= endTime;
+
+            if (!hasLunchBreak)
+            {
+                lunchStart = TimeSpan.Zero;
+                lunchEnd = TimeSpan.Zero;
+            }
+
+            displayStart = AgendaDisplayStartTime;
+            displayEnd = AgendaDisplayEndTime;
+
+            return true;
+        }
+
+        private static double GetWorkingHoursBetween(TimeSpan start, TimeSpan end, TimeSpan lunchStart, TimeSpan lunchEnd)
+        {
+            if (end <= start)
+            {
+                return 0;
+            }
+
+            double totalHours = (end - start).TotalHours;
+
+            if (lunchEnd > lunchStart)
+            {
+                TimeSpan overlapStart = start > lunchStart ? start : lunchStart;
+                TimeSpan overlapEnd = end < lunchEnd ? end : lunchEnd;
+
+                if (overlapEnd > overlapStart)
+                {
+                    totalHours -= (overlapEnd - overlapStart).TotalHours;
+                }
+            }
+
+            return Math.Max(0, totalHours);
+        }
+
+        private static bool TryParseTime(string? value, out TimeSpan time)
+        {
+            return TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out time) ||
+                   TimeSpan.TryParse(value, CultureInfo.GetCultureInfo("fr-FR"), out time);
+        }
+
+        private static TimeSpan ComputeTaskEndTime(
+            TimeSpan taskStart,
+            double durationHours,
+            TimeSpan lunchStart,
+            TimeSpan lunchEnd,
+            bool hasLunchBreak)
+        {
+            TimeSpan current = taskStart;
+            double remainingHours = durationHours;
+
+            if (hasLunchBreak && current < lunchStart)
+            {
+                double hoursBeforeLunch = (lunchStart - current).TotalHours;
+                if (remainingHours > hoursBeforeLunch)
+                {
+                    remainingHours -= hoursBeforeLunch;
+                    current = lunchEnd;
+                }
+                else
+                {
+                    return current.Add(TimeSpan.FromHours(remainingHours));
+                }
+            }
+
+            if (hasLunchBreak && current >= lunchStart && current < lunchEnd)
+            {
+                current = lunchEnd;
+            }
+
+            return current.Add(TimeSpan.FromHours(remainingHours));
+        }
+
+        private static TimeSpan RoundDownToHour(TimeSpan value)
+        {
+            return TimeSpan.FromHours(Math.Floor(value.TotalHours));
+        }
+
+        private static TimeSpan RoundUpToHour(TimeSpan value)
+        {
+            return TimeSpan.FromHours(Math.Ceiling(value.TotalHours));
+        }
+
+        private int? GetScheduledStartMinutes(AgendaWorkDay day, AgendaTaskItem task, double? dropY)
+        {
+            if (!dropY.HasValue ||
+                !TryParseTime(day.StartTimeText, out TimeSpan startTime) ||
+                !TryParseTime(day.EndTimeText, out TimeSpan endTime) ||
+                endTime <= startTime)
+            {
+                return task.ScheduledStartMinutes;
+            }
+
+            TimeSpan lunchStart = TimeSpan.Zero;
+            TimeSpan lunchEnd = TimeSpan.Zero;
+
+            bool hasLunchBreak =
+                TryParseTime(day.LunchStartText, out lunchStart) &&
+                TryParseTime(day.LunchEndText, out lunchEnd) &&
+                lunchEnd > lunchStart &&
+                lunchStart >= startTime &&
+                lunchEnd <= endTime;
+
+            TimeSpan displayStart = RoundDownToHour(startTime);
+            TimeSpan displayEnd = RoundUpToHour(endTime);
+            double totalDisplayHours = Math.Max(1, (displayEnd - displayStart).TotalHours);
+
+            double limitedY = Math.Max(0, Math.Min(dropY.Value, totalDisplayHours * AgendaHourSlotHeight));
+            double rawMinutes = displayStart.TotalMinutes + (limitedY / AgendaHourSlotHeight * 60);
+            int snappedMinutes = (int)(Math.Round(rawMinutes / 15.0) * 15.0);
+
+            TimeSpan candidate = TimeSpan.FromMinutes(snappedMinutes);
+
+            if (candidate < startTime)
+            {
+                candidate = startTime;
+            }
+
+            if (candidate > endTime)
+            {
+                candidate = endTime;
+            }
+
+            if (hasLunchBreak && candidate >= lunchStart && candidate < lunchEnd)
+            {
+                candidate = lunchEnd;
+            }
+
+            return (int)candidate.TotalMinutes;
+        }
+
+        private static void PopulateHourSlots(AgendaWorkDay day, TimeSpan start, TimeSpan end)
+        {
+            day.HourSlots.Clear();
+
+            start = AgendaDisplayStartTime;
+            end = AgendaDisplayEndTime;
+
+            TimeSpan current = start;
+            while (current < end)
+            {
+                day.HourSlots.Add($"{current:hh\\:mm}");
+                current = current.Add(TimeSpan.FromHours(1));
+            }
+
+            day.TimelineHeight = day.HourSlots.Count * AgendaHourSlotHeight;
+            day.EndHourLabel = $"{end:hh\\:mm}";
+        }
+
+        private static void ResetAgendaTaskLayout(AgendaTaskItem task)
+        {
+            task.TimeRangeLabel = null;
+            task.IsOverflow = false;
+            task.TimelineTop = 0;
+            task.BlockHeight = 52;
+            task.ScheduledStartMinutes = null;
+            task.TimelineMargin = new Thickness(10, 0, 10, 0);
+        }
+
+        private void RefreshAgendaCollections()
+        {
+            OnPropertyChanged(nameof(AgendaBacklogVisibleTasks));
+            OnPropertyChanged(nameof(AgendaBacklogVisibleCount));
+            OnPropertyChanged(nameof(AgendaDisplayHourMarkers));
+            OnPropertyChanged(nameof(AgendaDisplayGridSlots));
+            OnPropertyChanged(nameof(AgendaTimelineHeight));
+            OnPropertyChanged(nameof(AgendaWeekTitle));
+            OnPropertyChanged(nameof(CanUndoAgenda));
+        }
+
         private static string NormalizeText(string? value)
         {
             string normalized = (value ?? string.Empty).Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
@@ -869,6 +1647,23 @@ namespace MonTableurApp.ViewModels
             public string Key { get; }
 
             public string Label { get; }
+        }
+
+        private sealed record AgendaTaskPlacementSnapshot(string TaskKey, int? DayIndex, int? ScheduledStartMinutes, int? OrderIndex);
+
+        private sealed record AgendaUndoSnapshot(IReadOnlyList<AgendaTaskPlacementSnapshot> Placements);
+
+        public sealed class AgendaHourMarker
+        {
+            public AgendaHourMarker(string label, double offset)
+            {
+                Label = label;
+                Offset = offset;
+            }
+
+            public string Label { get; }
+
+            public double Offset { get; }
         }
     }
 }

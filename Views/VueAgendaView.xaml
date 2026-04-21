@@ -1,29 +1,525 @@
 <UserControl x:Class="MonTableurApp.Views.VueAgendaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="True"
+             PreviewKeyDown="VueAgendaView_PreviewKeyDown">
 
-    <Grid Background="Transparent">
-        <Border MaxWidth="620"
-                Padding="34"
-                Background="{DynamicResource InfoCardBackgroundBrush}"
-                BorderBrush="{DynamicResource InfoCardBorderBrush}"
-                BorderThickness="1"
-                CornerRadius="28"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-            <StackPanel>
-                <TextBlock Text="Agenda"
-                           Foreground="{DynamicResource PrimaryTitleBrush}"
-                           FontSize="28"
-                           FontWeight="SemiBold"
-                           TextAlignment="Center"/>
-                <TextBlock Text="Cette page vide servira plus tard pour le planning, les échéances et les rappels."
-                           Margin="0,14,0,0"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           FontSize="16"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"/>
-            </StackPanel>
+    <UserControl.Resources>
+        <Style x:Key="SectionCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="24"/>
+        </Style>
+
+        <Style x:Key="AgendaTaskCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="{DynamicResource SearchCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="TimelineTaskCardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="{DynamicResource SummaryLavenderBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SummaryLavenderBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="10,0"/>
+        </Style>
+
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="HourStripeStyle" TargetType="Border">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,1,0,0"/>
+            <Setter Property="Background" Value="#FFFCFE"/>
+        </Style>
+
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Style="{StaticResource SectionCardStyle}"
+                Padding="24">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Agenda de la semaine"
+                               FontSize="26"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                    <TextBlock Text="{Binding AgendaWeekTitle}"
+                               Margin="0,8,0,0"
+                               FontSize="15"
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="Glisse les essais dans la semaine pour les poser heure par heure, comme dans un vrai agenda semainier."
+                               Margin="0,6,0,0"
+                               FontSize="14"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Text="Astuce : Ctrl+Z annule le dernier placement."
+                               Margin="0,6,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                </StackPanel>
+
+                <Border Grid.Column="1"
+                        Padding="14,10"
+                        Background="{DynamicResource SummaryCardBackgroundBrush}"
+                        BorderBrush="{DynamicResource SummaryCardBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="16"
+                        VerticalAlignment="Top">
+                    <TextBlock Text="1 j = 8 h"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource SummaryValueBrush}"/>
+                </Border>
+            </Grid>
         </Border>
+
+        <Grid Grid.Row="1"
+              Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="18"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Style="{StaticResource SectionCardStyle}"
+                    Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="À planifier"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                            <TextBlock Text="Les essais encore libres restent ici tant qu'ils ne sont pas posés dans la semaine."
+                                       Margin="0,6,0,0"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
+                                Padding="10,6"
+                                Background="{DynamicResource SummaryWarmBackgroundBrush}"
+                                BorderBrush="{DynamicResource SummaryWarmBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                VerticalAlignment="Top">
+                            <TextBlock Text="{Binding AgendaBacklogVisibleCount, StringFormat={}{0} restant(s)}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="1"
+                          Margin="0,16,0,0">
+                        <TextBlock Text="Tout est placé pour l'instant"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource SecondaryTextBrush}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AgendaBacklogVisibleCount}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <ListBox ItemsSource="{Binding AgendaBacklogVisibleTasks}"
+                                 AllowDrop="True"
+                                 Drop="Backlog_Drop"
+                                 PreviewMouseMove="AgendaList_PreviewMouseMove">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource AgendaTaskCardStyle}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Background="{DynamicResource InfoCardAccentBrush}"
+                                                    CornerRadius="16,0,0,16"/>
+
+                                            <StackPanel Grid.Column="1"
+                                                        Margin="12">
+                                                <DockPanel>
+                                                    <TextBlock Text="{Binding NomEssai}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource PrimaryTitleBrush}"
+                                                               TextWrapping="Wrap"/>
+                                                    <Border DockPanel.Dock="Right"
+                                                            Padding="8,4"
+                                                            Margin="10,0,0,0"
+                                                            Background="{DynamicResource SummaryMintBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource SummaryMintBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="10">
+                                                        <TextBlock Text="{Binding DureeLabel}"
+                                                                   FontSize="11"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
+                                                    </Border>
+                                                </DockPanel>
+                                                <TextBlock Text="{Binding NomProduit}"
+                                                           Margin="0,4,0,0"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding NumeroProjet}"
+                                                           Margin="0,2,0,0"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource SummaryValueBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Style="{StaticResource SectionCardStyle}"
+                    Padding="18">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="54"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Background="Transparent"/>
+
+                        <ItemsControl Grid.Column="1"
+                                      ItemsSource="{Binding AgendaWeekDays}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="5"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,10,0"
+                                            Padding="12"
+                                            Background="#FBFDFF"
+                                            BorderBrush="{DynamicResource DataGridSurfaceBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="20">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DayLabel}"
+                                                       FontSize="16"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                            <TextBlock Text="{Binding DateLabel}"
+                                                       Margin="0,3,0,0"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                            <CheckBox Content="Jour travaillé"
+                                                      Margin="0,10,0,0"
+                                                      IsChecked="{Binding IsWorkingDay, Mode=TwoWay}"
+                                                      FontSize="12"
+                                                      FontWeight="SemiBold"
+                                                      Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                            <Grid Margin="0,10,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox Margin="0,0,4,0"
+                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                         Text="{Binding StartTimeText, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <TextBox Grid.Column="1"
+                                                         Margin="4,0,0,0"
+                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                         Text="{Binding EndTimeText, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Grid>
+
+                                            <Grid Margin="0,8,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox Margin="0,0,4,0"
+                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                         Text="{Binding LunchStartText, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <TextBox Grid.Column="1"
+                                                         Margin="4,0,0,0"
+                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                         Text="{Binding LunchEndText, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border Grid.Row="2"
+                                Grid.Column="0"
+                                Height="{Binding AgendaTimelineHeight}"
+                                Background="#FFF9FC"
+                                BorderBrush="{DynamicResource DataGridSurfaceBorderBrush}"
+                                BorderThickness="0,1,1,1"
+                                CornerRadius="14,0,0,14">
+                            <ItemsControl ItemsSource="{Binding AgendaDisplayHourMarkers}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas Height="{Binding DataContext.AgendaTimelineHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Canvas.Top" Value="{Binding Offset}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}"
+                                                   Width="46"
+                                                   TextAlignment="Right"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
+                        <ItemsControl Grid.Row="2"
+                                      Grid.Column="1"
+                                      ItemsSource="{Binding AgendaWeekDays}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="5"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,10,0"
+                                            Background="#FFFFFF"
+                                            BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="18">
+                                        <Grid Height="{Binding TimelineHeight}"
+                                              Tag="{Binding}"
+                                              Background="Transparent"
+                                              ClipToBounds="True"
+                                              AllowDrop="True"
+                                              Drop="DayPlan_Drop">
+                                            <ItemsControl ItemsSource="{Binding DataContext.AgendaDisplayGridSlots, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource HourStripeStyle}"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <TextBlock Text="Dépose les essais ici"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                                       IsHitTestVisible="False">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DisplaySegments.Count}" Value="0">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <ItemsControl ItemsSource="{Binding DisplaySegments}"
+                                                          PreviewMouseMove="AgendaList_PreviewMouseMove">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <Grid/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemContainerStyle>
+                                                    <Style TargetType="ContentPresenter">
+                                                        <Setter Property="VerticalAlignment" Value="Top"/>
+                                                    </Style>
+                                                </ItemsControl.ItemContainerStyle>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource TimelineTaskCardStyle}"
+                                                                Margin="{Binding TimelineMargin}"
+                                                                Height="{Binding BlockHeight}">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="6"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Border Background="{DynamicResource SummaryLavenderForegroundBrush}"
+                                                                        CornerRadius="16,0,0,16"/>
+
+                                                                <StackPanel Grid.Column="1"
+                                                                            Margin="8,0,0,0">
+                                                                    <DockPanel LastChildFill="True">
+                                                                        <TextBlock Text="{Binding NomEssai}"
+                                                                                   FontSize="12"
+                                                                                   FontWeight="SemiBold"
+                                                                                   Foreground="{DynamicResource PrimaryTitleBrush}"
+                                                                                   TextWrapping="Wrap"/>
+                                                                        <Border DockPanel.Dock="Right"
+                                                                                Margin="8,0,0,0"
+                                                                                Padding="7,3"
+                                                                                Background="{DynamicResource SummaryWarmBackgroundBrush}"
+                                                                                BorderBrush="{DynamicResource SummaryWarmBorderBrush}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="10">
+                                                                            <TextBlock Text="{Binding DureeLabel}"
+                                                                                       FontSize="10"
+                                                                                       FontWeight="SemiBold"
+                                                                                       Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
+                                                                        </Border>
+                                                                    </DockPanel>
+
+                                                                    <TextBlock Text="{Binding TimeRangeLabel}"
+                                                                               Margin="0,4,0,0"
+                                                                               FontSize="11"
+                                                                               FontWeight="SemiBold"
+                                                                               Foreground="{DynamicResource SummaryValueBrush}"/>
+                                                                    <TextBlock Text="{Binding NomProduit}"
+                                                                               Margin="0,3,0,0"
+                                                                               FontSize="10"
+                                                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                               TextTrimming="CharacterEllipsis"/>
+                                                                    <TextBlock Text="{Binding NumeroProjet}"
+                                                                               Margin="0,1,0,0"
+                                                                               FontSize="10"
+                                                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                               TextTrimming="CharacterEllipsis"/>
+                                                                    <TextBlock Text="Dépasse la semaine"
+                                                                               Margin="0,3,0,0"
+                                                                               FontSize="10"
+                                                                               Foreground="#D65C72">
+                                                                        <TextBlock.Style>
+                                                                            <Style TargetType="TextBlock">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding IsOverflow}" Value="True">
+                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </TextBlock.Style>
+                                                                    </TextBlock>
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <Border Background="#A6F1F1F5"
+                                                    CornerRadius="18"
+                                                    IsHitTestVisible="False">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsWorkingDay}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="Journée non travaillée"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

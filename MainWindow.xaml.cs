@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
@@ -15,6 +16,8 @@ namespace MonTableurApp
     {
         private const string ThemeRose = "rose";
         private const string ThemeBlue = "blue";
+        private const int MonitorDefaultToNearest = 2;
+        private const int MonitorInfoFlagPrimary = 1;
         private static readonly string ThemeSettingsPath = Path.Combine(AppContext.BaseDirectory, "ui-settings.json");
 
         private readonly MainViewModel viewModel = new MainViewModel();
@@ -35,7 +38,7 @@ namespace MonTableurApp
             vueSuiviEssais = new VueSuiviEssaisView { DataContext = viewModel };
             vueAjouterProjet = new VueAjouterProjetView { DataContext = viewModel };
             vueEnCours = new VueEnCoursView();
-            vueAgenda = new VueAgendaView();
+            vueAgenda = new VueAgendaView { DataContext = viewModel };
 
             isBlueTheme = LoadSavedTheme() == ThemeBlue;
             ApplyCurrentTheme();
@@ -52,7 +55,7 @@ namespace MonTableurApp
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ApplyCurrentScreenBounds(forceReposition: true);
+            ApplyPreferredScreenBounds(forceReposition: true);
         }
 
         private void SuiviEssais_Click(object sender, RoutedEventArgs e)
@@ -95,7 +98,7 @@ namespace MonTableurApp
 
         private void SystemEvents_DisplaySettingsChanged(object? sender, EventArgs e)
         {
-            Dispatcher.Invoke(() => ApplyCurrentScreenBounds(forceReposition: true));
+            Dispatcher.Invoke(() => ApplyPreferredScreenBounds(forceReposition: true));
         }
 
         private void AfficherVueGenerale()
@@ -161,6 +164,17 @@ namespace MonTableurApp
             activeButton.Tag = "Active";
         }
 
+        private void ApplyPreferredScreenBounds(bool forceReposition = false)
+        {
+            if (TryGetPreferredMonitorInfo(out MONITORINFO preferredMonitor))
+            {
+                ApplyMonitorBounds(preferredMonitor, forceReposition);
+                return;
+            }
+
+            ApplyCurrentScreenBounds(forceReposition);
+        }
+
         private void ApplyCurrentScreenBounds(bool forceReposition = false)
         {
             if (isUpdatingWindowBounds)
@@ -168,7 +182,7 @@ namespace MonTableurApp
                 return;
             }
 
-            var handle = new WindowInteropHelper(this).Handle;
+            IntPtr handle = new WindowInteropHelper(this).Handle;
             if (handle == IntPtr.Zero)
             {
                 return;
@@ -186,6 +200,16 @@ namespace MonTableurApp
             };
 
             if (!GetMonitorInfo(monitor, ref monitorInfo))
+            {
+                return;
+            }
+
+            ApplyMonitorBounds(monitorInfo, forceReposition);
+        }
+
+        private void ApplyMonitorBounds(MONITORINFO monitorInfo, bool forceReposition)
+        {
+            if (isUpdatingWindowBounds)
             {
                 return;
             }
@@ -217,14 +241,58 @@ namespace MonTableurApp
             }
         }
 
-        private const int MonitorDefaultToNearest = 2;
+        private static bool TryGetPreferredMonitorInfo(out MONITORINFO preferredMonitor)
+        {
+            List<MONITORINFO> monitors = new();
+
+            EnumDisplayMonitors(
+                IntPtr.Zero,
+                IntPtr.Zero,
+                (monitor, _, _, _) =>
+                {
+                    MONITORINFO info = new()
+                    {
+                        cbSize = Marshal.SizeOf<MONITORINFO>()
+                    };
+
+                    if (GetMonitorInfo(monitor, ref info))
+                    {
+                        monitors.Add(info);
+                    }
+
+                    return true;
+                },
+                IntPtr.Zero);
+
+            foreach (MONITORINFO monitor in monitors)
+            {
+                if ((monitor.dwFlags & MonitorInfoFlagPrimary) == 0)
+                {
+                    preferredMonitor = monitor;
+                    return true;
+                }
+            }
+
+            preferredMonitor = default;
+            return false;
+        }
 
         [DllImport("user32.dll")]
         private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool EnumDisplayMonitors(
+            IntPtr hdc,
+            IntPtr lprcClip,
+            MonitorEnumProc lpfnEnum,
+            IntPtr dwData);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, IntPtr lprcMonitor, IntPtr dwData);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct RECT
