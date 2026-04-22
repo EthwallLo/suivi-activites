@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -8,6 +9,9 @@ namespace MonTableurApp.Models
 {
     public class Projet : INotifyPropertyChanged
     {
+        private static readonly CultureInfo DateCulture = CultureInfo.GetCultureInfo("fr-FR");
+        private const string DateFormat = "dd/MM/yyyy";
+
         private static readonly string[] EssaisPreQualificationNames =
         {
             "Traction 100m",
@@ -83,21 +87,42 @@ namespace MonTableurApp.Models
         public string? DateDebut
         {
             get => dateDebut;
-            set { dateDebut = value; OnPropertyChanged(nameof(DateDebut)); }
+            set => SetDateText(ref dateDebut, value, nameof(DateDebut), nameof(DateDebutValue));
         }
 
         private string? datePrevisionnelle;
         public string? DatePrevisionnelle
         {
             get => datePrevisionnelle;
-            set { datePrevisionnelle = value; OnPropertyChanged(nameof(DatePrevisionnelle)); }
+            set => SetDateText(ref datePrevisionnelle, value, nameof(DatePrevisionnelle), nameof(DatePrevisionnelleValue));
         }
 
         private string? dateFin;
         public string? DateFin
         {
             get => dateFin;
-            set { dateFin = value; OnPropertyChanged(nameof(DateFin)); }
+            set => SetDateText(ref dateFin, value, nameof(DateFin), nameof(DateFinValue));
+        }
+
+        [JsonIgnore]
+        public DateTime? DateDebutValue
+        {
+            get => ParseDate(dateDebut);
+            set => SetDateValue(ref dateDebut, value, nameof(DateDebut), nameof(DateDebutValue));
+        }
+
+        [JsonIgnore]
+        public DateTime? DatePrevisionnelleValue
+        {
+            get => ParseDate(datePrevisionnelle);
+            set => SetDateValue(ref datePrevisionnelle, value, nameof(DatePrevisionnelle), nameof(DatePrevisionnelleValue));
+        }
+
+        [JsonIgnore]
+        public DateTime? DateFinValue
+        {
+            get => ParseDate(dateFin);
+            set => SetDateValue(ref dateFin, value, nameof(DateFin), nameof(DateFinValue));
         }
 
         private string? commentaires;
@@ -127,5 +152,50 @@ namespace MonTableurApp.Models
         [JsonIgnore]
         public IEnumerable<EssaiSuivi> EssaisQualification =>
             Essais.Where(essai => !EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty));
+
+        private static DateTime? ParseDate(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            if (DateTime.TryParseExact(value.Trim(), DateFormat, DateCulture, DateTimeStyles.None, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            return DateTime.TryParse(value, DateCulture, DateTimeStyles.None, out parsedDate)
+                ? parsedDate.Date
+                : null;
+        }
+
+        private void SetDateText(ref string? backingField, string? value, string textPropertyName, string valuePropertyName)
+        {
+            string normalizedValue = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+
+            if (backingField == normalizedValue)
+            {
+                return;
+            }
+
+            backingField = normalizedValue;
+            OnPropertyChanged(textPropertyName);
+            OnPropertyChanged(valuePropertyName);
+        }
+
+        private void SetDateValue(ref string? backingField, DateTime? value, string textPropertyName, string valuePropertyName)
+        {
+            string formattedValue = value?.ToString(DateFormat, DateCulture) ?? string.Empty;
+
+            if (backingField == formattedValue)
+            {
+                return;
+            }
+
+            backingField = formattedValue;
+            OnPropertyChanged(textPropertyName);
+            OnPropertyChanged(valuePropertyName);
+        }
     }
 }
