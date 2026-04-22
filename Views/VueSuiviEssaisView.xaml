@@ -1,6 +1,8 @@
 <UserControl x:Class="MonTableurApp.Views.VueSuiviEssaisView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="True"
+             PreviewKeyDown="VueSuiviEssaisView_PreviewKeyDown">
 
     <UserControl.Resources>
         <Style x:Key="InvisibleRepeatButtonStyle" TargetType="RepeatButton">

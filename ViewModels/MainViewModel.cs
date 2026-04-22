@@ -93,6 +93,7 @@ namespace MonTableurApp.ViewModels
         private int essaisSelectionTotal;
         private string agendaWeekTitle = string.Empty;
         private readonly Stack<AgendaUndoSnapshot> agendaUndoSnapshots = new();
+        private readonly Stack<EssaisUndoSnapshot> essaisUndoSnapshots = new();
         private bool isRestoringAgendaState;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -335,6 +336,7 @@ namespace MonTableurApp.ViewModels
                 .ToList();
 
         public bool CanUndoAgenda => agendaUndoSnapshots.Count > 0;
+        public bool CanUndoEssaisBulkAction => essaisUndoSnapshots.Count > 0;
 
         public int AgendaBacklogVisibleCount => AgendaBacklogVisibleTasks.Count();
 
@@ -419,6 +421,15 @@ namespace MonTableurApp.ViewModels
                 return;
             }
 
+            if (!SaveEssaisUndoSnapshotIfNeeded(
+                    projet,
+                    essai => essai.EstConcerne &&
+                             (!string.Equals(essai.Statut, "Fait", StringComparison.Ordinal) ||
+                              !string.Equals(essai.ResultatTraitement, "OK", StringComparison.Ordinal))))
+            {
+                return;
+            }
+
             foreach (EssaiSuivi essai in projet.Essais.Where(essai => essai.EstConcerne))
             {
                 essai.Statut = "Fait";
@@ -437,15 +448,38 @@ namespace MonTableurApp.ViewModels
                 return;
             }
 
+            if (!SaveEssaisUndoSnapshotIfNeeded(
+                    projet,
+                    essai => essai.EstConcerne &&
+                             (!string.Equals(essai.Statut, "\u00C0 faire", StringComparison.Ordinal) ||
+                              essai.ResultatTraitement != null)))
+            {
+                return;
+            }
+
             foreach (EssaiSuivi essai in projet.Essais.Where(essai => essai.EstConcerne))
             {
                 essai.Statut = "À faire";
+                essai.Statut = "\u00C0 faire";
                 essai.ResultatTraitement = null;
             }
 
             RefreshEssaiCollections();
             RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
+        }
+
+        public void UndoLastEssaisBulkAction()
+        {
+            if (essaisUndoSnapshots.Count == 0)
+            {
+                return;
+            }
+
+            EssaisUndoSnapshot snapshot = essaisUndoSnapshots.Pop();
+            OnPropertyChanged(nameof(CanUndoEssaisBulkAction));
+
+            RestoreEssaisSnapshot(snapshot);
         }
 
         public MainViewModel()
@@ -1200,6 +1234,66 @@ namespace MonTableurApp.ViewModels
             RefreshAgendaCollections();
         }
 
+        private bool SaveEssaisUndoSnapshotIfNeeded(Projet projet, Func<EssaiSuivi, bool> hasMeaningfulChange)
+        {
+            if (!projet.Essais.Any(hasMeaningfulChange))
+            {
+                return false;
+            }
+
+            EssaisUndoSnapshot snapshot = CaptureEssaisSnapshot(projet);
+            essaisUndoSnapshots.Push(snapshot);
+
+            while (essaisUndoSnapshots.Count > 30)
+            {
+                EssaisUndoSnapshot[] preserved = essaisUndoSnapshots.Reverse().Take(30).ToArray();
+                essaisUndoSnapshots.Clear();
+
+                for (int i = preserved.Length - 1; i >= 0; i--)
+                {
+                    essaisUndoSnapshots.Push(preserved[i]);
+                }
+            }
+
+            OnPropertyChanged(nameof(CanUndoEssaisBulkAction));
+            return true;
+        }
+
+        private EssaisUndoSnapshot CaptureEssaisSnapshot(Projet projet)
+        {
+            var states = projet.Essais
+                .Select((essai, index) => new EssaiStateSnapshot(index, essai.Statut, essai.ResultatTraitement))
+                .ToList();
+
+            return new EssaisUndoSnapshot(projet, states);
+        }
+
+        private void RestoreEssaisSnapshot(EssaisUndoSnapshot snapshot)
+        {
+            if (!Projets.Contains(snapshot.Projet))
+            {
+                return;
+            }
+
+            SelectedProjetEssais = snapshot.Projet;
+
+            foreach (EssaiStateSnapshot state in snapshot.States)
+            {
+                if (state.Index < 0 || state.Index >= snapshot.Projet.Essais.Count)
+                {
+                    continue;
+                }
+
+                EssaiSuivi essai = snapshot.Projet.Essais[state.Index];
+                essai.Statut = state.Statut;
+                essai.ResultatTraitement = state.ResultatTraitement;
+            }
+
+            RefreshEssaiCollections();
+            RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
+        }
+
         private static bool ShouldAppearInAgenda(EssaiSuivi essai)
         {
             return essai.EstConcerne && !IsEssaiDone(essai);
@@ -1688,6 +1782,10 @@ namespace MonTableurApp.ViewModels
         private sealed record AgendaTaskPlacementSnapshot(string TaskKey, int? DayIndex, int? ScheduledStartMinutes, int? OrderIndex);
 
         private sealed record AgendaUndoSnapshot(IReadOnlyList<AgendaTaskPlacementSnapshot> Placements);
+
+        private sealed record EssaiStateSnapshot(int Index, string? Statut, string? ResultatTraitement);
+
+        private sealed record EssaisUndoSnapshot(Projet Projet, IReadOnlyList<EssaiStateSnapshot> States);
 
         public sealed class AgendaHourMarker
         {

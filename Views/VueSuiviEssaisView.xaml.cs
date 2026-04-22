@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using MonTableurApp.Models;
 using MonTableurApp.ViewModels;
 
@@ -84,6 +85,27 @@ namespace MonTableurApp.Views
             }
 
             viewModel.MarkAllEssaisToDo(projet);
+        }
+
+        private void VueSuiviEssaisView_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)
+            {
+                return;
+            }
+
+            if (e.OriginalSource is TextBox)
+            {
+                return;
+            }
+
+            if (DataContext is not MainViewModel viewModel || !viewModel.CanUndoEssaisBulkAction)
+            {
+                return;
+            }
+
+            viewModel.UndoLastEssaisBulkAction();
+            e.Handled = true;
         }
     }
 }
