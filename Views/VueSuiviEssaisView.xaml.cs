@@ -55,5 +55,35 @@ namespace MonTableurApp.Views
 
             window.ShowDialog();
         }
+
+        private void ToutPasserFaitOk_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainViewModel viewModel)
+            {
+                return;
+            }
+
+            if ((sender as FrameworkElement)?.DataContext is not Projet projet)
+            {
+                return;
+            }
+
+            viewModel.MarkAllEssaisDoneAndOk(projet);
+        }
+
+        private void ToutPasserAFaire_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainViewModel viewModel)
+            {
+                return;
+            }
+
+            if ((sender as FrameworkElement)?.DataContext is not Projet projet)
+            {
+                return;
+            }
+
+            viewModel.MarkAllEssaisToDo(projet);
+        }
     }
 }

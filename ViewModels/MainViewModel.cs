@@ -412,6 +412,42 @@ namespace MonTableurApp.ViewModels
             Projets.Remove(projet);
         }
 
+        public void MarkAllEssaisDoneAndOk(Projet projet)
+        {
+            if (!Projets.Contains(projet))
+            {
+                return;
+            }
+
+            foreach (EssaiSuivi essai in projet.Essais.Where(essai => essai.EstConcerne))
+            {
+                essai.Statut = "Fait";
+                essai.ResultatTraitement = "OK";
+            }
+
+            RefreshEssaiCollections();
+            RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
+        }
+
+        public void MarkAllEssaisToDo(Projet projet)
+        {
+            if (!Projets.Contains(projet))
+            {
+                return;
+            }
+
+            foreach (EssaiSuivi essai in projet.Essais.Where(essai => essai.EstConcerne))
+            {
+                essai.Statut = "À faire";
+                essai.ResultatTraitement = null;
+            }
+
+            RefreshEssaiCollections();
+            RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
+        }
+
         public MainViewModel()
         {
             Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };

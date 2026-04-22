@@ -321,6 +321,16 @@
             </Setter>
         </Style>
 
+        <Style x:Key="BulkEssaiActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MetricFilterButtonStyle}">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="MinHeight" Value="56"/>
+            <Setter Property="MinWidth" Value="148"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="SmallProductActionButtonStyle" TargetType="Button" BasedOn="{StaticResource BulkEssaiActionButtonStyle}"/>
+
         <DataTemplate x:Key="EmptySelectionTemplate">
             <Border Style="{StaticResource SectionCardStyle}"
                     Padding="38">
@@ -367,7 +377,9 @@
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
                             </StackPanel>
 
-                            <Button Grid.Column="1"
+                            <StackPanel Grid.Column="1"
+                                        HorizontalAlignment="Right">
+                            <Button
                                     Style="{StaticResource ProductManageButtonStyle}"
                                     Click="ModifierProduit_Click">
                                 <StackPanel Orientation="Horizontal">
@@ -378,6 +390,8 @@
                                                FontSize="14"/>
                                 </StackPanel>
                             </Button>
+
+                            </StackPanel>
                         </Grid>
 
                         <WrapPanel Margin="0,12,0,0">
@@ -421,7 +435,8 @@
                             </Border>
                         </WrapPanel>
 
-                        <WrapPanel Margin="0,18,0,0">
+                        <Grid Margin="0,18,0,0">
+                            <WrapPanel HorizontalAlignment="Left">
                             <Button Click="EssaisATraiter_Click">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource MetricFilterButtonStyle}">
@@ -513,6 +528,63 @@
                                                Foreground="{DynamicResource SummaryValueBrush}"/>
                                 </StackPanel>
                             </Border>
+                            </WrapPanel>
+
+                            <WrapPanel HorizontalAlignment="Right">
+                            <Button Click="ToutPasserAFaire_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource BulkEssaiActionButtonStyle}">
+                                        <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <TextBlock Text="Action"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="Tout à faire"
+                                               Margin="0,4,0,0"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Click="ToutPasserFaitOk_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource BulkEssaiActionButtonStyle}">
+                                        <Setter Property="Background" Value="{DynamicResource SummaryMintBackgroundBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SummaryMintBorderBrush}"/>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel>
+                                    <TextBlock Text="Action"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
+                                    <TextBlock Text="Tout OK"
+                                               Margin="0,4,0,0"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
+                                </StackPanel>
+                            </Button>
+                            </WrapPanel>
+                        </Grid>
+
+                        <WrapPanel Margin="0,18,0,0"
+                                   Visibility="Collapsed">
+                            <Button
+                                    Click="ToutPasserAFaire_Click">
+                                <TextBlock Text="Tout passer à À faire"
+                                           FontWeight="SemiBold"/>
+                            </Button>
+
+                            <Button Style="{StaticResource SmallProductActionButtonStyle}"
+                                    Click="ToutPasserFaitOk_Click">
+                                <TextBlock Text="Tout passer à Fait + OK"
+                                           FontWeight="SemiBold"/>
+                            </Button>
+
                         </WrapPanel>
                     </StackPanel>
                 </Border>
