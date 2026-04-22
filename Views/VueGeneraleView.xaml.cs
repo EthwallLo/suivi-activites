@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using MonTableurApp.Models;
 using MonTableurApp.Services;
@@ -11,9 +13,13 @@ namespace MonTableurApp.Views
 {
     public partial class VueGeneraleView : UserControl
     {
+        private Window? hostWindow;
+
         public VueGeneraleView()
         {
             InitializeComponent();
+            Loaded += VueGeneraleView_Loaded;
+            Unloaded += VueGeneraleView_Unloaded;
         }
 
         private void TousProjets_Click(object sender, RoutedEventArgs e)
@@ -144,6 +150,179 @@ namespace MonTableurApp.Views
                 {
                     return result;
                 }
+            }
+
+            return null;
+        }
+
+        private void ProjetsDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject? source = e.OriginalSource as DependencyObject;
+            DataGridCell? cell = FindVisualParent<DataGridCell>(source);
+
+            if (cell is null || cell.IsEditing || !IsSingleClickComboColumn(cell.Column))
+            {
+                return;
+            }
+
+            DataGridRow? row = FindVisualParent<DataGridRow>(cell);
+            if (row?.Item is null)
+            {
+                return;
+            }
+
+            ProjetsDataGrid.SelectedItem = row.Item;
+            ProjetsDataGrid.CurrentCell = new DataGridCellInfo(row.Item, cell.Column);
+            ProjetsDataGrid.BeginEdit();
+            e.Handled = true;
+        }
+
+        private void VueGeneraleView_Loaded(object sender, RoutedEventArgs e)
+        {
+            Window? window = Window.GetWindow(this);
+            if (window is null || ReferenceEquals(window, hostWindow))
+            {
+                return;
+            }
+
+            if (hostWindow is not null)
+            {
+                hostWindow.RemoveHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(HostWindow_PreviewMouseLeftButtonDown));
+            }
+
+            hostWindow = window;
+            hostWindow.AddHandler(
+                PreviewMouseLeftButtonDownEvent,
+                new MouseButtonEventHandler(HostWindow_PreviewMouseLeftButtonDown),
+                true);
+        }
+
+        private void VueGeneraleView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (hostWindow is null)
+            {
+                return;
+            }
+
+            hostWindow.RemoveHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(HostWindow_PreviewMouseLeftButtonDown));
+            hostWindow = null;
+        }
+
+        private void HostWindow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject? source = e.OriginalSource as DependencyObject;
+
+            ComboBox? activeComboBox = FindOpenComboBox(ProjetsDataGrid);
+            Popup? clickedPopup = FindVisualParent<Popup>(source);
+            bool clickInsideActiveDropdown =
+                activeComboBox is not null
+                && (FindVisualParent<ComboBoxItem>(source) is not null
+                    || ReferenceEquals(clickedPopup?.PlacementTarget, activeComboBox));
+
+            if (clickInsideActiveDropdown)
+            {
+                return;
+            }
+
+            if (activeComboBox is not null)
+            {
+                activeComboBox.IsDropDownOpen = false;
+                ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+                ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            }
+
+            DataGrid? clickedGrid = FindVisualParent<DataGrid>(source);
+            if (clickedGrid == ProjetsDataGrid)
+            {
+                DataGridCell? clickedCell = FindVisualParent<DataGridCell>(source);
+
+                if (clickedCell is null)
+                {
+                    ClearGridSelection();
+                }
+
+                return;
+            }
+
+            ClearGridSelection();
+        }
+
+        private void ProjetsDataGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            if (!IsSingleClickComboColumn(e.Column))
+            {
+                return;
+            }
+
+            ComboBox? comboBox = e.EditingElement as ComboBox ?? FindDescendant<ComboBox>(e.EditingElement);
+            if (comboBox is null)
+            {
+                return;
+            }
+
+            comboBox.Dispatcher.BeginInvoke(() =>
+            {
+                comboBox.Focus();
+                comboBox.IsDropDownOpen = true;
+            }, DispatcherPriority.Background);
+        }
+
+        private bool IsSingleClickComboColumn(DataGridColumn? column)
+        {
+            return column == ClientColumn
+                || column == DemandeurColumn
+                || column == TypeActiviteColumn
+                || column == StatutColumn;
+        }
+
+        private static ComboBox? FindOpenComboBox(DependencyObject? parent)
+        {
+            if (parent is null)
+            {
+                return null;
+            }
+
+            if (parent is ComboBox comboBox && comboBox.IsDropDownOpen)
+            {
+                return comboBox;
+            }
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                ComboBox? result = FindOpenComboBox(VisualTreeHelper.GetChild(parent, i));
+                if (result is not null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        private void ClearGridSelection()
+        {
+            ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+            ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            ProjetsDataGrid.CancelEdit(DataGridEditingUnit.Cell);
+            ProjetsDataGrid.CancelEdit(DataGridEditingUnit.Row);
+            ProjetsDataGrid.UnselectAllCells();
+            ProjetsDataGrid.UnselectAll();
+            ProjetsDataGrid.SelectedItem = null;
+            ProjetsDataGrid.CurrentCell = default;
+            RootLayout.Focus();
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
+        {
+            while (child is not null)
+            {
+                if (child is T match)
+                {
+                    return match;
+                }
+
+                child = VisualTreeHelper.GetParent(child);
             }
 
             return null;

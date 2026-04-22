@@ -776,7 +776,9 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="6">
+    <Grid x:Name="RootLayout"
+          Margin="6"
+          Focusable="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -993,7 +995,8 @@
                 BorderThickness="1"
                 CornerRadius="24"
                 Padding="10">
-            <DataGrid ItemsSource="{Binding ProjetsView}"
+            <DataGrid x:Name="ProjetsDataGrid"
+                      ItemsSource="{Binding ProjetsView}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="True"
@@ -1006,6 +1009,8 @@
                       RowBackground="White"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
+                      PreviewMouseLeftButtonDown="ProjetsDataGrid_PreviewMouseLeftButtonDown"
+                      PreparingCellForEdit="ProjetsDataGrid_PreparingCellForEdit"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
 
@@ -1031,7 +1036,8 @@
                                         EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="1.35*"/>
 
-                    <DataGridTemplateColumn Header="Client"
+                    <DataGridTemplateColumn x:Name="ClientColumn"
+                                            Header="Client"
                                             Width="0.95*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1056,7 +1062,8 @@
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="Demandeur"
+                    <DataGridTemplateColumn x:Name="DemandeurColumn"
+                                            Header="Demandeur"
                                             Width="0.95*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1081,7 +1088,8 @@
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="Type d'activité"
+                    <DataGridTemplateColumn x:Name="TypeActiviteColumn"
+                                            Header="Type d'activité"
                                             Width="1.35*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -1112,7 +1120,8 @@
                                         EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="2.6*"/>
 
-                    <DataGridTemplateColumn Header="Statut"
+                    <DataGridTemplateColumn x:Name="StatutColumn"
+                                            Header="Statut"
                                             Width="1.65*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
