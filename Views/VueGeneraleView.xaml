@@ -345,29 +345,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="GridDatePickerTextBoxStyle" TargetType="{x:Type primitives:DatePickerTextBox}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
-            <Setter Property="Padding" Value="2,0,2,0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="CaretBrush" Value="{DynamicResource SearchInputForegroundBrush}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type primitives:DatePickerTextBox}">
-                        <Border Background="Transparent"
-                                BorderThickness="0">
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"
-                                          VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="GridDatePickerButtonStyle" TargetType="Button">
+        <Style x:Key="GridCalendarPopupToggleStyle" TargetType="ToggleButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Focusable" Value="False"/>
@@ -375,7 +353,7 @@
             <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="Button">
+                    <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="ButtonChrome"
                                 Width="22"
                                 Height="22"
@@ -397,6 +375,11 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
                                 <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+                                <Setter TargetName="CalendarIcon" Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
                                 <Setter TargetName="CalendarIcon" Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
@@ -439,18 +422,63 @@
             </Setter>
         </Style>
 
+        <Style x:Key="GridCalendarHeaderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource DataGridAltRowBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="HeaderButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HeaderButtonBorder" Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
+                                <Setter TargetName="HeaderButtonBorder" Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HeaderButtonBorder" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                <Setter TargetName="HeaderButtonBorder" Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="GridCalendarButtonStyle" TargetType="CalendarButton">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
-            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CalendarButton">
                         <Border x:Name="MonthBorder"
-                                Margin="2"
                                 Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Margin="{TemplateBinding Margin}"
+                                MinWidth="{TemplateBinding MinWidth}"
+                                MinHeight="{TemplateBinding MinHeight}"
                                 CornerRadius="10">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
@@ -458,10 +486,14 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="MonthBorder" Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
+                                <Setter TargetName="MonthBorder" Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+                                <Setter TargetName="MonthBorder" Property="BorderThickness" Value="1"/>
                                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
                             </Trigger>
                             <Trigger Property="HasSelectedDays" Value="True">
                                 <Setter TargetName="MonthBorder" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                <Setter TargetName="MonthBorder" Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                <Setter TargetName="MonthBorder" Property="BorderThickness" Value="1"/>
                                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
                             </Trigger>
                             <Trigger Property="IsInactive" Value="True">
@@ -474,6 +506,7 @@
         </Style>
 
         <Style x:Key="GridCalendarDayButtonStyle" TargetType="primitives:CalendarDayButton">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -523,91 +556,179 @@
         </Style>
 
         <Style x:Key="GridCalendarItemStyle" TargetType="primitives:CalendarItem">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-        </Style>
-
-        <Style x:Key="GridDatePickerStyle" TargetType="DatePicker">
-            <Setter Property="Language" Value="fr-FR"/>
-            <Setter Property="SelectedDateFormat" Value="Short"/>
-            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="MinHeight" Value="30"/>
-            <Setter Property="Padding" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="DatePicker">
-                        <Grid>
-                            <Border x:Name="PickerBorder"
-                                    Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    SnapsToDevicePixels="True">
-                                <Grid>
+                    <ControlTemplate TargetType="primitives:CalendarItem">
+                        <ControlTemplate.Resources>
+                            <DataTemplate x:Key="DayTitleTemplate">
+                                <TextBlock Text="{Binding}"
+                                           Margin="0,0,0,6"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </ControlTemplate.Resources>
+
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18"
+                                Padding="6">
+                            <Grid x:Name="PART_Root">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0"
+                                      Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="22"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <primitives:DatePickerTextBox x:Name="PART_TextBox"
-                                                                  Style="{StaticResource GridDatePickerTextBoxStyle}"
-                                                                  Foreground="{TemplateBinding Foreground}"/>
+                                    <Button x:Name="PART_PreviousButton"
+                                            Grid.Column="0"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="0,0,8,0"
+                                            Style="{StaticResource GridCalendarNavButtonStyle}"
+                                            Content="&#xE76B;"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            FontSize="12"/>
 
-                                    <Button x:Name="PART_Button"
+                                    <Button x:Name="PART_HeaderButton"
                                             Grid.Column="1"
-                                            Style="{StaticResource GridDatePickerButtonStyle}"/>
-                                </Grid>
-                            </Border>
+                                            HorizontalAlignment="Stretch"
+                                            Style="{StaticResource GridCalendarHeaderButtonStyle}"/>
 
-                            <Popup x:Name="PART_Popup"
-                                   Placement="Bottom"
-                                   AllowsTransparency="True"
-                                   Focusable="False"
-                                   PopupAnimation="Fade"
-                                   StaysOpen="False">
-                                <Border Margin="0,6,0,0"
-                                        Padding="10"
-                                        Background="{DynamicResource SearchInputBackgroundBrush}"
-                                        BorderBrush="{DynamicResource SearchInputBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="22"
-                                        SnapsToDevicePixels="True">
-                                    <Calendar x:Name="PART_Calendar"
-                                              Background="{DynamicResource SearchInputBackgroundBrush}"
-                                              BorderBrush="Transparent"
-                                              BorderThickness="0"
-                                              CalendarButtonStyle="{StaticResource GridCalendarButtonStyle}"
-                                              CalendarDayButtonStyle="{StaticResource GridCalendarDayButtonStyle}"
-                                              CalendarItemStyle="{StaticResource GridCalendarItemStyle}"
-                                              Foreground="{DynamicResource SearchInputForegroundBrush}">
-                                        <Calendar.Resources>
-                                            <Style TargetType="Button" BasedOn="{StaticResource GridCalendarNavButtonStyle}"/>
-                                        </Calendar.Resources>
-                                    </Calendar>
-                                </Border>
-                            </Popup>
-                        </Grid>
+                                    <Button x:Name="PART_NextButton"
+                                            Grid.Column="2"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="8,0,0,0"
+                                            Style="{StaticResource GridCalendarNavButtonStyle}"
+                                            Content="&#xE76C;"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            FontSize="12"/>
+                                </Grid>
+
+                                <Grid x:Name="PART_MonthView"
+                                      Grid.Row="1"
+                                      Margin="2,0,2,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                </Grid>
+
+                                <Grid x:Name="PART_YearView"
+                                      Grid.Row="1"
+                                      Margin="2,0,2,2"
+                                      Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                </Grid>
+
+                                <Border x:Name="PART_DisabledVisual"
+                                        Grid.RowSpan="2"
+                                        Background="#80FFFFFF"
+                                        CornerRadius="18"
+                                        Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
 
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
-                            </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="PickerBorder" Property="Opacity" Value="0.6"/>
+                                <Setter TargetName="PART_DisabledVisual" Property="Visibility" Value="Visible"/>
                             </Trigger>
+                            <DataTrigger Binding="{Binding DisplayMode, RelativeSource={RelativeSource AncestorType=Calendar}}"
+                                         Value="{x:Static CalendarMode.Month}">
+                                <Setter TargetName="PART_MonthView" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="PART_YearView" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DisplayMode, RelativeSource={RelativeSource AncestorType=Calendar}}"
+                                         Value="{x:Static CalendarMode.Year}">
+                                <Setter TargetName="PART_MonthView" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DisplayMode, RelativeSource={RelativeSource AncestorType=Calendar}}"
+                                         Value="{x:Static CalendarMode.Decade}">
+                                <Setter TargetName="PART_MonthView" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="GridCalendarStyle" TargetType="Calendar">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="CalendarButtonStyle" Value="{StaticResource GridCalendarButtonStyle}"/>
+            <Setter Property="CalendarDayButtonStyle" Value="{StaticResource GridCalendarDayButtonStyle}"/>
+            <Setter Property="CalendarItemStyle" Value="{StaticResource GridCalendarItemStyle}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Calendar">
+                        <StackPanel x:Name="PART_Root"
+                                    Background="{TemplateBinding Background}">
+                            <primitives:CalendarItem x:Name="PART_CalendarItem"
+                                                     Background="{TemplateBinding Background}"
+                                                     BorderBrush="{TemplateBinding BorderBrush}"
+                                                     BorderThickness="{TemplateBinding BorderThickness}"
+                                                     Style="{TemplateBinding CalendarItemStyle}"/>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="GridCalendarPopupStyle" TargetType="Popup">
+            <Setter Property="AllowsTransparency" Value="True"/>
+            <Setter Property="PopupAnimation" Value="Fade"/>
+            <Setter Property="StaysOpen" Value="False"/>
+        </Style>
+
+        <Style x:Key="GridDateDisplayTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="SearchComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource GridComboBoxStyle}">
@@ -1008,8 +1129,37 @@
                                             Width="1.15*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <DatePicker Style="{StaticResource GridDatePickerStyle}"
-                                            SelectedDate="{Binding DateDebutValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Margin="0,0,8,0"
+                                               Style="{StaticResource GridDateDisplayTextStyle}"
+                                               Text="{Binding DateDebut}"/>
+
+                                    <ToggleButton x:Name="DateDebutToggle"
+                                                  Grid.Column="1"
+                                                  Style="{StaticResource GridCalendarPopupToggleStyle}"/>
+
+                                    <Popup Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=DateDebutToggle}"
+                                           IsOpen="{Binding IsChecked, ElementName=DateDebutToggle, Mode=TwoWay}"
+                                           Style="{StaticResource GridCalendarPopupStyle}">
+                                        <Border Padding="10"
+                                                Background="{DynamicResource SearchInputBackgroundBrush}"
+                                                BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="22">
+                                            <Calendar Style="{StaticResource GridCalendarStyle}"
+                                                      Tag="{Binding ElementName=DateDebutToggle}"
+                                                      SelectedDate="{Binding DateDebutValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedDatesChanged="CalendarPopup_SelectedDatesChanged"/>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -1017,8 +1167,37 @@
                                             Width="1.25*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <DatePicker Style="{StaticResource GridDatePickerStyle}"
-                                            SelectedDate="{Binding DatePrevisionnelleValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Margin="0,0,8,0"
+                                               Style="{StaticResource GridDateDisplayTextStyle}"
+                                               Text="{Binding DatePrevisionnelle}"/>
+
+                                    <ToggleButton x:Name="DatePrevisionnelleToggle"
+                                                  Grid.Column="1"
+                                                  Style="{StaticResource GridCalendarPopupToggleStyle}"/>
+
+                                    <Popup Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=DatePrevisionnelleToggle}"
+                                           IsOpen="{Binding IsChecked, ElementName=DatePrevisionnelleToggle, Mode=TwoWay}"
+                                           Style="{StaticResource GridCalendarPopupStyle}">
+                                        <Border Padding="10"
+                                                Background="{DynamicResource SearchInputBackgroundBrush}"
+                                                BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="22">
+                                            <Calendar Style="{StaticResource GridCalendarStyle}"
+                                                      Tag="{Binding ElementName=DatePrevisionnelleToggle}"
+                                                      SelectedDate="{Binding DatePrevisionnelleValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedDatesChanged="CalendarPopup_SelectedDatesChanged"/>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -1026,8 +1205,37 @@
                                             Width="1.15*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <DatePicker Style="{StaticResource GridDatePickerStyle}"
-                                            SelectedDate="{Binding DateFinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Margin="0,0,8,0"
+                                               Style="{StaticResource GridDateDisplayTextStyle}"
+                                               Text="{Binding DateFin}"/>
+
+                                    <ToggleButton x:Name="DateFinToggle"
+                                                  Grid.Column="1"
+                                                  Style="{StaticResource GridCalendarPopupToggleStyle}"/>
+
+                                    <Popup Placement="Bottom"
+                                           PlacementTarget="{Binding ElementName=DateFinToggle}"
+                                           IsOpen="{Binding IsChecked, ElementName=DateFinToggle, Mode=TwoWay}"
+                                           Style="{StaticResource GridCalendarPopupStyle}">
+                                        <Border Padding="10"
+                                                Background="{DynamicResource SearchInputBackgroundBrush}"
+                                                BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="22">
+                                            <Calendar Style="{StaticResource GridCalendarStyle}"
+                                                      Tag="{Binding ElementName=DateFinToggle}"
+                                                      SelectedDate="{Binding DateFinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedDatesChanged="CalendarPopup_SelectedDatesChanged"/>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

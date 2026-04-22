@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using Microsoft.Win32;
 using MonTableurApp.Models;
 using MonTableurApp.Services;
@@ -75,6 +76,19 @@ namespace MonTableurApp.Views
                 "Export Excel",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
+        }
+
+        private void CalendarPopup_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not Calendar calendar || e.AddedItems.Count == 0)
+            {
+                return;
+            }
+
+            if (calendar.Tag is ToggleButton toggleButton)
+            {
+                toggleButton.IsChecked = false;
+            }
         }
     }
 }
