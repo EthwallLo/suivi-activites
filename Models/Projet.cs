@@ -87,42 +87,42 @@ namespace MonTableurApp.Models
         public string? DateDebut
         {
             get => dateDebut;
-            set => SetDateText(ref dateDebut, value, nameof(DateDebut), nameof(DateDebutValue));
+            set => SetDateDebutText(value);
         }
 
         private string? datePrevisionnelle;
         public string? DatePrevisionnelle
         {
             get => datePrevisionnelle;
-            set => SetDateText(ref datePrevisionnelle, value, nameof(DatePrevisionnelle), nameof(DatePrevisionnelleValue));
+            set => SetDatePrevisionnelleText(value);
         }
 
         private string? dateFin;
         public string? DateFin
         {
             get => dateFin;
-            set => SetDateText(ref dateFin, value, nameof(DateFin), nameof(DateFinValue));
+            set => SetDateFinText(value);
         }
 
         [JsonIgnore]
         public DateTime? DateDebutValue
         {
             get => ParseDate(dateDebut);
-            set => SetDateValue(ref dateDebut, value, nameof(DateDebut), nameof(DateDebutValue));
+            set => SetDateDebutValue(value);
         }
 
         [JsonIgnore]
         public DateTime? DatePrevisionnelleValue
         {
             get => ParseDate(datePrevisionnelle);
-            set => SetDateValue(ref datePrevisionnelle, value, nameof(DatePrevisionnelle), nameof(DatePrevisionnelleValue));
+            set => SetDatePrevisionnelleValue(value);
         }
 
         [JsonIgnore]
         public DateTime? DateFinValue
         {
             get => ParseDate(dateFin);
-            set => SetDateValue(ref dateFin, value, nameof(DateFin), nameof(DateFinValue));
+            set => SetDateFinValue(value);
         }
 
         private string? commentaires;
@@ -170,32 +170,143 @@ namespace MonTableurApp.Models
                 : null;
         }
 
-        private void SetDateText(ref string? backingField, string? value, string textPropertyName, string valuePropertyName)
+        private void SetDateDebutText(string? value)
         {
-            string normalizedValue = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+            if (!SetDateText(ref dateDebut, value, nameof(DateDebut), nameof(DateDebutValue)))
+            {
+                return;
+            }
+
+            EnsureDatesNotBeforeStart();
+        }
+
+        private void SetDatePrevisionnelleText(string? value)
+        {
+            string normalizedValue = CoerceDateTextAgainstStart(value);
+            SetDateText(ref datePrevisionnelle, normalizedValue, nameof(DatePrevisionnelle), nameof(DatePrevisionnelleValue));
+        }
+
+        private void SetDateFinText(string? value)
+        {
+            string normalizedValue = CoerceDateTextAgainstStart(value);
+            SetDateText(ref dateFin, normalizedValue, nameof(DateFin), nameof(DateFinValue));
+        }
+
+        private void SetDateDebutValue(DateTime? value)
+        {
+            if (!SetDateValue(ref dateDebut, value, nameof(DateDebut), nameof(DateDebutValue)))
+            {
+                return;
+            }
+
+            EnsureDatesNotBeforeStart();
+        }
+
+        private void SetDatePrevisionnelleValue(DateTime? value)
+        {
+            SetDateValue(
+                ref datePrevisionnelle,
+                CoerceDateAgainstStart(value),
+                nameof(DatePrevisionnelle),
+                nameof(DatePrevisionnelleValue));
+        }
+
+        private void SetDateFinValue(DateTime? value)
+        {
+            SetDateValue(
+                ref dateFin,
+                CoerceDateAgainstStart(value),
+                nameof(DateFin),
+                nameof(DateFinValue));
+        }
+
+        private bool SetDateText(ref string? backingField, string? value, string textPropertyName, string valuePropertyName)
+        {
+            string normalizedValue = NormalizeDateText(value);
 
             if (backingField == normalizedValue)
             {
-                return;
+                return false;
             }
 
             backingField = normalizedValue;
             OnPropertyChanged(textPropertyName);
             OnPropertyChanged(valuePropertyName);
+            return true;
         }
 
-        private void SetDateValue(ref string? backingField, DateTime? value, string textPropertyName, string valuePropertyName)
+        private bool SetDateValue(ref string? backingField, DateTime? value, string textPropertyName, string valuePropertyName)
         {
-            string formattedValue = value?.ToString(DateFormat, DateCulture) ?? string.Empty;
+            string formattedValue = FormatDate(value);
 
             if (backingField == formattedValue)
             {
-                return;
+                return false;
             }
 
             backingField = formattedValue;
             OnPropertyChanged(textPropertyName);
             OnPropertyChanged(valuePropertyName);
+            return true;
+        }
+
+        private void EnsureDatesNotBeforeStart()
+        {
+            DateTime? dateDebutValue = ParseDate(dateDebut);
+            if (dateDebutValue is null)
+            {
+                return;
+            }
+
+            CoerceStoredDateAgainstStart(ref datePrevisionnelle, nameof(DatePrevisionnelle), nameof(DatePrevisionnelleValue), dateDebutValue.Value);
+            CoerceStoredDateAgainstStart(ref dateFin, nameof(DateFin), nameof(DateFinValue), dateDebutValue.Value);
+        }
+
+        private void CoerceStoredDateAgainstStart(ref string? backingField, string textPropertyName, string valuePropertyName, DateTime dateDebutValue)
+        {
+            DateTime? currentValue = ParseDate(backingField);
+            if (currentValue is null || currentValue.Value.Date >= dateDebutValue.Date)
+            {
+                return;
+            }
+
+            SetDateValue(ref backingField, dateDebutValue.Date, textPropertyName, valuePropertyName);
+        }
+
+        private string CoerceDateTextAgainstStart(string? value)
+        {
+            string normalizedValue = NormalizeDateText(value);
+            DateTime? parsedDate = ParseDate(normalizedValue);
+
+            if (parsedDate is null)
+            {
+                return normalizedValue;
+            }
+
+            return FormatDate(CoerceDateAgainstStart(parsedDate));
+        }
+
+        private DateTime? CoerceDateAgainstStart(DateTime? value)
+        {
+            DateTime? dateDebutValue = ParseDate(dateDebut);
+            if (value is null || dateDebutValue is null)
+            {
+                return value;
+            }
+
+            return value.Value.Date < dateDebutValue.Value.Date
+                ? dateDebutValue.Value.Date
+                : value.Value.Date;
+        }
+
+        private static string NormalizeDateText(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+        }
+
+        private static string FormatDate(DateTime? value)
+        {
+            return value?.ToString(DateFormat, DateCulture) ?? string.Empty;
         }
     }
 }

@@ -463,9 +463,9 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="MinWidth" Value="30"/>
-            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="MinWidth" Value="42"/>
+            <Setter Property="MinHeight" Value="34"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -495,6 +495,9 @@
                                 <Setter TargetName="MonthBorder" Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
                                 <Setter TargetName="MonthBorder" Property="BorderThickness" Value="1"/>
                                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.32"/>
                             </Trigger>
                             <Trigger Property="IsInactive" Value="True">
                                 <Setter Property="Opacity" Value="0.55"/>
@@ -538,6 +541,9 @@
                                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.28"/>
+                            </Trigger>
                             <Trigger Property="IsToday" Value="True">
                                 <Setter TargetName="DayBorder" Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
                                 <Setter TargetName="DayBorder" Property="Background" Value="{DynamicResource DataGridAltRowBrush}"/>
@@ -547,7 +553,11 @@
                                 <Setter Property="Opacity" Value="0.4"/>
                             </Trigger>
                             <Trigger Property="IsBlackedOut" Value="True">
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                <Setter Property="Focusable" Value="False"/>
                                 <Setter Property="Opacity" Value="0.3"/>
+                                <Setter TargetName="DayBorder" Property="Background" Value="Transparent"/>
+                                <Setter TargetName="DayBorder" Property="BorderBrush" Value="Transparent"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -645,7 +655,7 @@
 
                                 <Grid x:Name="PART_YearView"
                                       Grid.Row="1"
-                                      Margin="2,0,2,2"
+                                      Margin="6,4,6,6"
                                       Visibility="Collapsed">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -695,6 +705,8 @@
 
         <Style x:Key="GridCalendarStyle" TargetType="Calendar">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Language" Value="fr-FR"/>
+            <Setter Property="FirstDayOfWeek" Value="Monday"/>
             <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -1183,8 +1195,10 @@
                                                   Style="{StaticResource GridCalendarPopupToggleStyle}"/>
 
                                     <Popup Placement="Bottom"
+                                           DataContext="{Binding ElementName=DatePrevisionnelleToggle, Path=DataContext}"
                                            PlacementTarget="{Binding ElementName=DatePrevisionnelleToggle}"
                                            IsOpen="{Binding IsChecked, ElementName=DatePrevisionnelleToggle, Mode=TwoWay}"
+                                           Opened="ConstrainedCalendarPopup_Opened"
                                            Style="{StaticResource GridCalendarPopupStyle}">
                                         <Border Padding="10"
                                                 Background="{DynamicResource SearchInputBackgroundBrush}"
@@ -1193,6 +1207,7 @@
                                                 CornerRadius="22">
                                             <Calendar Style="{StaticResource GridCalendarStyle}"
                                                       Tag="{Binding ElementName=DatePrevisionnelleToggle}"
+                                                      DisplayDateStart="{Binding DateDebutValue}"
                                                       SelectedDate="{Binding DatePrevisionnelleValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       SelectedDatesChanged="CalendarPopup_SelectedDatesChanged"/>
                                         </Border>
@@ -1221,8 +1236,10 @@
                                                   Style="{StaticResource GridCalendarPopupToggleStyle}"/>
 
                                     <Popup Placement="Bottom"
+                                           DataContext="{Binding ElementName=DateFinToggle, Path=DataContext}"
                                            PlacementTarget="{Binding ElementName=DateFinToggle}"
                                            IsOpen="{Binding IsChecked, ElementName=DateFinToggle, Mode=TwoWay}"
+                                           Opened="ConstrainedCalendarPopup_Opened"
                                            Style="{StaticResource GridCalendarPopupStyle}">
                                         <Border Padding="10"
                                                 Background="{DynamicResource SearchInputBackgroundBrush}"
@@ -1231,6 +1248,7 @@
                                                 CornerRadius="22">
                                             <Calendar Style="{StaticResource GridCalendarStyle}"
                                                       Tag="{Binding ElementName=DateFinToggle}"
+                                                      DisplayDateStart="{Binding DateDebutValue}"
                                                       SelectedDate="{Binding DateFinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       SelectedDatesChanged="CalendarPopup_SelectedDatesChanged"/>
                                         </Border>
