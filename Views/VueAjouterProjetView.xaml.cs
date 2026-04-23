@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 using MonTableurApp.Models;
 using MonTableurApp.ViewModels;
 
@@ -11,8 +14,10 @@ namespace MonTableurApp.Views
 {
     public partial class VueAjouterProjetView : UserControl
     {
+        private static readonly CultureInfo DateCulture = CultureInfo.GetCultureInfo("fr-FR");
         private const string FamilleCable = "Câble";
         private const string FamilleCordon = "Cordon";
+
         private static readonly string[] EssaisPreQualification =
         {
             "Traction 100m",
@@ -20,11 +25,13 @@ namespace MonTableurApp.Views
             "Statique Bending",
             "Vieillissement"
         };
+
         private static readonly string[] EssaisExterieurs =
         {
             "Exposition UV",
             "CPR"
         };
+
         private static readonly string[] EssaisCordon =
         {
             "Traction 100m",
@@ -117,9 +124,9 @@ namespace MonTableurApp.Views
                 TypeActivite = TypeActiviteComboBox.SelectedItem as string,
                 DossierRacine = DossierRacineTextBox.Text.Trim(),
                 Statut = StatutComboBox.SelectedItem as string,
-                DateDebut = DateDebutTextBox.Text.Trim(),
-                DatePrevisionnelle = DatePrevisionnelleTextBox.Text.Trim(),
-                DateFin = DateFinTextBox.Text.Trim(),
+                DateDebut = FormatDate(DateDebutCalendar.SelectedDate),
+                DatePrevisionnelle = FormatDate(DatePrevisionnelleCalendar.SelectedDate),
+                DateFin = FormatDate(DateFinCalendar.SelectedDate),
                 Commentaires = CommentairesTextBox.Text.Trim(),
                 Essais = new ObservableCollection<EssaiSuivi>(BuildEssaisForNewProject())
             };
@@ -144,9 +151,9 @@ namespace MonTableurApp.Views
             NumeroProjetTextBox.Clear();
             NomProduitTextBox.Clear();
             DossierRacineTextBox.Clear();
-            DateDebutTextBox.Clear();
-            DatePrevisionnelleTextBox.Clear();
-            DateFinTextBox.Clear();
+            DateDebutCalendar.SelectedDate = null;
+            DatePrevisionnelleCalendar.SelectedDate = null;
+            DateFinCalendar.SelectedDate = null;
             CommentairesTextBox.Clear();
 
             foreach (EssaiSelectionItem item in GetAllEssaisSelectionItems())
@@ -167,6 +174,22 @@ namespace MonTableurApp.Views
             TypeActiviteComboBox.SelectedItem = viewModel.TypesActivite.Count > 0 ? viewModel.TypesActivite[0] : null;
             StatutComboBox.SelectedItem = viewModel.Statuts.Count > 0 ? viewModel.Statuts[0] : null;
             NumeroProjetTextBox.Focus();
+        }
+
+        private void ParcourirDossierRacine_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = "Sélectionner le dossier racine du projet",
+                InitialDirectory = string.IsNullOrWhiteSpace(DossierRacineTextBox.Text)
+                    ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                    : DossierRacineTextBox.Text.Trim()
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                DossierRacineTextBox.Text = dialog.FolderName;
+            }
         }
 
         private void ToggleEssaisSelection_Click(object sender, RoutedEventArgs e)
@@ -274,7 +297,7 @@ namespace MonTableurApp.Views
                 : "Tout sélectionner";
         }
 
-        private void SetEssaisSelectionState(System.Func<EssaiSelectionItem, bool> selector)
+        private void SetEssaisSelectionState(Func<EssaiSelectionItem, bool> selector)
         {
             foreach (EssaiSelectionItem item in GetAllEssaisSelectionItems())
             {
@@ -287,6 +310,11 @@ namespace MonTableurApp.Views
             return EssaisPreQualificationSelection
                 .Concat(EssaisQualificationSelection)
                 .Concat(EssaisExterieursSelection);
+        }
+
+        private static string FormatDate(DateTime? date)
+        {
+            return date?.ToString("dd/MM/yyyy", DateCulture) ?? string.Empty;
         }
 
         public sealed class EssaiSelectionItem : INotifyPropertyChanged

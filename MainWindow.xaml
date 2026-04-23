@@ -197,7 +197,7 @@
                                        Foreground="{DynamicResource SecondaryTextBrush}"
                                        FontSize="13"
                                        FontWeight="SemiBold"/>
-                            <TextBlock Text="tinouille !"
+                            <TextBlock Text="Quentin"
                                        Margin="0,3,0,0"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"
                                        FontSize="19"
