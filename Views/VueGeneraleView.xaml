@@ -977,8 +977,7 @@
                                       Style="{StaticResource SearchComboBoxStyle}"
                                       ItemsSource="{Binding ProjetSearchFields}"
                                       DisplayMemberPath="Label"
-                                      SelectedValuePath="Key"
-                                      SelectedValue="{Binding SelectedProjetSearchFieldKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                      SelectedItem="{Binding SelectedProjetSearchField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                             <TextBox Grid.Column="2"
                                      Style="{StaticResource RoundedTextBoxStyle}"

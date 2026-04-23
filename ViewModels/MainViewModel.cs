@@ -79,7 +79,7 @@ namespace MonTableurApp.ViewModels
 
         private string? searchNomProduit;
         private string? searchNomProduitEssais;
-        private string selectedProjetSearchFieldKey = "NomProduit";
+        private SearchFieldOption? selectedProjetSearchField;
         private string activeQuickFilter = QuickFilterAll;
         private string activeEssaiFilter = EssaiFilterAll;
         private int totalProjets;
@@ -129,19 +129,19 @@ namespace MonTableurApp.ViewModels
             }
         }
 
-        public string SelectedProjetSearchFieldKey
+        public SearchFieldOption? SelectedProjetSearchField
         {
-            get => selectedProjetSearchFieldKey;
+            get => selectedProjetSearchField;
             set
             {
-                if (selectedProjetSearchFieldKey == value)
+                if (ReferenceEquals(selectedProjetSearchField, value))
                 {
                     return;
                 }
 
-                selectedProjetSearchFieldKey = value;
+                selectedProjetSearchField = value;
                 ProjetsView.Refresh();
-                OnPropertyChanged(nameof(SelectedProjetSearchFieldKey));
+                OnPropertyChanged(nameof(SelectedProjetSearchField));
                 RefreshStatistics();
             }
         }
@@ -525,6 +525,7 @@ namespace MonTableurApp.ViewModels
                 new("NomProduit", "Produit"),
                 new("NumeroProjet", "Projet")
             };
+            selectedProjetSearchField = ProjetSearchFields[0];
             AgendaBacklogTasks = new ObservableCollection<AgendaTaskItem>();
             AgendaWeekDays = CreateAgendaWeekDays();
 
@@ -838,7 +839,7 @@ namespace MonTableurApp.ViewModels
 
             string searchValue = NormalizeText(SearchNomProduit);
 
-            return SelectedProjetSearchFieldKey switch
+            return SelectedProjetSearchField?.Key switch
             {
                 "NumeroProjet" => NormalizeText(projet.NumeroProjet).Contains(searchValue),
                 "Client" => NormalizeText(projet.Client).Contains(searchValue),

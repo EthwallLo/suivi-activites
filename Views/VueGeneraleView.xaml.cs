@@ -214,9 +214,11 @@ namespace MonTableurApp.Views
 
             ComboBox? activeComboBox = FindOpenComboBox(ProjetsDataGrid);
             Popup? clickedPopup = FindVisualParent<Popup>(source);
+            ComboBoxItem? clickedComboBoxItem = FindVisualParent<ComboBoxItem>(source);
+            ComboBox? clickedComboBox = FindVisualParent<ComboBox>(source) ?? clickedPopup?.PlacementTarget as ComboBox;
             bool clickInsideActiveDropdown =
                 activeComboBox is not null
-                && (FindVisualParent<ComboBoxItem>(source) is not null
+                && (clickedComboBoxItem is not null
                     || ReferenceEquals(clickedPopup?.PlacementTarget, activeComboBox));
 
             if (clickInsideActiveDropdown)
@@ -229,6 +231,15 @@ namespace MonTableurApp.Views
                 activeComboBox.IsDropDownOpen = false;
                 ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
                 ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+
+                if (clickedComboBox is not null || clickedComboBoxItem is not null)
+                {
+                    return;
+                }
+            }
+            else if (clickedComboBox is not null || clickedComboBoxItem is not null)
+            {
+                return;
             }
 
             DataGrid? clickedGrid = FindVisualParent<DataGrid>(source);
