@@ -314,6 +314,17 @@ namespace MonTableurApp.ViewModels
         public IEnumerable<EssaiSuivi> EssaisQualificationFiltres =>
             GetFilteredEssais(SelectedProjetEssais?.EssaisQualification ?? Enumerable.Empty<EssaiSuivi>());
 
+        public bool HasFilteredEssais =>
+            EssaisPreQualificationFiltres.Any() || EssaisQualificationFiltres.Any();
+
+        public string EmptyEssaisFilterMessage => activeEssaiFilter switch
+        {
+            EssaiFilterToProcess => "Aucun essai à faire.",
+            EssaiFilterInProgress => "Aucun essai en cours.",
+            EssaiFilterDone => "Aucun essai terminé.",
+            _ => "Aucun résultat."
+        };
+
         public string AgendaWeekTitle
         {
             get => agendaWeekTitle;
@@ -947,7 +958,7 @@ namespace MonTableurApp.ViewModels
         private static bool IsEssaiToProcess(EssaiSuivi essai)
         {
             string statut = NormalizeText(essai.Statut);
-            return statut.Contains("trait") && statut != "traite";
+            return statut.Contains("faire");
         }
 
         private static bool IsEssaiDone(EssaiSuivi essai)
@@ -975,6 +986,8 @@ namespace MonTableurApp.ViewModels
         {
             OnPropertyChanged(nameof(EssaisPreQualificationFiltres));
             OnPropertyChanged(nameof(EssaisQualificationFiltres));
+            OnPropertyChanged(nameof(HasFilteredEssais));
+            OnPropertyChanged(nameof(EmptyEssaisFilterMessage));
             OnPropertyChanged(nameof(IsEssaiToProcessFilterActive));
             OnPropertyChanged(nameof(IsEssaiInProgressFilterActive));
             OnPropertyChanged(nameof(IsEssaiDoneFilterActive));

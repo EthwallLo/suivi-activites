@@ -324,9 +324,9 @@
         </Style>
 
         <Style x:Key="BulkEssaiActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MetricFilterButtonStyle}">
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="MinHeight" Value="56"/>
-            <Setter Property="MinWidth" Value="148"/>
+            <Setter Property="Padding" Value="11,7"/>
+            <Setter Property="MinHeight" Value="52"/>
+            <Setter Property="MinWidth" Value="142"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
@@ -380,7 +380,7 @@
                                     <TextBlock Text="Modifier le produit"
                                                FontWeight="SemiBold"/>
                                     <TextBlock Margin="8,0,0,0"
-                                               Text="âœŽ"
+                                               Text="&#x270E;"
                                                FontSize="14"/>
                                 </StackPanel>
                             </Button>
@@ -391,7 +391,7 @@
                         <WrapPanel Margin="0,12,0,0">
                             <Border Style="{StaticResource MetricPillStyle}">
                                 <StackPanel>
-                                    <TextBlock Text="NumÃ©ro projet"
+                                    <TextBlock Text="Numéro projet"
                                                FontSize="12"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding NumeroProjet}"
@@ -446,7 +446,7 @@
                                     </Style>
                                 </Button.Style>
                                 <StackPanel>
-                                    <TextBlock Text="Ã€ traiter"
+                                    <TextBlock Text="À faire"
                                                FontSize="12"
                                                Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
                                     <TextBlock Text="{Binding DataContext.EssaisSelectionATraiter, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -498,7 +498,7 @@
                                     </Style>
                                 </Button.Style>
                                 <StackPanel>
-                                    <TextBlock Text="Essais terminÃ©s"
+                                    <TextBlock Text="Essais terminés"
                                                FontSize="12"
                                                Foreground="{DynamicResource SummaryLavenderForegroundBrush}"/>
                                     <TextBlock Text="{Binding DataContext.EssaisSelectionTermines, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -536,7 +536,7 @@
                                     <TextBlock Text="Action"
                                                FontSize="12"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="Tout Ã  faire"
+                                    <TextBlock Text="Tout à faire"
                                                Margin="0,4,0,0"
                                                FontSize="16"
                                                FontWeight="Bold"
@@ -569,13 +569,13 @@
                                    Visibility="Collapsed">
                             <Button
                                     Click="ToutPasserAFaire_Click">
-                                <TextBlock Text="Tout passer Ã  Ã€ faire"
+                                <TextBlock Text="Tout passer à À faire"
                                            FontWeight="SemiBold"/>
                             </Button>
 
                             <Button Style="{StaticResource SmallProductActionButtonStyle}"
                                     Click="ToutPasserFaitOk_Click">
-                                <TextBlock Text="Tout passer Ã  Fait + OK"
+                                <TextBlock Text="Tout passer à Fait + OK"
                                            FontWeight="SemiBold"/>
                             </Button>
 
@@ -596,213 +596,243 @@
                         <StackPanel>
                         </StackPanel>
 
-                        <ScrollViewer Grid.Row="1"
-                                      Margin="0,18,0,0"
-                                      VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Disabled">
-                            <StackPanel Margin="0,8,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="PrÃ©-qualification"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                        <Grid Grid.Row="1"
+                              Margin="0,18,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Style>
+                                    <Style TargetType="ScrollViewer">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.HasFilteredEssais, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ScrollViewer.Style>
+                                <StackPanel Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Pré-qualification"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                    <ItemsControl ItemsSource="{Binding DataContext.EssaisPreQualificationFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                  Margin="0,14,0,0">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid Columns="4"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Margin="0,0,12,12"
-                                                        MinHeight="138"
-                                                        Padding="14"
-                                                        Background="{DynamicResource SearchCardBackgroundBrush}"
-                                                        BorderBrush="{DynamicResource SearchCardBorderBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="20">
-                                                    <StackPanel>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
+                                        <ItemsControl ItemsSource="{Binding DataContext.EssaisPreQualificationFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      Margin="0,14,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <UniformGrid Columns="4"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,12,12"
+                                                            MinHeight="138"
+                                                            Padding="14"
+                                                            Background="{DynamicResource SearchCardBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="20">
+                                                        <StackPanel>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                                            <TextBlock Text="{Binding NomEssai}"
-                                                                       TextWrapping="Wrap"
-                                                                       FontSize="15"
-                                                                       FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                                                <TextBlock Text="{Binding NomEssai}"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="15"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                            <Ellipse Grid.Column="1"
-                                                                     Width="12"
-                                                                     Height="12"
-                                                                     Margin="10,2,0,0"
-                                                                     Fill="{Binding CouleurIndicateurEtat}"
-                                                                     Stroke="#FFFFFFFF"
-                                                                     StrokeThickness="1"
-                                                                     VerticalAlignment="Top"
-                                                                     Visibility="{Binding AfficheIndicateurEtat}"/>
-                                                        </Grid>
+                                                                <Ellipse Grid.Column="1"
+                                                                         Width="12"
+                                                                         Height="12"
+                                                                         Margin="10,2,0,0"
+                                                                         Fill="{Binding CouleurIndicateurEtat}"
+                                                                         Stroke="#FFFFFFFF"
+                                                                         StrokeThickness="1"
+                                                                         VerticalAlignment="Top"
+                                                                         Visibility="{Binding AfficheIndicateurEtat}"/>
+                                                            </Grid>
 
-                                                        <Grid Margin="0,12,0,0">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
+                                                            <Grid Margin="0,12,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                                            <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
-                                                                         Style="{StaticResource EssaiProgressBarStyle}"/>
+                                                                <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
+                                                                             Style="{StaticResource EssaiProgressBarStyle}"/>
 
-                                                            <TextBlock Grid.Column="1"
-                                                                       Margin="10,-4,0,0"
-                                                                       Text="{Binding ProgressionTexte}"
-                                                                       FontSize="12"
-                                                                       FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource SummaryValueBrush}"
-                                                                       VerticalAlignment="Center"/>
-                                                        </Grid>
+                                                                <TextBlock Grid.Column="1"
+                                                                           Margin="10,-4,0,0"
+                                                                           Text="{Binding ProgressionTexte}"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SummaryValueBrush}"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Grid>
 
-                                                        <Grid Margin="0,14,0,0">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
+                                                            <Grid Margin="0,14,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                                            <ComboBox Grid.Column="0"
-                                                                      ItemsSource="{Binding StatutsDisponibles}"
-                                                                      SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                      Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding StatutsDisponibles}"
+                                                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
 
-                                                            <ComboBox Grid.Column="1"
-                                                                      Margin="10,0,0,0"
-                                                                      ItemsSource="{Binding ResultatsTraitementDisponibles}"
-                                                                      SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                                <ComboBox.Style>
-                                                                    <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding EstFait}" Value="True">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </ComboBox.Style>
-                                                            </ComboBox>
-                                                        </Grid>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                                                <ComboBox Grid.Column="1"
+                                                                          Margin="10,0,0,0"
+                                                                          ItemsSource="{Binding ResultatsTraitementDisponibles}"
+                                                                          SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                    <ComboBox.Style>
+                                                                        <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding EstFait}" Value="True">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </ComboBox.Style>
+                                                                </ComboBox>
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
+                                    <Border Height="1"
+                                            Margin="0,10,0,18"
+                                            Background="{DynamicResource DataGridSurfaceBorderBrush}"
+                                            Opacity="0.75"/>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Qualification"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                        <ItemsControl ItemsSource="{Binding DataContext.EssaisQualificationFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      Margin="0,14,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <UniformGrid Columns="4"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,12,12"
+                                                            MinHeight="138"
+                                                            Padding="14"
+                                                            Background="{DynamicResource SearchCardBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="20">
+                                                        <StackPanel>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <TextBlock Text="{Binding NomEssai}"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="15"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                                                <Ellipse Grid.Column="1"
+                                                                         Width="12"
+                                                                         Height="12"
+                                                                         Margin="10,2,0,0"
+                                                                         Fill="{Binding CouleurIndicateurEtat}"
+                                                                         Stroke="#FFFFFFFF"
+                                                                         StrokeThickness="1"
+                                                                         VerticalAlignment="Top"
+                                                                         Visibility="{Binding AfficheIndicateurEtat}"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
+                                                                             Style="{StaticResource EssaiProgressBarStyle}"/>
+
+                                                                <TextBlock Grid.Column="1"
+                                                                           Margin="10,-4,0,0"
+                                                                           Text="{Binding ProgressionTexte}"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SummaryValueBrush}"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,14,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding StatutsDisponibles}"
+                                                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                                <ComboBox Grid.Column="1"
+                                                                          Margin="10,0,0,0"
+                                                                          ItemsSource="{Binding ResultatsTraitementDisponibles}"
+                                                                          SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                    <ComboBox.Style>
+                                                                        <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding EstFait}" Value="True">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </ComboBox.Style>
+                                                                </ComboBox>
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </StackPanel>
+                            </ScrollViewer>
 
-                                <Border Height="1"
-                                        Margin="0,10,0,18"
-                                        Background="{DynamicResource DataGridSurfaceBorderBrush}"
-                                        Opacity="0.75"/>
-
-                                <StackPanel>
-                                    <TextBlock Text="Qualification"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
-
-                                    <ItemsControl ItemsSource="{Binding DataContext.EssaisQualificationFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                  Margin="0,14,0,0">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid Columns="4"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Margin="0,0,12,12"
-                                                        MinHeight="138"
-                                                        Padding="14"
-                                                        Background="{DynamicResource SearchCardBackgroundBrush}"
-                                                        BorderBrush="{DynamicResource SearchCardBorderBrush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="20">
-                                                    <StackPanel>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <TextBlock Text="{Binding NomEssai}"
-                                                                       TextWrapping="Wrap"
-                                                                       FontSize="15"
-                                                                       FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
-
-                                                            <Ellipse Grid.Column="1"
-                                                                     Width="12"
-                                                                     Height="12"
-                                                                     Margin="10,2,0,0"
-                                                                     Fill="{Binding CouleurIndicateurEtat}"
-                                                                     Stroke="#FFFFFFFF"
-                                                                     StrokeThickness="1"
-                                                                     VerticalAlignment="Top"
-                                                                     Visibility="{Binding AfficheIndicateurEtat}"/>
-                                                        </Grid>
-
-                                                        <Grid Margin="0,12,0,0">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
-                                                                         Style="{StaticResource EssaiProgressBarStyle}"/>
-
-                                                            <TextBlock Grid.Column="1"
-                                                                       Margin="10,-4,0,0"
-                                                                       Text="{Binding ProgressionTexte}"
-                                                                       FontSize="12"
-                                                                       FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource SummaryValueBrush}"
-                                                                       VerticalAlignment="Center"/>
-                                                        </Grid>
-
-                                                        <Grid Margin="0,14,0,0">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <ComboBox Grid.Column="0"
-                                                                      ItemsSource="{Binding StatutsDisponibles}"
-                                                                      SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                      Style="{StaticResource EssaiStatusComboBoxStyle}"/>
-
-                                                            <ComboBox Grid.Column="1"
-                                                                      Margin="10,0,0,0"
-                                                                      ItemsSource="{Binding ResultatsTraitementDisponibles}"
-                                                                      SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                                <ComboBox.Style>
-                                                                    <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding EstFait}" Value="True">
-                                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </ComboBox.Style>
-                                                            </ComboBox>
-                                                        </Grid>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </StackPanel>
-                        </ScrollViewer>
+                            <Border Background="Transparent">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.HasFilteredEssais, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding DataContext.EmptyEssaisFilterMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
