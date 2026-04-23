@@ -462,7 +462,7 @@
 
                                 <Border Style="{StaticResource MetricPillStyle}">
                                     <StackPanel>
-                                        <TextBlock Text="Projet"
+                                        <TextBlock Text="Avancement"
                                                    FontSize="12"
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                                         <TextBlock Text="{Binding Statut}"

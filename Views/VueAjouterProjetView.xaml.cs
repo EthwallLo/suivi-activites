@@ -15,8 +15,15 @@ namespace MonTableurApp.Views
     public partial class VueAjouterProjetView : UserControl
     {
         private static readonly CultureInfo DateCulture = CultureInfo.GetCultureInfo("fr-FR");
-        private const string FamilleCable = "Câble";
+        private const string FamilleCableIndoor = "Câble indoor";
+        private const string FamilleCableOutdoor = "Câble outdoor";
+        private const string FamilleCableDrop = "Câble drop";
         private const string FamilleCordon = "Cordon";
+        private const string FamillePatchcords = "Patchcords";
+        private const string FamilleAramides = "Aramides";
+        private const string FamilleRipcords = "Ripcords";
+        private const string FamilleFrp = "FRP";
+        private const string FamilleAutre = "Autre";
 
         private static readonly string[] EssaisPreQualification =
         {
@@ -32,10 +39,86 @@ namespace MonTableurApp.Views
             "CPR"
         };
 
+        private static readonly string[] TousLesEssais =
+        {
+            "Traction 100m",
+            "Cyclage thermique",
+            "OTDR",
+            "Statique Bending",
+            "Vieillissement",
+            "Dimensionnel",
+            "Crush",
+            "Cut through",
+            "Traction verticale",
+            "Kink",
+            "Repeated bending",
+            "Torsion",
+            "Abrasion marquage",
+            "Abrasion gaine",
+            "Friction gaine",
+            "Traction pince",
+            "Traction spiralé",
+            "Pénétration d'eau",
+            "Petite flamme",
+            "Vibration éolienne",
+            "Collage",
+            "Exposition UV",
+            "CPR"
+        };
+
         private static readonly string[] EssaisCordon =
         {
             "Traction 100m",
             "Statique Bending"
+        };
+
+        private static readonly Dictionary<string, HashSet<string>> EssaisPresetsParFamille = new(StringComparer.Ordinal)
+        {
+            [FamilleCableIndoor] = new HashSet<string>(TousLesEssais, StringComparer.Ordinal),
+            [FamilleCableOutdoor] = new HashSet<string>(TousLesEssais, StringComparer.Ordinal),
+            [FamilleCableDrop] = new HashSet<string>(TousLesEssais, StringComparer.Ordinal),
+            [FamilleCordon] = new HashSet<string>(new[]
+            {
+                "Traction 100m",
+                "OTDR",
+                "Statique Bending",
+                "Repeated bending",
+                "Torsion",
+                "Exposition UV"
+            }, StringComparer.Ordinal),
+            [FamillePatchcords] = new HashSet<string>(new[]
+            {
+                "Traction 100m",
+                "OTDR",
+                "Statique Bending",
+                "Repeated bending",
+                "Cut through",
+                "Abrasion gaine",
+                "CPR"
+            }, StringComparer.Ordinal),
+            [FamilleAramides] = new HashSet<string>(new[]
+            {
+                "Traction verticale"
+            }, StringComparer.Ordinal),
+            [FamilleRipcords] = new HashSet<string>(new[]
+            {
+                "Traction verticale"
+            }, StringComparer.Ordinal),
+            [FamilleFrp] = new HashSet<string>(new[]
+            {
+                "Traction verticale",
+                "Vieillissement"
+            }, StringComparer.Ordinal),
+            [FamilleAutre] = new HashSet<string>(new[]
+            {
+                "Cyclage thermique",
+                "OTDR",
+                "Dimensionnel",
+                "Crush",
+                "Friction gaine",
+                "Pénétration d'eau",
+                "Collage"
+            }, StringComparer.Ordinal)
         };
 
         public ObservableCollection<EssaiSelectionItem> EssaisPreQualificationSelection { get; } = new();
@@ -60,7 +143,7 @@ namespace MonTableurApp.Views
 
             if (FamilleProduitComboBox.SelectedItem == null && viewModel.FamillesProduit.Count > 0)
             {
-                FamilleProduitComboBox.SelectedItem = FamilleCable;
+                FamilleProduitComboBox.SelectedItem = FamilleCableIndoor;
             }
 
             if (ClientComboBox.SelectedItem == null && viewModel.Clients.Count > 0)
@@ -170,7 +253,7 @@ namespace MonTableurApp.Views
 
             ClientComboBox.SelectedItem = viewModel.Clients.Count > 0 ? viewModel.Clients[0] : null;
             DemandeurComboBox.SelectedItem = viewModel.Demandeurs.Count > 0 ? viewModel.Demandeurs[0] : null;
-            FamilleProduitComboBox.SelectedItem = viewModel.FamillesProduit.Count > 0 ? FamilleCable : null;
+            FamilleProduitComboBox.SelectedItem = viewModel.FamillesProduit.Count > 0 ? FamilleCableIndoor : null;
             TypeActiviteComboBox.SelectedItem = viewModel.TypesActivite.Count > 0 ? viewModel.TypesActivite[0] : null;
             StatutComboBox.SelectedItem = viewModel.Statuts.Count > 0 ? viewModel.Statuts[0] : null;
             NumeroProjetTextBox.Focus();
@@ -212,13 +295,10 @@ namespace MonTableurApp.Views
             }
 
             string? famille = FamilleProduitComboBox.SelectedItem as string;
-            if (famille == FamilleCable)
+            if (!string.IsNullOrWhiteSpace(famille) &&
+                     EssaisPresetsParFamille.TryGetValue(famille, out HashSet<string>? essaisPreselectionnes))
             {
-                SetEssaisSelectionState(_ => true);
-            }
-            else if (famille == FamilleCordon)
-            {
-                SetEssaisSelectionState(item => EssaisCordon.Contains(item.NomEssai));
+                SetEssaisSelectionState(item => essaisPreselectionnes.Contains(item.NomEssai));
             }
 
             UpdateToggleEssaisSelectionButtonText();
