@@ -87,6 +87,14 @@ namespace MonTableurApp.Views
             viewModel.MarkAllEssaisToDo(projet);
         }
 
+        private void ToggleProjetEssaisSortDirection_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.ToggleProjetEssaisSortDirection();
+            }
+        }
+
         private void VueSuiviEssaisView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)

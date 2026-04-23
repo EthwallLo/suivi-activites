@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -26,6 +27,10 @@ namespace MonTableurApp.ViewModels
         private const string EssaiFilterToProcess = "to-process";
         private const string EssaiFilterInProgress = "in-progress";
         private const string EssaiFilterDone = "done";
+        private const string EssaisSortAlphabetical = "alphabetical";
+        private const string EssaisSortStartDate = "start-date";
+        private const string EssaisSortStatus = "status";
+        private const string EssaisSortRemainingTests = "remaining-tests";
         private const double AgendaHoursPerDay = 8.0;
         private const double AgendaHourSlotHeight = 48.0;
         private static readonly TimeSpan AgendaDisplayStartTime = TimeSpan.FromHours(7);
@@ -80,6 +85,8 @@ namespace MonTableurApp.ViewModels
         private string? searchNomProduit;
         private string? searchNomProduitEssais;
         private SearchFieldOption? selectedProjetSearchField;
+        private SearchFieldOption? selectedProjetEssaisSortOption;
+        private bool isProjetEssaisSortDescending;
         private string activeQuickFilter = QuickFilterAll;
         private string activeEssaiFilter = EssaiFilterAll;
         private int totalProjets;
@@ -94,6 +101,7 @@ namespace MonTableurApp.ViewModels
         private string agendaWeekTitle = string.Empty;
         private readonly Stack<AgendaUndoSnapshot> agendaUndoSnapshots = new();
         private readonly Stack<EssaisUndoSnapshot> essaisUndoSnapshots = new();
+        private readonly Stack<ProjectTableUndoSnapshot> projectTableUndoSnapshots = new();
         private bool isRestoringAgendaState;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -109,6 +117,7 @@ namespace MonTableurApp.ViewModels
         public List<string> Statuts { get; }
         public List<string> NomsEssais { get; }
         public List<SearchFieldOption> ProjetSearchFields { get; }
+        public List<SearchFieldOption> ProjetEssaisSortOptions { get; }
         public ObservableCollection<AgendaTaskItem> AgendaBacklogTasks { get; }
         public ObservableCollection<AgendaWorkDay> AgendaWeekDays { get; }
 
@@ -162,6 +171,28 @@ namespace MonTableurApp.ViewModels
                 EnsureSelectedProjetEssais();
             }
         }
+
+        public SearchFieldOption? SelectedProjetEssaisSortOption
+        {
+            get => selectedProjetEssaisSortOption;
+            set
+            {
+                if (ReferenceEquals(selectedProjetEssaisSortOption, value))
+                {
+                    return;
+                }
+
+                selectedProjetEssaisSortOption = value;
+                ApplyProjetEssaisSorting();
+                ProjetsEssaisView.Refresh();
+                OnPropertyChanged(nameof(SelectedProjetEssaisSortOption));
+                EnsureSelectedProjetEssais();
+            }
+        }
+
+        public bool IsProjetEssaisSortDescending => isProjetEssaisSortDescending;
+        public string ProjetEssaisSortDirectionGlyph => isProjetEssaisSortDescending ? "↓" : "↑";
+        public string ProjetEssaisSortDirectionToolTip => isProjetEssaisSortDescending ? "Tri décroissant" : "Tri croissant";
 
         public bool IsAllFilterActive => activeQuickFilter == QuickFilterAll;
         public bool IsInProgressFilterActive => activeQuickFilter == QuickFilterInProgress;
@@ -348,6 +379,7 @@ namespace MonTableurApp.ViewModels
 
         public bool CanUndoAgenda => agendaUndoSnapshots.Count > 0;
         public bool CanUndoEssaisBulkAction => essaisUndoSnapshots.Count > 0;
+        public bool CanUndoProjectTable => projectTableUndoSnapshots.Count > 0;
 
         public int AgendaBacklogVisibleCount => AgendaBacklogVisibleTasks.Count();
 
@@ -423,6 +455,44 @@ namespace MonTableurApp.ViewModels
             }
 
             Projets.Remove(projet);
+        }
+
+        public void SaveProjectTableUndoSnapshot()
+        {
+            ProjectTableUndoSnapshot snapshot = CaptureProjectTableSnapshot();
+
+            if (projectTableUndoSnapshots.Count > 0 &&
+                projectTableUndoSnapshots.Peek().States.SequenceEqual(snapshot.States))
+            {
+                return;
+            }
+
+            projectTableUndoSnapshots.Push(snapshot);
+
+            while (projectTableUndoSnapshots.Count > 30)
+            {
+                ProjectTableUndoSnapshot[] preserved = projectTableUndoSnapshots.Reverse().Take(30).ToArray();
+                projectTableUndoSnapshots.Clear();
+
+                for (int i = preserved.Length - 1; i >= 0; i--)
+                {
+                    projectTableUndoSnapshots.Push(preserved[i]);
+                }
+            }
+
+            OnPropertyChanged(nameof(CanUndoProjectTable));
+        }
+
+        public void UndoProjectTableLastAction()
+        {
+            if (projectTableUndoSnapshots.Count == 0)
+            {
+                return;
+            }
+
+            ProjectTableUndoSnapshot snapshot = projectTableUndoSnapshots.Pop();
+            RestoreProjectTableSnapshot(snapshot);
+            OnPropertyChanged(nameof(CanUndoProjectTable));
         }
 
         public void MarkAllEssaisDoneAndOk(Projet projet)
@@ -537,6 +607,14 @@ namespace MonTableurApp.ViewModels
                 new("NumeroProjet", "Projet")
             };
             selectedProjetSearchField = ProjetSearchFields[0];
+            ProjetEssaisSortOptions = new List<SearchFieldOption>
+            {
+                new(EssaisSortAlphabetical, "A-Z"),
+                new(EssaisSortStartDate, "Date début"),
+                new(EssaisSortStatus, "Statut"),
+                new(EssaisSortRemainingTests, "Restants")
+            };
+            selectedProjetEssaisSortOption = ProjetEssaisSortOptions[0];
             AgendaBacklogTasks = new ObservableCollection<AgendaTaskItem>();
             AgendaWeekDays = CreateAgendaWeekDays();
 
@@ -552,6 +630,7 @@ namespace MonTableurApp.ViewModels
 
             ProjetsEssaisView = new CollectionViewSource { Source = Projets }.View;
             ProjetsEssaisView.Filter = FilterProjetEssais;
+            ApplyProjetEssaisSorting();
 
             Projets.CollectionChanged += Projets_CollectionChanged;
 
@@ -603,7 +682,10 @@ namespace MonTableurApp.ViewModels
                 return true;
             }
 
-            return NormalizeText(projet.NomProduit).Contains(NormalizeText(SearchNomProduitEssais));
+            string searchValue = NormalizeText(SearchNomProduitEssais);
+
+            return NormalizeText(projet.NomProduit).Contains(searchValue) ||
+                   NormalizeText(projet.NumeroProjet).Contains(searchValue);
         }
 
         private void Projets_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -657,7 +739,11 @@ namespace MonTableurApp.ViewModels
 
         private void Projet_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Projet.NomProduit) || e.PropertyName == nameof(Projet.Statut))
+            if (e.PropertyName == nameof(Projet.NomProduit) ||
+                e.PropertyName == nameof(Projet.NumeroProjet) ||
+                e.PropertyName == nameof(Projet.Statut) ||
+                e.PropertyName == nameof(Projet.DateDebut) ||
+                e.PropertyName == nameof(Projet.DateDebutValue))
             {
                 ProjetsView.Refresh();
                 ProjetsEssaisView.Refresh();
@@ -708,6 +794,8 @@ namespace MonTableurApp.ViewModels
             }
 
             Sauvegarder();
+            ProjetsEssaisView.Refresh();
+            EnsureSelectedProjetEssais();
             RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
         }
@@ -724,6 +812,8 @@ namespace MonTableurApp.ViewModels
             }
 
             Sauvegarder();
+            ProjetsEssaisView.Refresh();
+            EnsureSelectedProjetEssais();
             RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
         }
@@ -763,6 +853,17 @@ namespace MonTableurApp.ViewModels
             EssaisSelectionEnCours = essaisConcernes.Count(IsEssaiInProgress);
             EssaisSelectionTermines = essaisConcernes.Count(IsEssaiDone);
             RefreshEssaiCollections();
+        }
+
+        public void ToggleProjetEssaisSortDirection()
+        {
+            isProjetEssaisSortDescending = !isProjetEssaisSortDescending;
+            ApplyProjetEssaisSorting();
+            ProjetsEssaisView.Refresh();
+            OnPropertyChanged(nameof(IsProjetEssaisSortDescending));
+            OnPropertyChanged(nameof(ProjetEssaisSortDirectionGlyph));
+            OnPropertyChanged(nameof(ProjetEssaisSortDirectionToolTip));
+            EnsureSelectedProjetEssais();
         }
 
         private int CountStatusContaining(string expectedPart)
@@ -839,6 +940,24 @@ namespace MonTableurApp.ViewModels
             }
 
             RefreshEssaiCollections();
+        }
+
+        private void ApplyProjetEssaisSorting()
+        {
+            if (ProjetsEssaisView is not ListCollectionView listCollectionView)
+            {
+                return;
+            }
+
+            listCollectionView.CustomSort = new DelegateComparer((left, right) =>
+            {
+                if (left is not Projet leftProjet || right is not Projet rightProjet)
+                {
+                    return 0;
+                }
+
+                return CompareProjetsEssais(leftProjet, rightProjet);
+            });
         }
 
         private bool MatchesSearch(Projet projet)
@@ -980,6 +1099,103 @@ namespace MonTableurApp.ViewModels
 
             string statut = NormalizeText(essai.Statut);
             return !string.IsNullOrWhiteSpace(statut) && statut != "a faire";
+        }
+
+        private int CompareProjetsEssais(Projet left, Projet right)
+        {
+            int comparison = (SelectedProjetEssaisSortOption?.Key ?? EssaisSortAlphabetical) switch
+            {
+                EssaisSortStartDate => CompareProjectStartDates(left, right),
+                EssaisSortStatus => CompareProjectStatuses(left, right),
+                EssaisSortRemainingTests => CompareRemainingEssais(left, right),
+                _ => CompareProjectNames(left, right)
+            };
+
+            if (isProjetEssaisSortDescending)
+            {
+                comparison *= -1;
+            }
+
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            comparison = CompareProjectNames(left, right);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+
+            return string.Compare(
+                NormalizeText(left.NumeroProjet),
+                NormalizeText(right.NumeroProjet),
+                StringComparison.Ordinal);
+        }
+
+        private int CompareProjectNames(Projet left, Projet right)
+        {
+            return string.Compare(
+                NormalizeText(left.NomProduit),
+                NormalizeText(right.NomProduit),
+                StringComparison.Ordinal);
+        }
+
+        private int CompareProjectStartDates(Projet left, Projet right)
+        {
+            DateTime? leftDate = left.DateDebutValue;
+            DateTime? rightDate = right.DateDebutValue;
+
+            if (leftDate.HasValue && rightDate.HasValue)
+            {
+                return DateTime.Compare(leftDate.Value, rightDate.Value);
+            }
+
+            if (leftDate.HasValue)
+            {
+                return -1;
+            }
+
+            if (rightDate.HasValue)
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        private int CompareProjectStatuses(Projet left, Projet right)
+        {
+            int leftIndex = GetProjectStatusSortIndex(left.Statut);
+            int rightIndex = GetProjectStatusSortIndex(right.Statut);
+            return leftIndex.CompareTo(rightIndex);
+        }
+
+        private int GetProjectStatusSortIndex(string? statut)
+        {
+            string normalizedStatus = NormalizeText(statut);
+
+            for (int index = 0; index < Statuts.Count; index++)
+            {
+                if (NormalizeText(Statuts[index]) == normalizedStatus)
+                {
+                    return index;
+                }
+            }
+
+            return int.MaxValue;
+        }
+
+        private int CompareRemainingEssais(Projet left, Projet right)
+        {
+            int leftRemaining = CountRemainingEssais(left);
+            int rightRemaining = CountRemainingEssais(right);
+            return rightRemaining.CompareTo(leftRemaining);
+        }
+
+        private static int CountRemainingEssais(Projet projet)
+        {
+            return projet.Essais.Count(essai => essai.EstConcerne && !IsEssaiDone(essai));
         }
 
         private void RefreshEssaiCollections()
@@ -1304,6 +1520,58 @@ namespace MonTableurApp.ViewModels
             }
 
             RefreshEssaiCollections();
+            RefreshSelectedProjectStatistics();
+            RefreshAgendaTasks();
+        }
+
+        private ProjectTableUndoSnapshot CaptureProjectTableSnapshot()
+        {
+            var states = Projets
+                .Select(projet => new ProjectTableStateSnapshot(
+                    projet,
+                    projet.NumeroProjet,
+                    projet.NomProduit,
+                    projet.FamilleProduit,
+                    projet.Client,
+                    projet.Demandeur,
+                    projet.TypeActivite,
+                    projet.DossierRacine,
+                    projet.Statut,
+                    projet.DateDebut,
+                    projet.DatePrevisionnelle,
+                    projet.DateFin,
+                    projet.Commentaires))
+                .ToList();
+
+            return new ProjectTableUndoSnapshot(states);
+        }
+
+        private void RestoreProjectTableSnapshot(ProjectTableUndoSnapshot snapshot)
+        {
+            foreach (ProjectTableStateSnapshot state in snapshot.States)
+            {
+                if (!Projets.Contains(state.Projet))
+                {
+                    continue;
+                }
+
+                state.Projet.NumeroProjet = state.NumeroProjet;
+                state.Projet.NomProduit = state.NomProduit;
+                state.Projet.FamilleProduit = state.FamilleProduit;
+                state.Projet.Client = state.Client;
+                state.Projet.Demandeur = state.Demandeur;
+                state.Projet.TypeActivite = state.TypeActivite;
+                state.Projet.DossierRacine = state.DossierRacine;
+                state.Projet.Statut = state.Statut;
+                state.Projet.DateDebut = state.DateDebut;
+                state.Projet.DatePrevisionnelle = state.DatePrevisionnelle;
+                state.Projet.DateFin = state.DateFin;
+                state.Projet.Commentaires = state.Commentaires;
+            }
+
+            ProjetsView.Refresh();
+            ProjetsEssaisView.Refresh();
+            RefreshStatistics();
             RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
         }
@@ -1793,6 +2061,21 @@ namespace MonTableurApp.ViewModels
             public string Label { get; }
         }
 
+        private sealed class DelegateComparer : IComparer
+        {
+            private readonly Comparison<object?> comparison;
+
+            public DelegateComparer(Comparison<object?> comparison)
+            {
+                this.comparison = comparison;
+            }
+
+            public int Compare(object? x, object? y)
+            {
+                return comparison(x, y);
+            }
+        }
+
         private sealed record AgendaTaskPlacementSnapshot(string TaskKey, int? DayIndex, int? ScheduledStartMinutes, int? OrderIndex);
 
         private sealed record AgendaUndoSnapshot(IReadOnlyList<AgendaTaskPlacementSnapshot> Placements);
@@ -1800,6 +2083,23 @@ namespace MonTableurApp.ViewModels
         private sealed record EssaiStateSnapshot(int Index, string? Statut, string? ResultatTraitement);
 
         private sealed record EssaisUndoSnapshot(Projet Projet, IReadOnlyList<EssaiStateSnapshot> States);
+
+        private sealed record ProjectTableStateSnapshot(
+            Projet Projet,
+            string? NumeroProjet,
+            string? NomProduit,
+            string? FamilleProduit,
+            string? Client,
+            string? Demandeur,
+            string? TypeActivite,
+            string? DossierRacine,
+            string? Statut,
+            string? DateDebut,
+            string? DatePrevisionnelle,
+            string? DateFin,
+            string? Commentaires);
+
+        private sealed record ProjectTableUndoSnapshot(IReadOnlyList<ProjectTableStateSnapshot> States);
 
         public sealed class AgendaHourMarker
         {

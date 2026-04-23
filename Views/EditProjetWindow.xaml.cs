@@ -1,4 +1,10 @@
+using System;
+using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using Microsoft.Win32;
 using MonTableurApp.Models;
 using MonTableurApp.ViewModels;
 
@@ -73,6 +79,25 @@ namespace MonTableurApp.Views
             Close();
         }
 
+        private void BrowseDossierRacine_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = "Choisir le dossier racine"
+            };
+
+            string? currentPath = EditableProjet.DossierRacine;
+            if (!string.IsNullOrWhiteSpace(currentPath) && Directory.Exists(currentPath))
+            {
+                dialog.InitialDirectory = currentPath;
+            }
+
+            if (dialog.ShowDialog(this) == true)
+            {
+                EditableProjet.DossierRacine = dialog.FolderName;
+            }
+        }
+
         private void ApplyChanges()
         {
             sourceProjet.NumeroProjet = EditableProjet.NumeroProjet;
@@ -106,6 +131,76 @@ namespace MonTableurApp.Views
                 DateFin = projet.DateFin,
                 Commentaires = projet.Commentaires
             };
+        }
+
+        private void CalendarPopup_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not Calendar calendar || e.AddedItems.Count == 0)
+            {
+                return;
+            }
+
+            DateTime? minDate = (calendar.DataContext as Projet)?.DateDebutValue ?? calendar.DisplayDateStart;
+
+            if (minDate is DateTime startDate
+                && calendar.SelectedDate is DateTime selectedDate
+                && selectedDate.Date < startDate.Date)
+            {
+                calendar.SelectedDate = startDate.Date;
+                return;
+            }
+
+            if (calendar.Tag is ToggleButton toggleButton)
+            {
+                toggleButton.IsChecked = false;
+            }
+        }
+
+        private void ConstrainedCalendarPopup_Opened(object sender, EventArgs e)
+        {
+            if (sender is not Popup popup)
+            {
+                return;
+            }
+
+            Calendar? calendar = FindDescendant<Calendar>(popup.Child);
+            if (popup.DataContext is not Projet projet || calendar is null)
+            {
+                return;
+            }
+
+            calendar.BlackoutDates.Clear();
+            calendar.DisplayDateStart = projet.DateDebutValue;
+
+            if (projet.DateDebutValue is DateTime dateDebutValue)
+            {
+                calendar.BlackoutDates.Add(new CalendarDateRange(DateTime.MinValue, dateDebutValue.Date.AddDays(-1)));
+            }
+        }
+
+        private static T? FindDescendant<T>(DependencyObject? parent) where T : DependencyObject
+        {
+            if (parent is null)
+            {
+                return null;
+            }
+
+            if (parent is T match)
+            {
+                return match;
+            }
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                T? result = FindDescendant<T>(VisualTreeHelper.GetChild(parent, i));
+                if (result is not null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
         }
     }
 }

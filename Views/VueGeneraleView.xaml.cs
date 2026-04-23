@@ -1,9 +1,11 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.IO;
 using Microsoft.Win32;
 using MonTableurApp.Models;
 using MonTableurApp.Services;
@@ -85,6 +87,44 @@ namespace MonTableurApp.Views
                 MessageBoxImage.Information);
         }
 
+        private void BrowseDossierRacine_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.DataContext is not Projet projet)
+            {
+                return;
+            }
+
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.SaveProjectTableUndoSnapshot();
+            }
+
+            var dialog = new OpenFolderDialog
+            {
+                Title = "Choisir le dossier racine"
+            };
+
+            if (!string.IsNullOrWhiteSpace(projet.DossierRacine) && Directory.Exists(projet.DossierRacine))
+            {
+                dialog.InitialDirectory = projet.DossierRacine;
+            }
+
+            Window? owner = Window.GetWindow(this);
+            bool? result = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+            if (result == true)
+            {
+                projet.DossierRacine = dialog.FolderName;
+            }
+        }
+
+        private void ProjectTableDatePopup_Opened(object sender, EventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.SaveProjectTableUndoSnapshot();
+            }
+        }
+
         private void CalendarPopup_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is not Calendar calendar || e.AddedItems.Count == 0)
@@ -110,6 +150,11 @@ namespace MonTableurApp.Views
 
         private void ConstrainedCalendarPopup_Opened(object sender, System.EventArgs e)
         {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.SaveProjectTableUndoSnapshot();
+            }
+
             if (sender is not Popup popup)
             {
                 return;
@@ -128,6 +173,27 @@ namespace MonTableurApp.Views
             {
                 calendar.BlackoutDates.Add(new CalendarDateRange(DateTime.MinValue, dateDebutValue.Date.AddDays(-1)));
             }
+        }
+
+        private void VueGeneraleView_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)
+            {
+                return;
+            }
+
+            if (e.OriginalSource is TextBox or ComboBox)
+            {
+                return;
+            }
+
+            if (DataContext is not MainViewModel viewModel || !viewModel.CanUndoProjectTable)
+            {
+                return;
+            }
+
+            viewModel.UndoProjectTableLastAction();
+            e.Handled = true;
         }
 
         private static T? FindDescendant<T>(DependencyObject? parent) where T : DependencyObject
@@ -276,6 +342,14 @@ namespace MonTableurApp.Views
                 comboBox.Focus();
                 comboBox.IsDropDownOpen = true;
             }, DispatcherPriority.Background);
+        }
+
+        private void ProjetsDataGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.SaveProjectTableUndoSnapshot();
+            }
         }
 
         private bool IsSingleClickComboColumn(DataGridColumn? column)
