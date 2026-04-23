@@ -427,48 +427,80 @@
                             </StackPanel>
                         </Grid>
 
-                        <WrapPanel Margin="0,12,0,0">
-                            <Border Style="{StaticResource MetricPillStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Numéro projet"
-                                               FontSize="12"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding NumeroProjet}"
-                                               Margin="0,4,0,0"
-                                               FontSize="15"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                </StackPanel>
-                            </Border>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                            <Border Style="{StaticResource MetricPillStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Client"
-                                               FontSize="12"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding Client}"
-                                               Margin="0,4,0,0"
-                                               FontSize="15"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                </StackPanel>
-                            </Border>
+                            <WrapPanel Grid.Column="0">
+                                <Border Style="{StaticResource MetricPillStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Numéro projet"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding NumeroProjet}"
+                                                   Margin="0,4,0,0"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                    </StackPanel>
+                                </Border>
 
-                            <Border Style="{StaticResource MetricPillStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Projet"
-                                               FontSize="12"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding Statut}"
-                                               Margin="0,4,0,0"
-                                               FontSize="15"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                </StackPanel>
-                            </Border>
-                        </WrapPanel>
+                                <Border Style="{StaticResource MetricPillStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Client"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Client}"
+                                                   Margin="0,4,0,0"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                    </StackPanel>
+                                </Border>
 
-                        <Grid Margin="0,18,0,0">
+                                <Border Style="{StaticResource MetricPillStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Projet"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Statut}"
+                                                   Margin="0,4,0,0"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                            </WrapPanel>
+
+                            <WrapPanel Grid.Column="1"
+                                       HorizontalAlignment="Right">
+                                <Border Style="{StaticResource MetricPillStyle}"
+                                        Padding="12,8"
+                                        Margin="0">
+                                    <TextBlock FontSize="16"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource SummaryMintForegroundBrush}">
+                                        <Run Text="{Binding DataContext.EssaisSelectionOk, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
+                                        <Run Text=" OK"/>
+                                    </TextBlock>
+                                </Border>
+
+                                <Border Style="{StaticResource MetricPillStyle}"
+                                        Padding="12,8"
+                                        Margin="10,0,0,0">
+                                    <TextBlock FontSize="16"
+                                               FontWeight="Bold"
+                                               Foreground="#C95B6A">
+                                        <Run Text="{Binding DataContext.EssaisSelectionNok, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
+                                        <Run Text=" NOK"/>
+                                    </TextBlock>
+                                </Border>
+                            </WrapPanel>
+                        </Grid>
+
+                        <Grid Margin="0,12,0,0">
                             <WrapPanel HorizontalAlignment="Left">
                             <Button Click="EssaisATraiter_Click">
                                 <Button.Style>

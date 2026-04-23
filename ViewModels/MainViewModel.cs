@@ -98,6 +98,8 @@ namespace MonTableurApp.ViewModels
         private int essaisSelectionEnCours;
         private int essaisSelectionTermines;
         private int essaisSelectionTotal;
+        private int essaisSelectionOk;
+        private int essaisSelectionNok;
         private bool showDoneOkEssais = true;
         private IReadOnlyList<ProjetEnCoursSummary> projetsEnCoursDashboard = Array.Empty<ProjetEnCoursSummary>();
         private int projetsEnCoursDashboardCount;
@@ -344,6 +346,36 @@ namespace MonTableurApp.ViewModels
 
                 essaisSelectionTotal = value;
                 OnPropertyChanged(nameof(EssaisSelectionTotal));
+            }
+        }
+
+        public int EssaisSelectionOk
+        {
+            get => essaisSelectionOk;
+            private set
+            {
+                if (essaisSelectionOk == value)
+                {
+                    return;
+                }
+
+                essaisSelectionOk = value;
+                OnPropertyChanged(nameof(EssaisSelectionOk));
+            }
+        }
+
+        public int EssaisSelectionNok
+        {
+            get => essaisSelectionNok;
+            private set
+            {
+                if (essaisSelectionNok == value)
+                {
+                    return;
+                }
+
+                essaisSelectionNok = value;
+                OnPropertyChanged(nameof(EssaisSelectionNok));
             }
         }
 
@@ -878,6 +910,8 @@ namespace MonTableurApp.ViewModels
                 EssaisSelectionEnCours = 0;
                 EssaisSelectionATraiter = 0;
                 EssaisSelectionTermines = 0;
+                EssaisSelectionOk = 0;
+                EssaisSelectionNok = 0;
                 RefreshEssaiCollections();
                 RefreshEnCoursDashboard();
                 return;
@@ -888,6 +922,8 @@ namespace MonTableurApp.ViewModels
             EssaisSelectionATraiter = essaisConcernes.Count(IsEssaiToProcess);
             EssaisSelectionEnCours = essaisConcernes.Count(IsEssaiInProgress);
             EssaisSelectionTermines = essaisConcernes.Count(IsEssaiDone);
+            EssaisSelectionOk = essaisConcernes.Count(essai => IsEssaiDone(essai) && NormalizeText(essai.ResultatTraitement) == "ok");
+            EssaisSelectionNok = essaisConcernes.Count(essai => IsEssaiDone(essai) && NormalizeText(essai.ResultatTraitement) == "nok");
             RefreshEssaiCollections();
             RefreshEnCoursDashboard();
         }

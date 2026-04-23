@@ -10,6 +10,81 @@
         Background="{DynamicResource WindowBackgroundBrush}">
 
     <Window.Resources>
+        <Style x:Key="InvisibleRepeatButtonStyle" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Rectangle Fill="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CuteThumbStyle" TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="ThumbBorder"
+                                Background="{DynamicResource ScrollThumbBrush}"
+                                CornerRadius="8"
+                                Margin="1"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Border x:Name="TrackBorder"
+                                    Background="{DynamicResource ScrollTrackBrush}"
+                                    CornerRadius="8"/>
+                            <Track x:Name="PART_Track"
+                                   IsDirectionReversed="False">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton x:Name="DecreaseButton"
+                                                  Style="{StaticResource InvisibleRepeatButtonStyle}"
+                                                  Command="ScrollBar.PageLeftCommand"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource CuteThumbStyle}"/>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton x:Name="IncreaseButton"
+                                                  Style="{StaticResource InvisibleRepeatButtonStyle}"
+                                                  Command="ScrollBar.PageRightCommand"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter TargetName="TrackBorder" Property="Height" Value="12"/>
+                                <Setter TargetName="TrackBorder" Property="Margin" Value="0,10,0,2"/>
+                                <Setter Property="Height" Value="16"/>
+                            </Trigger>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter TargetName="TrackBorder" Property="Width" Value="12"/>
+                                <Setter TargetName="TrackBorder" Property="Margin" Value="2,0,0,0"/>
+                                <Setter Property="Width" Value="16"/>
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
+                                <Setter TargetName="DecreaseButton" Property="Command" Value="ScrollBar.PageUpCommand"/>
+                                <Setter TargetName="IncreaseButton" Property="Command" Value="ScrollBar.PageDownCommand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="SectionCardStyle" TargetType="Border">
             <Setter Property="Background" Value="#FFFFFE"/>
             <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
@@ -654,7 +729,8 @@
                 </Border>
 
                 <StackPanel Grid.Column="1"
-                            Margin="16,2,0,0">
+                            Margin="16,0,0,0"
+                            VerticalAlignment="Center">
                     <TextBlock Text="Modifier le produit"
                                FontSize="28"
                                FontWeight="SemiBold"
@@ -780,6 +856,8 @@
                                         </Grid.ColumnDefinitions>
 
                                         <TextBox Text="{Binding EditableProjet.DossierRacine, UpdateSourceTrigger=PropertyChanged}"
+                                                 Padding="14,7"
+                                                 MinHeight="42"
                                                  Style="{StaticResource EditorTextBoxStyle}"/>
 
                                         <Button Grid.Column="1"
