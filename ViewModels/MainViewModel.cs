@@ -98,6 +98,7 @@ namespace MonTableurApp.ViewModels
         private int essaisSelectionEnCours;
         private int essaisSelectionTermines;
         private int essaisSelectionTotal;
+        private bool showDoneOkEssais = true;
         private IReadOnlyList<ProjetEnCoursSummary> projetsEnCoursDashboard = Array.Empty<ProjetEnCoursSummary>();
         private int projetsEnCoursDashboardCount;
         private int projetsEnAttentionDashboardCount;
@@ -345,6 +346,10 @@ namespace MonTableurApp.ViewModels
                 OnPropertyChanged(nameof(EssaisSelectionTotal));
             }
         }
+
+        public bool ShowDoneOkEssais => showDoneOkEssais;
+
+        public string ToggleDoneOkEssaisLabel => showDoneOkEssais ? "Masquer les essais terminés" : "Afficher les essais terminés";
 
         public IReadOnlyList<ProjetEnCoursSummary> ProjetsEnCoursDashboard => projetsEnCoursDashboard;
 
@@ -945,6 +950,14 @@ namespace MonTableurApp.ViewModels
             SetEssaiFilter(EssaiFilterDone);
         }
 
+        public void ToggleDoneOkEssaisVisibility()
+        {
+            showDoneOkEssais = !showDoneOkEssais;
+            OnPropertyChanged(nameof(ShowDoneOkEssais));
+            OnPropertyChanged(nameof(ToggleDoneOkEssaisLabel));
+            RefreshEssaiCollections();
+        }
+
         private void SetQuickFilter(string filter)
         {
             if (activeQuickFilter == filter)
@@ -1097,6 +1110,11 @@ namespace MonTableurApp.ViewModels
 
         private bool MatchesEssaiFilter(EssaiSuivi essai)
         {
+            if (!showDoneOkEssais && IsEssaiDoneAndOk(essai))
+            {
+                return false;
+            }
+
             return activeEssaiFilter switch
             {
                 EssaiFilterToProcess => IsEssaiToProcess(essai),

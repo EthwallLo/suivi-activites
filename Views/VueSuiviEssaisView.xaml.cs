@@ -95,6 +95,14 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void ToggleDoneOkEssaisVisibility_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.ToggleDoneOkEssaisVisibility();
+            }
+        }
+
         private void VueSuiviEssaisView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)
