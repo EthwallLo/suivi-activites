@@ -20,6 +20,11 @@ namespace MonTableurApp.Views
             "Statique Bending",
             "Vieillissement"
         };
+        private static readonly string[] EssaisExterieurs =
+        {
+            "Exposition UV",
+            "CPR"
+        };
         private static readonly string[] EssaisCordon =
         {
             "Traction 100m",
@@ -28,6 +33,7 @@ namespace MonTableurApp.Views
 
         public ObservableCollection<EssaiSelectionItem> EssaisPreQualificationSelection { get; } = new();
         public ObservableCollection<EssaiSelectionItem> EssaisQualificationSelection { get; } = new();
+        public ObservableCollection<EssaiSelectionItem> EssaisExterieursSelection { get; } = new();
 
         public VueAjouterProjetView()
         {
@@ -143,7 +149,7 @@ namespace MonTableurApp.Views
             DateFinTextBox.Clear();
             CommentairesTextBox.Clear();
 
-            foreach (EssaiSelectionItem item in EssaisPreQualificationSelection.Concat(EssaisQualificationSelection))
+            foreach (EssaiSelectionItem item in GetAllEssaisSelectionItems())
             {
                 item.IsSelected = true;
             }
@@ -167,7 +173,7 @@ namespace MonTableurApp.Views
         {
             bool shouldSelectAll = !AreAllEssaisSelected();
 
-            foreach (EssaiSelectionItem item in EssaisPreQualificationSelection.Concat(EssaisQualificationSelection))
+            foreach (EssaiSelectionItem item in GetAllEssaisSelectionItems())
             {
                 item.IsSelected = shouldSelectAll;
             }
@@ -197,13 +203,17 @@ namespace MonTableurApp.Views
 
         private void EnsureEssaiSelections(MainViewModel viewModel)
         {
-            if (EssaisPreQualificationSelection.Count > 0 || EssaisQualificationSelection.Count > 0)
+            if (EssaisPreQualificationSelection.Count > 0 ||
+                EssaisQualificationSelection.Count > 0 ||
+                EssaisExterieursSelection.Count > 0)
             {
                 return;
             }
 
             IEnumerable<string> essaisQualification = viewModel.NomsEssais
-                .Where(nomEssai => !EssaisPreQualification.Contains(nomEssai));
+                .Where(nomEssai =>
+                    !EssaisPreQualification.Contains(nomEssai) &&
+                    !EssaisExterieurs.Contains(nomEssai));
 
             foreach (string nomEssai in EssaisPreQualification)
             {
@@ -213,6 +223,11 @@ namespace MonTableurApp.Views
             foreach (string nomEssai in essaisQualification)
             {
                 AddEssaiSelectionItem(EssaisQualificationSelection, nomEssai);
+            }
+
+            foreach (string nomEssai in EssaisExterieurs)
+            {
+                AddEssaiSelectionItem(EssaisExterieursSelection, nomEssai);
             }
         }
 
@@ -233,8 +248,7 @@ namespace MonTableurApp.Views
 
         private IEnumerable<EssaiSuivi> BuildEssaisForNewProject()
         {
-            return EssaisPreQualificationSelection
-                .Concat(EssaisQualificationSelection)
+            return GetAllEssaisSelectionItems()
                 .Select(item => new EssaiSuivi
                 {
                     NomEssai = item.NomEssai,
@@ -245,7 +259,7 @@ namespace MonTableurApp.Views
 
         private bool AreAllEssaisSelected()
         {
-            return EssaisPreQualificationSelection.Concat(EssaisQualificationSelection).All(item => item.IsSelected);
+            return GetAllEssaisSelectionItems().All(item => item.IsSelected);
         }
 
         private void UpdateToggleEssaisSelectionButtonText()
@@ -262,10 +276,17 @@ namespace MonTableurApp.Views
 
         private void SetEssaisSelectionState(System.Func<EssaiSelectionItem, bool> selector)
         {
-            foreach (EssaiSelectionItem item in EssaisPreQualificationSelection.Concat(EssaisQualificationSelection))
+            foreach (EssaiSelectionItem item in GetAllEssaisSelectionItems())
             {
                 item.IsSelected = selector(item);
             }
+        }
+
+        private IEnumerable<EssaiSelectionItem> GetAllEssaisSelectionItems()
+        {
+            return EssaisPreQualificationSelection
+                .Concat(EssaisQualificationSelection)
+                .Concat(EssaisExterieursSelection);
         }
 
         public sealed class EssaiSelectionItem : INotifyPropertyChanged

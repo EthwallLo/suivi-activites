@@ -901,6 +901,109 @@
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
                                     </StackPanel>
+
+                                    <Border Height="1"
+                                            Margin="0,10,0,18"
+                                            Background="{DynamicResource DataGridSurfaceBorderBrush}"
+                                            Opacity="0.75"/>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Essais extérieurs"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                        <ItemsControl ItemsSource="{Binding DataContext.EssaisExterieursFiltres, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      Margin="0,14,0,0">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <UniformGrid Columns="4"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Margin="0,0,12,12"
+                                                            MinHeight="138"
+                                                            Padding="14"
+                                                            Background="{DynamicResource SearchCardBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="20">
+                                                        <StackPanel>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <TextBlock Text="{Binding NomEssai}"
+                                                                           TextWrapping="Wrap"
+                                                                           FontSize="15"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                                                                <Ellipse Grid.Column="1"
+                                                                         Width="12"
+                                                                         Height="12"
+                                                                         Margin="10,2,0,0"
+                                                                         Fill="{Binding CouleurIndicateurEtat}"
+                                                                         Stroke="#FFFFFFFF"
+                                                                         StrokeThickness="1"
+                                                                         VerticalAlignment="Top"
+                                                                         Visibility="{Binding AfficheIndicateurEtat}"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ProgressBar Value="{Binding ProgressionPourcentage, Mode=OneWay}"
+                                                                             Style="{StaticResource EssaiProgressBarStyle}"/>
+
+                                                                <TextBlock Grid.Column="1"
+                                                                           Margin="10,-4,0,0"
+                                                                           Text="{Binding ProgressionTexte}"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SummaryValueBrush}"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,14,0,0">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding StatutsDisponibles}"
+                                                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                                <ComboBox Grid.Column="1"
+                                                                          Margin="10,0,0,0"
+                                                                          ItemsSource="{Binding ResultatsTraitementDisponibles}"
+                                                                          SelectedItem="{Binding ResultatTraitement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                    <ComboBox.Style>
+                                                                        <Style TargetType="ComboBox" BasedOn="{StaticResource EssaiResultatComboBoxStyle}">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding EstFait}" Value="True">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </ComboBox.Style>
+                                                                </ComboBox>
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
 

@@ -162,7 +162,7 @@
                                     CornerRadius="12"
                                     VerticalAlignment="Top">
                                 <TextBlock x:Name="CheckMark"
-                                           Text="â˜…"
+                                           Text="★"
                                            FontSize="11"
                                            Foreground="White"
                                            HorizontalAlignment="Center"
@@ -244,7 +244,7 @@
                         <StackPanel Grid.Row="1"
                                     Grid.Column="0"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="NumÃ©ro projet"
+                            <TextBlock Text="Numéro projet"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="NumeroProjetTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"/>
@@ -293,7 +293,7 @@
                         <StackPanel Grid.Row="3"
                                     Grid.Column="2"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Type d'activitÃ©"
+                            <TextBlock Text="Type d'activité"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox x:Name="TypeActiviteComboBox"
                                       ItemsSource="{Binding TypesActivite}"
@@ -346,7 +346,7 @@
                         <StackPanel Grid.Row="1"
                                     Grid.Column="0"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Date de dÃ©but"
+                            <TextBlock Text="Date de début"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="DateDebutTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"/>
@@ -355,7 +355,7 @@
                         <StackPanel Grid.Row="1"
                                     Grid.Column="2"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Date prÃ©visionnelle"
+                            <TextBlock Text="Date prévisionnelle"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="DatePrevisionnelleTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"/>
@@ -398,7 +398,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel>
-                            <TextBlock Text="Essais Ã  prÃ©voir"
+                            <TextBlock Text="Essais à prévoir"
                                        FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
@@ -412,7 +412,7 @@
                                 Click="ToggleEssaisSelection_Click"/>
                     </Grid>
 
-                    <TextBlock Text="PrÃ©-qualification"
+                    <TextBlock Text="Pré-qualification"
                                Margin="0,20,0,10"
                                FontSize="15"
                                FontWeight="SemiBold"
@@ -445,6 +445,32 @@
                                Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
                     <ItemsControl ItemsSource="{Binding EssaisQualificationSelection, ElementName=Root}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource EssaiSelectionCardStyle}">
+                                    <CheckBox Content="{Binding NomEssai}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              Style="{StaticResource KawaiiCheckBoxStyle}"
+                                              FontSize="14"
+                                              FontWeight="SemiBold"
+                                              Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="Essais extérieurs"
+                               Margin="0,12,0,10"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
+                    <ItemsControl ItemsSource="{Binding EssaisExterieursSelection, ElementName=Root}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid Columns="4"/>

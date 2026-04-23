@@ -80,6 +80,8 @@ namespace MonTableurApp.ViewModels
             ["Petite flamme"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
             ["Vibration \u00E9olienne"] = new List<string> { "\u00C0 faire", "\u00C9chantillon pr\u00EAt", "En cours", "Fait", "Non concern\u00E9" },
             ["Collage"] = new List<string> { "\u00C0 faire", "Fait", "Non concern\u00E9" },
+            ["Exposition UV"] = new List<string> { "\u00C0 faire", "En cours", "Fait", "Non concern\u00E9" },
+            ["CPR"] = new List<string> { "\u00C0 faire", "En cours", "Fait", "Non concern\u00E9" },
         };
 
         private string? searchNomProduit;
@@ -410,8 +412,13 @@ namespace MonTableurApp.ViewModels
         public IEnumerable<EssaiSuivi> EssaisQualificationFiltres =>
             GetFilteredEssais(SelectedProjetEssais?.EssaisQualification ?? Enumerable.Empty<EssaiSuivi>());
 
+        public IEnumerable<EssaiSuivi> EssaisExterieursFiltres =>
+            GetFilteredEssais(SelectedProjetEssais?.EssaisExterieurs ?? Enumerable.Empty<EssaiSuivi>());
+
         public bool HasFilteredEssais =>
-            EssaisPreQualificationFiltres.Any() || EssaisQualificationFiltres.Any();
+            EssaisPreQualificationFiltres.Any() ||
+            EssaisQualificationFiltres.Any() ||
+            EssaisExterieursFiltres.Any();
 
         public string EmptyEssaisFilterMessage => activeEssaiFilter switch
         {
@@ -632,15 +639,15 @@ namespace MonTableurApp.ViewModels
         {
             Clients = new List<string> { "Orange", "Free", "Bouygues", "DTAG", "BT", "N/A" };
             Demandeurs = new List<string> { "RUC", "JEN", "KYJ", "JLC", "JER", "JEL", "JYM", "XAL" };
-            FamillesProduit = new List<string> { "Câble", "Cordon", "Autre" };
-            TypesActivite = new List<string> { "Qualification", "Appel d'offre", "Investigation", "Caract\u00E9risation" };
+            FamillesProduit = new List<string> { "Câble indoor", "Câble outdoor", "Câble drop", "Cordon", "Patchcords", "Aramides", "Ripcords", "FRP", "Autre" };
+            TypesActivite = new List<string> { "Qualification", "Appel d'offre", "Investigation", "Caractérisation" };
             Statuts = new List<string>
             {
-                "\u00C0 faire",
-                "Pr\u00E9-qualification en cours",
+                "À faire",
+                "Pré-qualification en cours",
                 "Qualification en cours",
                 "Rapport en cours",
-                "Rapport termin\u00E9",
+                "Rapport terminé",
                 "Fait"
             };
             NomsEssais = new List<string>
@@ -660,11 +667,13 @@ namespace MonTableurApp.ViewModels
                 "Abrasion gaine",
                 "Friction gaine",
                 "Traction pince",
-                "Traction spiral\u00E9",
-                "P\u00E9n\u00E9tration d'eau",
+                "Traction spiralé",
+                "Pénétration d'eau",
                 "Petite flamme",
-                "Vibration \u00E9olienne",
-                "Collage"
+                "Vibration éolienne",
+                "Collage",
+                "Exposition UV",
+                "CPR"
             };
             ProjetSearchFields = new List<SearchFieldOption>
             {
@@ -1288,6 +1297,7 @@ namespace MonTableurApp.ViewModels
         {
             OnPropertyChanged(nameof(EssaisPreQualificationFiltres));
             OnPropertyChanged(nameof(EssaisQualificationFiltres));
+            OnPropertyChanged(nameof(EssaisExterieursFiltres));
             OnPropertyChanged(nameof(HasFilteredEssais));
             OnPropertyChanged(nameof(EmptyEssaisFilterMessage));
             OnPropertyChanged(nameof(IsEssaiToProcessFilterActive));

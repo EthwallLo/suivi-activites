@@ -20,6 +20,12 @@ namespace MonTableurApp.Models
             "Vieillissement"
         };
 
+        private static readonly string[] EssaisExterieursNames =
+        {
+            "Exposition UV",
+            "CPR"
+        };
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string name)
@@ -142,6 +148,7 @@ namespace MonTableurApp.Models
                 OnPropertyChanged(nameof(Essais));
                 OnPropertyChanged(nameof(EssaisPreQualification));
                 OnPropertyChanged(nameof(EssaisQualification));
+                OnPropertyChanged(nameof(EssaisExterieurs));
             }
         }
 
@@ -151,7 +158,13 @@ namespace MonTableurApp.Models
 
         [JsonIgnore]
         public IEnumerable<EssaiSuivi> EssaisQualification =>
-            Essais.Where(essai => !EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty));
+            Essais.Where(essai =>
+                !EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty) &&
+                !EssaisExterieursNames.Contains(essai.NomEssai ?? string.Empty));
+
+        [JsonIgnore]
+        public IEnumerable<EssaiSuivi> EssaisExterieurs =>
+            Essais.Where(essai => EssaisExterieursNames.Contains(essai.NomEssai ?? string.Empty));
 
         private static DateTime? ParseDate(string? value)
         {
