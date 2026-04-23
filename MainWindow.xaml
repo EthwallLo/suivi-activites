@@ -258,11 +258,6 @@
                                FontSize="33"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                    <TextBlock x:Name="PageSubtitleText"
-                               Text="Les infos essentielles, en un coup d'oeil."
-                               Margin="0,8,0,0"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               FontSize="15"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1"

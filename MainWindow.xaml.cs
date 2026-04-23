@@ -106,7 +106,6 @@ namespace MonTableurApp
             ShowView(
                 vueGenerale,
                 "Vue générale des projets",
-                "Les infos essentielles, en un coup d'oeil.",
                 VueGeneraleButton);
         }
 
@@ -115,7 +114,6 @@ namespace MonTableurApp
             ShowView(
                 vueSuiviEssais,
                 "Suivi des essais",
-                "Pilote les statuts essai par essai, produit par produit.",
                 SuiviEssaisButton);
         }
 
@@ -146,12 +144,16 @@ namespace MonTableurApp
                 AgendaButton);
         }
 
-        private void ShowView(UserControl view, string title, string subtitle, Button activeButton)
+        private void ShowView(UserControl view, string title, Button activeButton)
         {
             PageTitleText.Text = title;
-            PageSubtitleText.Text = subtitle;
             SetActiveButton(activeButton);
             MainContent.Content = view;
+        }
+
+        private void ShowView(UserControl view, string title, string subtitle, Button activeButton)
+        {
+            ShowView(view, title, activeButton);
         }
 
         private void SetActiveButton(Button activeButton)

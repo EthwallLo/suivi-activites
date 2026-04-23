@@ -1,4 +1,4 @@
-<UserControl x:Class="MonTableurApp.Views.VueAjouterProjetView"
+﻿<UserControl x:Class="MonTableurApp.Views.VueAjouterProjetView"
              x:Name="Root"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -162,7 +162,7 @@
                                     CornerRadius="12"
                                     VerticalAlignment="Top">
                                 <TextBlock x:Name="CheckMark"
-                                           Text="★"
+                                           Text="â˜…"
                                            FontSize="11"
                                            Foreground="White"
                                            HorizontalAlignment="Center"
@@ -207,11 +207,6 @@
                                FontSize="28"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                    <TextBlock Text="Renseigne les informations principales du projet pour l'ajouter au tableau et au suivi des essais."
-                               Margin="0,8,0,0"
-                               FontSize="15"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
 
@@ -249,7 +244,7 @@
                         <StackPanel Grid.Row="1"
                                     Grid.Column="0"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Numéro projet"
+                            <TextBlock Text="NumÃ©ro projet"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="NumeroProjetTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"/>
@@ -298,7 +293,7 @@
                         <StackPanel Grid.Row="3"
                                     Grid.Column="2"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Type d'activité"
+                            <TextBlock Text="Type d'activitÃ©"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox x:Name="TypeActiviteComboBox"
                                       ItemsSource="{Binding TypesActivite}"
@@ -351,7 +346,7 @@
                         <StackPanel Grid.Row="1"
                                     Grid.Column="0"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Date de début"
+                            <TextBlock Text="Date de dÃ©but"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="DateDebutTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"/>
@@ -360,7 +355,7 @@
                         <StackPanel Grid.Row="1"
                                     Grid.Column="2"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Date prévisionnelle"
+                            <TextBlock Text="Date prÃ©visionnelle"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="DatePrevisionnelleTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"/>
@@ -403,15 +398,10 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel>
-                            <TextBlock Text="Essais à prévoir"
+                            <TextBlock Text="Essais Ã  prÃ©voir"
                                        FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                            <TextBlock Text="Coche les essais qui devront être réalisés. Les essais non cochés seront créés en Non concerné."
-                                       Margin="0,8,0,0"
-                                       FontSize="14"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       TextWrapping="Wrap"/>
                         </StackPanel>
 
                         <Button x:Name="ToggleEssaisSelectionButton"
@@ -422,7 +412,7 @@
                                 Click="ToggleEssaisSelection_Click"/>
                     </Grid>
 
-                    <TextBlock Text="Pré-qualification"
+                    <TextBlock Text="PrÃ©-qualification"
                                Margin="0,20,0,10"
                                FontSize="15"
                                FontWeight="SemiBold"
@@ -487,10 +477,6 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Les essais du projet seront créés automatiquement après l'ajout."
-                               VerticalAlignment="Center"
-                               FontSize="14"
-                               Foreground="{DynamicResource SecondaryTextBrush}"/>
 
                     <Button Grid.Column="1"
                             Margin="12,0,0,0"

@@ -1,4 +1,4 @@
-<UserControl x:Class="MonTableurApp.Views.VueAgendaView"
+﻿<UserControl x:Class="MonTableurApp.Views.VueAgendaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Focusable="True"
@@ -96,15 +96,6 @@
                                Margin="0,8,0,0"
                                FontSize="15"
                                Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <TextBlock Text="Glisse les essais dans la semaine pour les poser heure par heure, comme dans un vrai agenda semainier."
-                               Margin="0,6,0,0"
-                               FontSize="14"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               TextWrapping="Wrap"/>
-                    <TextBlock Text="Astuce : Ctrl+Z annule le dernier placement."
-                               Margin="0,6,0,0"
-                               FontSize="12"
-                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                 </StackPanel>
 
                 <Border Grid.Column="1"
@@ -144,15 +135,10 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel>
-                            <TextBlock Text="À planifier"
+                            <TextBlock Text="Ã€ planifier"
                                        FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                            <TextBlock Text="Les essais encore libres restent ici tant qu'ils ne sont pas posés dans la semaine."
-                                       Margin="0,6,0,0"
-                                       FontSize="13"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       TextWrapping="Wrap"/>
                         </StackPanel>
 
                         <Border Grid.Column="1"
@@ -171,7 +157,7 @@
 
                     <Grid Grid.Row="1"
                           Margin="0,16,0,0">
-                        <TextBlock Text="Tout est placé pour l'instant"
+                        <TextBlock Text="Tout est placÃ© pour l'instant"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontSize="13"
@@ -288,7 +274,7 @@
                                                        FontSize="12"
                                                        Foreground="{DynamicResource SecondaryTextBrush}"/>
 
-                                            <CheckBox Content="Jour travaillé"
+                                            <CheckBox Content="Jour travaillÃ©"
                                                       Margin="0,10,0,0"
                                                       IsChecked="{Binding IsWorkingDay, Mode=TwoWay}"
                                                       FontSize="12"
@@ -389,7 +375,7 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
-                                            <TextBlock Text="Dépose les essais ici"
+                                            <TextBlock Text="DÃ©pose les essais ici"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        FontSize="12"
@@ -470,7 +456,7 @@
                                                                                FontSize="10"
                                                                                Foreground="{DynamicResource SecondaryTextBrush}"
                                                                                TextTrimming="CharacterEllipsis"/>
-                                                                    <TextBlock Text="Dépasse la semaine"
+                                                                    <TextBlock Text="DÃ©passe la semaine"
                                                                                Margin="0,3,0,0"
                                                                                FontSize="10"
                                                                                Foreground="#D65C72">
@@ -505,7 +491,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <TextBlock Text="Journée non travaillée"
+                                                <TextBlock Text="JournÃ©e non travaillÃ©e"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"
                                                            FontSize="12"
