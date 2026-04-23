@@ -1,6 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
@@ -184,16 +186,44 @@ namespace MonTableurApp.Models
 
         private static string NormalizeValue(string? value)
         {
-            return (value ?? string.Empty)
+            string repairedValue = RepairMojibakeIfNeeded(value);
+            string normalized = repairedValue
                 .Trim()
                 .ToLowerInvariant()
-                .Replace("Ã©", "e")
-                .Replace("Ã¨", "e")
-                .Replace("Ãª", "e")
-                .Replace("é", "e")
-                .Replace("è", "e")
-                .Replace("ê", "e")
-                .Replace("à", "a");
+                .Normalize(NormalizationForm.FormD);
+
+            var builder = new StringBuilder(normalized.Length);
+
+            foreach (char current in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(current) != UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(current);
+                }
+            }
+
+            return builder
+                .ToString()
+                .Normalize(NormalizationForm.FormC);
+        }
+
+        private static string RepairMojibakeIfNeeded(string? value)
+        {
+            string input = value ?? string.Empty;
+            if (!input.Contains('\u00C3') && !input.Contains('\u00C2') && !input.Contains('\u00E2'))
+            {
+                return input;
+            }
+
+            try
+            {
+                return Encoding.UTF8.GetString(Encoding.Latin1.GetBytes(input));
+            }
+            catch (ArgumentException)
+            {
+                return input;
+            }
         }
     }
 }
+

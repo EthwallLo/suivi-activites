@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -612,7 +612,6 @@ namespace MonTableurApp.ViewModels
 
             foreach (EssaiSuivi essai in projet.Essais.Where(essai => essai.EstConcerne))
             {
-                essai.Statut = "À faire";
                 essai.Statut = "\u00C0 faire";
                 essai.ResultatTraitement = null;
             }
@@ -727,7 +726,28 @@ namespace MonTableurApp.ViewModels
             }
 
             string json = File.ReadAllText(DataFilePath, Encoding.UTF8);
-            return JsonSerializer.Deserialize<ObservableCollection<Projet>>(json) ?? new ObservableCollection<Projet>();
+            ObservableCollection<Projet> projets = JsonSerializer.Deserialize<ObservableCollection<Projet>>(json) ?? new ObservableCollection<Projet>();
+            bool hasRepairs = false;
+
+            foreach (Projet projet in projets)
+            {
+                hasRepairs |= RepairLoadedProject(projet);
+            }
+
+            if (hasRepairs)
+            {
+                string repairedJson = JsonSerializer.Serialize(
+                    projets,
+                    new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    });
+
+                File.WriteAllText(DataFilePath, repairedJson, new UTF8Encoding(false));
+            }
+
+            return projets;
         }
 
         private bool FilterProjet(object obj)
@@ -1449,28 +1469,32 @@ namespace MonTableurApp.ViewModels
                 !statutProjet.Contains("pre") &&
                 statutProjet.Contains("qualification") &&
                 statutProjet.Contains("cours");
+            bool isReportInProgress =
+                statutProjet.Contains("rapport") &&
+                statutProjet.Contains("cours");
 
-            if (!isPreQualificationInProgress && !isQualificationInProgress)
+            if (!isPreQualificationInProgress && !isQualificationInProgress && !isReportInProgress)
             {
                 return;
             }
 
             List<EssaiSuivi> essaisPreQualification = projet.EssaisPreQualification.ToList();
-            if (essaisPreQualification.Count == 0)
-            {
-                return;
-            }
-
             bool allPreQualificationEssaisCompleted = essaisPreQualification.All(essai =>
                 !essai.EstConcerne || IsEssaiDoneAndOk(essai));
+            bool allProjectEssaisCompleted = projet.Essais.All(essai =>
+                !essai.EstConcerne || IsEssaiDoneAndOk(essai));
 
-            if (allPreQualificationEssaisCompleted && isPreQualificationInProgress)
+            if (allProjectEssaisCompleted)
             {
-                projet.Statut = "Qualification en cours";
+                projet.Statut = "Rapport en cours";
             }
-            else if (!allPreQualificationEssaisCompleted && isQualificationInProgress)
+            else if (!allPreQualificationEssaisCompleted)
             {
                 projet.Statut = "Pré-qualification en cours";
+            }
+            else
+            {
+                projet.Statut = "Qualification en cours";
             }
         }
 
@@ -2257,6 +2281,63 @@ namespace MonTableurApp.ViewModels
             }
 
             return builder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        private static bool RepairLoadedProject(Projet projet)
+        {
+            bool hasRepairs = false;
+
+            hasRepairs |= RepairStringProperty(projet.NumeroProjet, repaired => projet.NumeroProjet = repaired);
+            hasRepairs |= RepairStringProperty(projet.NomProduit, repaired => projet.NomProduit = repaired);
+            hasRepairs |= RepairStringProperty(projet.FamilleProduit, repaired => projet.FamilleProduit = repaired);
+            hasRepairs |= RepairStringProperty(projet.Client, repaired => projet.Client = repaired);
+            hasRepairs |= RepairStringProperty(projet.Demandeur, repaired => projet.Demandeur = repaired);
+            hasRepairs |= RepairStringProperty(projet.TypeActivite, repaired => projet.TypeActivite = repaired);
+            hasRepairs |= RepairStringProperty(projet.DossierRacine, repaired => projet.DossierRacine = repaired);
+            hasRepairs |= RepairStringProperty(projet.Statut, repaired => projet.Statut = repaired);
+            hasRepairs |= RepairStringProperty(projet.DateDebut, repaired => projet.DateDebut = repaired);
+            hasRepairs |= RepairStringProperty(projet.DatePrevisionnelle, repaired => projet.DatePrevisionnelle = repaired);
+            hasRepairs |= RepairStringProperty(projet.DateFin, repaired => projet.DateFin = repaired);
+            hasRepairs |= RepairStringProperty(projet.Commentaires, repaired => projet.Commentaires = repaired);
+
+            foreach (EssaiSuivi essai in projet.Essais)
+            {
+                hasRepairs |= RepairStringProperty(essai.NomEssai, repaired => essai.NomEssai = repaired);
+                hasRepairs |= RepairStringProperty(essai.Statut, repaired => essai.Statut = repaired);
+                hasRepairs |= RepairStringProperty(essai.ResultatTraitement, repaired => essai.ResultatTraitement = repaired);
+            }
+
+            return hasRepairs;
+        }
+
+        private static bool RepairStringProperty(string? currentValue, Action<string> assign)
+        {
+            string repairedValue = RepairMojibakeIfNeeded(currentValue);
+            if (string.Equals(currentValue, repairedValue, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            assign(repairedValue);
+            return true;
+        }
+
+        private static string RepairMojibakeIfNeeded(string? value)
+        {
+            string input = value ?? string.Empty;
+            if (!input.Contains('\u00C3') && !input.Contains('\u00C2') && !input.Contains('\u00E2'))
+            {
+                return input;
+            }
+
+            try
+            {
+                return Encoding.UTF8.GetString(Encoding.Latin1.GetBytes(input));
+            }
+            catch (ArgumentException)
+            {
+                return input;
+            }
         }
 
         private void Sauvegarder()

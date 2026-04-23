@@ -135,7 +135,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel>
-                            <TextBlock Text="Ã€ planifier"
+                            <TextBlock Text="À planifier"
                                        FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
@@ -157,7 +157,7 @@
 
                     <Grid Grid.Row="1"
                           Margin="0,16,0,0">
-                        <TextBlock Text="Tout est placÃ© pour l'instant"
+                        <TextBlock Text="Tout est placé pour l'instant"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontSize="13"
@@ -274,7 +274,7 @@
                                                        FontSize="12"
                                                        Foreground="{DynamicResource SecondaryTextBrush}"/>
 
-                                            <CheckBox Content="Jour travaillÃ©"
+                                            <CheckBox Content="Jour travaillé"
                                                       Margin="0,10,0,0"
                                                       IsChecked="{Binding IsWorkingDay, Mode=TwoWay}"
                                                       FontSize="12"
@@ -375,7 +375,7 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
-                                            <TextBlock Text="DÃ©pose les essais ici"
+                                            <TextBlock Text="Dépose les essais ici"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        FontSize="12"
@@ -456,7 +456,7 @@
                                                                                FontSize="10"
                                                                                Foreground="{DynamicResource SecondaryTextBrush}"
                                                                                TextTrimming="CharacterEllipsis"/>
-                                                                    <TextBlock Text="DÃ©passe la semaine"
+                                                                    <TextBlock Text="Dépasse la semaine"
                                                                                Margin="0,3,0,0"
                                                                                FontSize="10"
                                                                                Foreground="#D65C72">
@@ -491,7 +491,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <TextBlock Text="JournÃ©e non travaillÃ©e"
+                                                <TextBlock Text="Journée non travaillée"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"
                                                            FontSize="12"
