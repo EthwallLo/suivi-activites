@@ -37,7 +37,7 @@ namespace MonTableurApp
             vueGenerale = new VueGeneraleView { DataContext = viewModel };
             vueSuiviEssais = new VueSuiviEssaisView { DataContext = viewModel };
             vueAjouterProjet = new VueAjouterProjetView { DataContext = viewModel };
-            vueEnCours = new VueEnCoursView();
+            vueEnCours = new VueEnCoursView { DataContext = viewModel };
             vueAgenda = new VueAgendaView { DataContext = viewModel };
 
             isBlueTheme = LoadSavedTheme() == ThemeBlue;

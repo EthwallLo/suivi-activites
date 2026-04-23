@@ -98,6 +98,13 @@ namespace MonTableurApp.ViewModels
         private int essaisSelectionEnCours;
         private int essaisSelectionTermines;
         private int essaisSelectionTotal;
+        private IReadOnlyList<ProjetEnCoursSummary> projetsEnCoursDashboard = Array.Empty<ProjetEnCoursSummary>();
+        private int projetsEnCoursDashboardCount;
+        private int projetsEnAttentionDashboardCount;
+        private int essaisTerminesDashboardTotal;
+        private int essaisEnCoursDashboardTotal;
+        private int essaisRestantsDashboardTotal;
+        private int avancementGlobalEnCoursPourcentage;
         private string agendaWeekTitle = string.Empty;
         private readonly Stack<AgendaUndoSnapshot> agendaUndoSnapshots = new();
         private readonly Stack<EssaisUndoSnapshot> essaisUndoSnapshots = new();
@@ -338,6 +345,27 @@ namespace MonTableurApp.ViewModels
                 OnPropertyChanged(nameof(EssaisSelectionTotal));
             }
         }
+
+        public IReadOnlyList<ProjetEnCoursSummary> ProjetsEnCoursDashboard => projetsEnCoursDashboard;
+
+        public bool HasProjetsEnCoursDashboard => projetsEnCoursDashboardCount > 0;
+
+        public int ProjetsEnCoursDashboardCount => projetsEnCoursDashboardCount;
+
+        public int ProjetsEnAttentionDashboardCount => projetsEnAttentionDashboardCount;
+
+        public int EssaisTerminesDashboardTotal => essaisTerminesDashboardTotal;
+
+        public int EssaisEnCoursDashboardTotal => essaisEnCoursDashboardTotal;
+
+        public int EssaisRestantsDashboardTotal => essaisRestantsDashboardTotal;
+
+        public int AvancementGlobalEnCoursPourcentage => avancementGlobalEnCoursPourcentage;
+
+        public string AvancementGlobalEnCoursLabel =>
+            (essaisTerminesDashboardTotal + essaisEnCoursDashboardTotal + essaisRestantsDashboardTotal) == 0
+                ? "Aucun essai concerné"
+                : $"{essaisTerminesDashboardTotal} essais terminés sur {essaisTerminesDashboardTotal + essaisEnCoursDashboardTotal + essaisRestantsDashboardTotal}";
 
         public IEnumerable<EssaiSuivi> EssaisPreQualificationFiltres =>
             GetFilteredEssais(SelectedProjetEssais?.EssaisPreQualification ?? Enumerable.Empty<EssaiSuivi>());
@@ -641,6 +669,7 @@ namespace MonTableurApp.ViewModels
 
             RefreshStatistics();
             EnsureSelectedProjetEssais();
+            RefreshEnCoursDashboard();
             RefreshAgendaTasks();
         }
 
@@ -833,6 +862,7 @@ namespace MonTableurApp.ViewModels
             OnPropertyChanged(nameof(IsInProgressFilterActive));
             OnPropertyChanged(nameof(IsReportsFilterActive));
             OnPropertyChanged(nameof(IsDoneFilterActive));
+            RefreshEnCoursDashboard();
         }
 
         private void RefreshSelectedProjectStatistics()
@@ -844,6 +874,7 @@ namespace MonTableurApp.ViewModels
                 EssaisSelectionATraiter = 0;
                 EssaisSelectionTermines = 0;
                 RefreshEssaiCollections();
+                RefreshEnCoursDashboard();
                 return;
             }
 
@@ -853,6 +884,7 @@ namespace MonTableurApp.ViewModels
             EssaisSelectionEnCours = essaisConcernes.Count(IsEssaiInProgress);
             EssaisSelectionTermines = essaisConcernes.Count(IsEssaiDone);
             RefreshEssaiCollections();
+            RefreshEnCoursDashboard();
         }
 
         public void ToggleProjetEssaisSortDirection()
@@ -1207,6 +1239,139 @@ namespace MonTableurApp.ViewModels
             OnPropertyChanged(nameof(IsEssaiToProcessFilterActive));
             OnPropertyChanged(nameof(IsEssaiInProgressFilterActive));
             OnPropertyChanged(nameof(IsEssaiDoneFilterActive));
+        }
+
+        private void RefreshEnCoursDashboard()
+        {
+            List<ProjetEnCoursSummary> dashboard = BuildProjetsEnCoursDashboard().ToList();
+
+            projetsEnCoursDashboard = dashboard;
+            projetsEnCoursDashboardCount = dashboard.Count;
+            projetsEnAttentionDashboardCount = dashboard.Count(item => item.IsAttentionRequired);
+            essaisTerminesDashboardTotal = dashboard.Sum(item => item.EssaisFaits);
+            essaisEnCoursDashboardTotal = dashboard.Sum(item => item.EssaisEnCours);
+            essaisRestantsDashboardTotal = dashboard.Sum(item => item.EssaisRestants);
+
+            int essaisTotaux = dashboard.Sum(item => item.TotalEssais);
+            avancementGlobalEnCoursPourcentage = essaisTotaux == 0
+                ? 0
+                : (int)Math.Round(essaisTerminesDashboardTotal * 100.0 / essaisTotaux);
+
+            OnPropertyChanged(nameof(ProjetsEnCoursDashboard));
+            OnPropertyChanged(nameof(HasProjetsEnCoursDashboard));
+            OnPropertyChanged(nameof(ProjetsEnCoursDashboardCount));
+            OnPropertyChanged(nameof(ProjetsEnAttentionDashboardCount));
+            OnPropertyChanged(nameof(EssaisTerminesDashboardTotal));
+            OnPropertyChanged(nameof(EssaisEnCoursDashboardTotal));
+            OnPropertyChanged(nameof(EssaisRestantsDashboardTotal));
+            OnPropertyChanged(nameof(AvancementGlobalEnCoursPourcentage));
+            OnPropertyChanged(nameof(AvancementGlobalEnCoursLabel));
+        }
+
+        private IEnumerable<ProjetEnCoursSummary> BuildProjetsEnCoursDashboard()
+        {
+            return Projets
+                .Where(IsProjetActifPourDashboard)
+                .Select(BuildProjetEnCoursSummary)
+                .OrderByDescending(item => item.IsAttentionRequired)
+                .ThenBy(item => item.StatusSortOrder)
+                .ThenBy(item => item.DateDebutSortValue ?? DateTime.MaxValue)
+                .ThenBy(item => item.NomProduit, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+        }
+
+        private bool IsProjetActifPourDashboard(Projet projet)
+        {
+            return NormalizeText(projet.Statut).Contains("cours");
+        }
+
+        private ProjetEnCoursSummary BuildProjetEnCoursSummary(Projet projet)
+        {
+            List<EssaiSuivi> essaisConcernes = projet.Essais
+                .Where(essai => essai.EstConcerne)
+                .ToList();
+
+            List<string> essaisFaits = essaisConcernes
+                .Where(IsEssaiDone)
+                .Select(essai => essai.NomEssai ?? string.Empty)
+                .Where(nom => !string.IsNullOrWhiteSpace(nom))
+                .OrderBy(nom => nom, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+            List<string> essaisEnCours = essaisConcernes
+                .Where(IsEssaiInProgress)
+                .Select(essai => essai.NomEssai ?? string.Empty)
+                .Where(nom => !string.IsNullOrWhiteSpace(nom))
+                .OrderBy(nom => nom, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+            List<string> essaisAFaire = essaisConcernes
+                .Where(IsEssaiToProcess)
+                .Select(essai => essai.NomEssai ?? string.Empty)
+                .Where(nom => !string.IsNullOrWhiteSpace(nom))
+                .OrderBy(nom => nom, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+            int totalEssais = essaisConcernes.Count;
+            int doneCount = essaisFaits.Count;
+            int inProgressCount = essaisEnCours.Count;
+            int todoCount = essaisAFaire.Count;
+            int remainingCount = Math.Max(0, totalEssais - doneCount);
+            int progression = totalEssais == 0
+                ? 0
+                : (int)Math.Round(doneCount * 100.0 / totalEssais);
+            bool isAttentionRequired = remainingCount > 0 && inProgressCount == 0;
+            bool isNearlyDone = remainingCount <= 2 && totalEssais > 0;
+
+            IReadOnlyList<string> donePreview = essaisFaits.Take(4).ToList();
+            IReadOnlyList<string> remainingPreview = essaisEnCours
+                .Concat(essaisAFaire)
+                .Take(4)
+                .ToList();
+
+            return new ProjetEnCoursSummary(
+                numeroProjet: projet.NumeroProjet ?? string.Empty,
+                nomProduit: projet.NomProduit ?? string.Empty,
+                client: projet.Client ?? "N/A",
+                statut: projet.Statut ?? string.Empty,
+                dateDebutLabel: projet.DateDebutValue?.ToString("dd/MM/yyyy", CultureInfo.GetCultureInfo("fr-FR")) ?? "Date à préciser",
+                dateDebutSortValue: projet.DateDebutValue,
+                totalEssais: totalEssais,
+                essaisFaits: doneCount,
+                essaisEnCours: inProgressCount,
+                essaisAFaire: todoCount,
+                essaisRestants: remainingCount,
+                progressionPourcentage: progression,
+                progressionLabel: $"{doneCount}/{totalEssais} essais faits",
+                etatPilotage: BuildProjetEnCoursPilotageLabel(isAttentionRequired, isNearlyDone, inProgressCount),
+                resumeEtat: $"{doneCount} faits · {inProgressCount} en cours · {remainingCount} restants",
+                isAttentionRequired: isAttentionRequired,
+                isNearlyDone: isNearlyDone,
+                statusSortOrder: GetProjectStatusSortIndex(projet.Statut),
+                essaisFaitsPreview: donePreview,
+                essaisRestantsPreview: remainingPreview,
+                essaisFaitsOverflowText: essaisFaits.Count > donePreview.Count ? $"+{essaisFaits.Count - donePreview.Count}" : string.Empty,
+                essaisRestantsOverflowText: (essaisEnCours.Count + essaisAFaire.Count) > remainingPreview.Count ? $"+{(essaisEnCours.Count + essaisAFaire.Count) - remainingPreview.Count}" : string.Empty);
+        }
+
+        private static string BuildProjetEnCoursPilotageLabel(bool isAttentionRequired, bool isNearlyDone, int essaisEnCoursCount)
+        {
+            if (isAttentionRequired)
+            {
+                return "Attention";
+            }
+
+            if (isNearlyDone)
+            {
+                return "Finalisation";
+            }
+
+            if (essaisEnCoursCount > 0)
+            {
+                return "Cadencé";
+            }
+
+            return "Lancé";
         }
 
         private void UpdateProjectStatusFromEssais(Projet projet)
@@ -2059,6 +2224,109 @@ namespace MonTableurApp.ViewModels
             public string Key { get; }
 
             public string Label { get; }
+        }
+
+        public sealed class ProjetEnCoursSummary
+        {
+            public ProjetEnCoursSummary(
+                string numeroProjet,
+                string nomProduit,
+                string client,
+                string statut,
+                string dateDebutLabel,
+                DateTime? dateDebutSortValue,
+                int totalEssais,
+                int essaisFaits,
+                int essaisEnCours,
+                int essaisAFaire,
+                int essaisRestants,
+                int progressionPourcentage,
+                string progressionLabel,
+                string etatPilotage,
+                string resumeEtat,
+                bool isAttentionRequired,
+                bool isNearlyDone,
+                int statusSortOrder,
+                IReadOnlyList<string> essaisFaitsPreview,
+                IReadOnlyList<string> essaisRestantsPreview,
+                string essaisFaitsOverflowText,
+                string essaisRestantsOverflowText)
+            {
+                NumeroProjet = numeroProjet;
+                NomProduit = nomProduit;
+                Client = client;
+                Statut = statut;
+                DateDebutLabel = dateDebutLabel;
+                DateDebutSortValue = dateDebutSortValue;
+                TotalEssais = totalEssais;
+                EssaisFaits = essaisFaits;
+                EssaisEnCours = essaisEnCours;
+                EssaisAFaire = essaisAFaire;
+                EssaisRestants = essaisRestants;
+                ProgressionPourcentage = progressionPourcentage;
+                ProgressionLabel = progressionLabel;
+                EtatPilotage = etatPilotage;
+                ResumeEtat = resumeEtat;
+                IsAttentionRequired = isAttentionRequired;
+                IsNearlyDone = isNearlyDone;
+                StatusSortOrder = statusSortOrder;
+                EssaisFaitsPreview = essaisFaitsPreview;
+                EssaisRestantsPreview = essaisRestantsPreview;
+                EssaisFaitsOverflowText = essaisFaitsOverflowText;
+                EssaisRestantsOverflowText = essaisRestantsOverflowText;
+            }
+
+            public string NumeroProjet { get; }
+
+            public string NomProduit { get; }
+
+            public string Client { get; }
+
+            public string Statut { get; }
+
+            public string DateDebutLabel { get; }
+
+            public DateTime? DateDebutSortValue { get; }
+
+            public int TotalEssais { get; }
+
+            public int EssaisFaits { get; }
+
+            public int EssaisEnCours { get; }
+
+            public int EssaisAFaire { get; }
+
+            public int EssaisRestants { get; }
+
+            public int ProgressionPourcentage { get; }
+
+            public string ProgressionLabel { get; }
+
+            public string EtatPilotage { get; }
+
+            public string ResumeEtat { get; }
+
+            public bool IsAttentionRequired { get; }
+
+            public bool IsNearlyDone { get; }
+
+            public int StatusSortOrder { get; }
+
+            public IReadOnlyList<string> EssaisFaitsPreview { get; }
+
+            public IReadOnlyList<string> EssaisRestantsPreview { get; }
+
+            public string EssaisFaitsOverflowText { get; }
+
+            public string EssaisRestantsOverflowText { get; }
+
+            public bool HasEssaisFaits => EssaisFaitsPreview.Count > 0;
+
+            public bool HasEssaisRestants => EssaisRestantsPreview.Count > 0;
+
+            public bool HasEssaisFaitsOverflow => !string.IsNullOrWhiteSpace(EssaisFaitsOverflowText);
+
+            public bool HasEssaisRestantsOverflow => !string.IsNullOrWhiteSpace(EssaisRestantsOverflowText);
         }
 
         private sealed class DelegateComparer : IComparer
