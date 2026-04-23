@@ -103,6 +103,7 @@ namespace MonTableurApp.Views
             sourceProjet.NumeroProjet = EditableProjet.NumeroProjet;
             sourceProjet.NomProduit = EditableProjet.NomProduit;
             sourceProjet.FamilleProduit = EditableProjet.FamilleProduit;
+            sourceProjet.ReferenceProduit = EditableProjet.ReferenceProduit;
             sourceProjet.Client = EditableProjet.Client;
             sourceProjet.Demandeur = EditableProjet.Demandeur;
             sourceProjet.TypeActivite = EditableProjet.TypeActivite;
@@ -121,6 +122,7 @@ namespace MonTableurApp.Views
                 NumeroProjet = projet.NumeroProjet,
                 NomProduit = projet.NomProduit,
                 FamilleProduit = projet.FamilleProduit,
+                ReferenceProduit = projet.ReferenceProduit,
                 Client = projet.Client,
                 Demandeur = projet.Demandeur,
                 TypeActivite = projet.TypeActivite,

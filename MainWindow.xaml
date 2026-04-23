@@ -235,6 +235,10 @@
                             x:Name="AgendaButton"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="Agenda_Click"/>
+                    <Button Content="Modifier des propriétés"
+                            x:Name="ModifierProprietesButton"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="ModifierProprietes_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

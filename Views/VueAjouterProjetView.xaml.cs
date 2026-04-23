@@ -202,6 +202,7 @@ namespace MonTableurApp.Views
                 NumeroProjet = numeroProjet,
                 NomProduit = nomProduit,
                 FamilleProduit = FamilleProduitComboBox.SelectedItem as string,
+                ReferenceProduit = ReferenceProduitTextBox.Text.Trim(),
                 Client = ClientComboBox.SelectedItem as string,
                 Demandeur = DemandeurComboBox.SelectedItem as string,
                 TypeActivite = TypeActiviteComboBox.SelectedItem as string,
@@ -233,6 +234,7 @@ namespace MonTableurApp.Views
         {
             NumeroProjetTextBox.Clear();
             NomProduitTextBox.Clear();
+            ReferenceProduitTextBox.Clear();
             DossierRacineTextBox.Clear();
             DateDebutCalendar.SelectedDate = null;
             DatePrevisionnelleCalendar.SelectedDate = null;

@@ -54,6 +54,13 @@ namespace MonTableurApp.Models
             set { familleProduit = value; OnPropertyChanged(nameof(FamilleProduit)); }
         }
 
+        private string? referenceProduit;
+        public string? ReferenceProduit
+        {
+            get => referenceProduit;
+            set { referenceProduit = value; OnPropertyChanged(nameof(ReferenceProduit)); }
+        }
+
         private string? client;
         public string? Client
         {

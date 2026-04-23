@@ -24,6 +24,7 @@ namespace MonTableurApp
         private readonly VueGeneraleView vueGenerale;
         private readonly VueSuiviEssaisView vueSuiviEssais;
         private readonly VueAjouterProjetView vueAjouterProjet;
+        private readonly VueModifierProprietesView vueModifierProprietes;
         private readonly VueEnCoursView vueEnCours;
         private readonly VueAgendaView vueAgenda;
         private bool isUpdatingWindowBounds;
@@ -37,6 +38,7 @@ namespace MonTableurApp
             vueGenerale = new VueGeneraleView { DataContext = viewModel };
             vueSuiviEssais = new VueSuiviEssaisView { DataContext = viewModel };
             vueAjouterProjet = new VueAjouterProjetView { DataContext = viewModel };
+            vueModifierProprietes = new VueModifierProprietesView { DataContext = viewModel };
             vueEnCours = new VueEnCoursView { DataContext = viewModel };
             vueAgenda = new VueAgendaView { DataContext = viewModel };
 
@@ -66,6 +68,11 @@ namespace MonTableurApp
         private void AjouterProjet_Click(object sender, RoutedEventArgs e)
         {
             AfficherVueAjouterProjet();
+        }
+
+        private void ModifierProprietes_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherVueModifierProprietes();
         }
 
         private void EnCours_Click(object sender, RoutedEventArgs e)
@@ -126,6 +133,14 @@ namespace MonTableurApp
                 AjouterProjetButton);
         }
 
+        private void AfficherVueModifierProprietes()
+        {
+            ShowView(
+                vueModifierProprietes,
+                "Modifier des propriétés",
+                ModifierProprietesButton);
+        }
+
         private void AfficherVueEnCours()
         {
             ShowView(
@@ -161,6 +176,7 @@ namespace MonTableurApp
             VueGeneraleButton.Tag = null;
             SuiviEssaisButton.Tag = null;
             AjouterProjetButton.Tag = null;
+            ModifierProprietesButton.Tag = null;
             EnCoursButton.Tag = null;
             AgendaButton.Tag = null;
             activeButton.Tag = "Active";

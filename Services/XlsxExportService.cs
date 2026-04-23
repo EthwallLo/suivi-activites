@@ -38,6 +38,7 @@ namespace MonTableurApp.Services
                 "Date de début",
                 "Date prévisionnelle",
                 "Date de fin",
+                "Référence produit",
                 "Commentaires"
             };
 
@@ -55,6 +56,7 @@ namespace MonTableurApp.Services
                     projet.DateDebut ?? string.Empty,
                     projet.DatePrevisionnelle ?? string.Empty,
                     projet.DateFin ?? string.Empty,
+                    projet.ReferenceProduit ?? string.Empty,
                     projet.Commentaires ?? string.Empty
                 };
             }
@@ -181,7 +183,8 @@ namespace MonTableurApp.Services
                   <col min="6" max="6" width="48" customWidth="1"/>
                   <col min="7" max="7" width="24" customWidth="1"/>
                   <col min="8" max="10" width="18" customWidth="1"/>
-                  <col min="11" max="11" width="24" customWidth="1"/>
+                  <col min="11" max="11" width="22" customWidth="1"/>
+                  <col min="12" max="12" width="24" customWidth="1"/>
                 </cols>
                 <sheetData>
                 """);
@@ -204,7 +207,7 @@ namespace MonTableurApp.Services
 
             builder.Append("""
                 </sheetData>
-                <autoFilter ref="A1:K1"/>
+                <autoFilter ref="A1:L1"/>
                 </worksheet>
                 """);
 

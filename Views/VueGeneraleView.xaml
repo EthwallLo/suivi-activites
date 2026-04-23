@@ -1435,6 +1435,11 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Référence produit"
+                                        Binding="{Binding ReferenceProduit}"
+                                        ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
+                                        EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
+                                        Width="1.3*"/>
                     <DataGridTextColumn Header="Commentaires"
                                         Binding="{Binding Commentaires}"
                                         ElementStyle="{StaticResource CenteredTextColumnElementStyle}"

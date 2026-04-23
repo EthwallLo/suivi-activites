@@ -1787,6 +1787,7 @@ namespace MonTableurApp.ViewModels
                     projet.NumeroProjet,
                     projet.NomProduit,
                     projet.FamilleProduit,
+                    projet.ReferenceProduit,
                     projet.Client,
                     projet.Demandeur,
                     projet.TypeActivite,
@@ -1813,6 +1814,7 @@ namespace MonTableurApp.ViewModels
                 state.Projet.NumeroProjet = state.NumeroProjet;
                 state.Projet.NomProduit = state.NomProduit;
                 state.Projet.FamilleProduit = state.FamilleProduit;
+                state.Projet.ReferenceProduit = state.ReferenceProduit;
                 state.Projet.Client = state.Client;
                 state.Projet.Demandeur = state.Demandeur;
                 state.Projet.TypeActivite = state.TypeActivite;
@@ -2292,6 +2294,7 @@ namespace MonTableurApp.ViewModels
             hasRepairs |= RepairStringProperty(projet.NumeroProjet, repaired => projet.NumeroProjet = repaired);
             hasRepairs |= RepairStringProperty(projet.NomProduit, repaired => projet.NomProduit = repaired);
             hasRepairs |= RepairStringProperty(projet.FamilleProduit, repaired => projet.FamilleProduit = repaired);
+            hasRepairs |= RepairStringProperty(projet.ReferenceProduit, repaired => projet.ReferenceProduit = repaired);
             hasRepairs |= RepairStringProperty(projet.Client, repaired => projet.Client = repaired);
             hasRepairs |= RepairStringProperty(projet.Demandeur, repaired => projet.Demandeur = repaired);
             hasRepairs |= RepairStringProperty(projet.TypeActivite, repaired => projet.TypeActivite = repaired);
@@ -2504,6 +2507,7 @@ namespace MonTableurApp.ViewModels
             string? NumeroProjet,
             string? NomProduit,
             string? FamilleProduit,
+            string? ReferenceProduit,
             string? Client,
             string? Demandeur,
             string? TypeActivite,

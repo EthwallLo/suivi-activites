@@ -113,6 +113,13 @@
             </Setter>
         </Style>
 
+        <Style x:Key="SingleLineRoundedTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource RoundedTextBoxStyle}">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
         <Style x:Key="CuteThumbStyle" TargetType="Thumb">
             <Setter Property="Template">
                 <Setter.Value>
@@ -717,7 +724,7 @@
                             <TextBlock Text="Numéro projet"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="NumeroProjetTextBox"
-                                     Style="{StaticResource RoundedTextBoxStyle}"/>
+                                     Style="{StaticResource SingleLineRoundedTextBoxStyle}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1"
@@ -726,7 +733,7 @@
                             <TextBlock Text="Nom produit"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="NomProduitTextBox"
-                                     Style="{StaticResource RoundedTextBoxStyle}"/>
+                                     Style="{StaticResource SingleLineRoundedTextBoxStyle}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Row="2"
@@ -743,6 +750,15 @@
                         <StackPanel Grid.Row="2"
                                     Grid.Column="2"
                                     Margin="0,18,0,0">
+                            <TextBlock Text="Référence produit"
+                                       Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBox x:Name="ReferenceProduitTextBox"
+                                     Style="{StaticResource SingleLineRoundedTextBoxStyle}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3"
+                                    Grid.Column="0"
+                                    Margin="0,18,0,0">
                             <TextBlock Text="Client"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox x:Name="ClientComboBox"
@@ -751,7 +767,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="3"
-                                    Grid.Column="0"
+                                    Grid.Column="2"
                                     Margin="0,18,0,0">
                             <TextBlock Text="Demandeur"
                                        Style="{StaticResource FieldLabelStyle}"/>
@@ -760,8 +776,8 @@
                                       Style="{StaticResource FormComboBoxStyle}"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="3"
-                                    Grid.Column="2"
+                        <StackPanel Grid.Row="4"
+                                    Grid.Column="0"
                                     Margin="0,18,0,0">
                             <TextBlock Text="Type d'activité"
                                        Style="{StaticResource FieldLabelStyle}"/>
@@ -771,7 +787,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="4"
-                                    Grid.Column="0"
+                                    Grid.Column="2"
                                     Margin="0,18,0,0">
                             <TextBlock Text="Statut"
                                        Style="{StaticResource FieldLabelStyle}"/>
@@ -792,7 +808,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBox x:Name="DossierRacineTextBox"
-                                         Style="{StaticResource RoundedTextBoxStyle}"/>
+                                         Style="{StaticResource SingleLineRoundedTextBoxStyle}"/>
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"
