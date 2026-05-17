@@ -3,9 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Suivi des activités"
         Icon="logg.png"
-        ResizeMode="NoResize"
-        WindowStartupLocation="Manual"
-        Loaded="MainWindow_Loaded">
+        Width="1680"
+        Height="1120"
+        MinWidth="900"
+        MinHeight="600"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <Style x:Key="MenuButtonStyle" TargetType="Button">
@@ -146,20 +149,57 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource MenuButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ToggleBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ToggleBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ToggleBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="315"/>
+            <ColumnDefinition x:Name="SidebarColumn"
+                              Width="315"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Margin="18"
+        <Border x:Name="SidebarBorder"
+                Margin="18"
                 Background="{DynamicResource SidebarBrush}"
                 CornerRadius="30"
                 BorderBrush="{DynamicResource SidebarBorderBrush}"
                 BorderThickness="1">
-            <Grid Margin="28">
+            <Grid x:Name="SidebarInnerGrid"
+                  Margin="28">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -173,14 +213,16 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Width="84"
+                        <Border x:Name="LogoChip"
+                                Width="84"
                                 Height="84"
                                 Background="{DynamicResource LogoChipBackgroundBrush}"
                                 CornerRadius="26"
                                 BorderBrush="{DynamicResource LogoChipBorderBrush}"
                                 BorderThickness="1"
                                 HorizontalAlignment="Left">
-                            <Image Source="logg.png"
+                            <Image x:Name="LogoImage"
+                                   Source="logg.png"
                                    Width="64"
                                    Height="64"
                                    Stretch="Uniform"
@@ -190,7 +232,8 @@
                                    VerticalAlignment="Center"/>
                         </Border>
 
-                        <StackPanel Grid.Column="1"
+                        <StackPanel x:Name="UserGreetingPanel"
+                                    Grid.Column="1"
                                     Margin="16,10,0,0"
                                     VerticalAlignment="Top">
                             <TextBlock Text="Bienvenue,"
@@ -203,9 +246,19 @@
                                        FontSize="19"
                                        FontWeight="SemiBold"/>
                         </StackPanel>
+
+                        <Button x:Name="SidebarToggleButton"
+                                Grid.Column="1"
+                                Content="&lt;&lt;"
+                                Style="{StaticResource SidebarToggleButtonStyle}"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                ToolTip="Réduire le bandeau de navigation"
+                                Click="SidebarToggle_Click"/>
                     </Grid>
 
-                    <TextBlock Text="Suivi des&#x0a;activités"
+                    <TextBlock x:Name="AppTitleText"
+                               Text="Suivi des&#x0a;activités"
                                Margin="0,22,0,0"
                                Foreground="{DynamicResource PrimaryTitleBrush}"
                                FontSize="29"
@@ -213,7 +266,8 @@
                                TextWrapping="Wrap"/>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1"
+                <StackPanel x:Name="NavigationPanel"
+                            Grid.Row="1"
                             Margin="0,38,0,0">
                     <Button Content="Vue générale"
                             x:Name="VueGeneraleButton"

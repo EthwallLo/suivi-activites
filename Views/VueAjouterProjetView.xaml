@@ -24,17 +24,22 @@
             <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="14">
+                                CornerRadius="14"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"/>
+                                          Margin="0"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -46,8 +51,9 @@
             <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="MinHeight" Value="48"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -116,7 +122,7 @@
         <Style x:Key="SingleLineRoundedTextBoxStyle"
                TargetType="TextBox"
                BasedOn="{StaticResource RoundedTextBoxStyle}">
-            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinHeight" Value="56"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
@@ -577,6 +583,7 @@
 
         <Style x:Key="GridDateDisplayTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="TextAlignment" Value="Center"/>
@@ -587,7 +594,8 @@
             <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="14"/>
-            <Setter Property="Padding" Value="12,9"/>
+            <Setter Property="Padding" Value="14,11"/>
+            <Setter Property="MinHeight" Value="50"/>
         </Style>
 
         <Style x:Key="PrimaryActionButtonStyle" TargetType="Button">
@@ -965,7 +973,7 @@
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="CommentairesTextBox"
                                      Style="{StaticResource RoundedTextBoxStyle}"
-                                     Height="150"
+                                     Height="190"
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
                                      VerticalScrollBarVisibility="Auto"/>

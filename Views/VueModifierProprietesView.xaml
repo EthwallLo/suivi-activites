@@ -9,20 +9,311 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="24"/>
         </Style>
+
+        <Style x:Key="PropertyPanelStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SearchCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6"/>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="6">
         <Border Style="{StaticResource SectionCardStyle}"
-                Padding="30">
+                Padding="24">
             <Grid>
-                <TextBlock Text="Écran vide prêt pour les futures modifications de propriétés."
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           TextWrapping="Wrap"
-                           TextAlignment="Center"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Style="{StaticResource PropertyPanelStyle}"
+                            Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <DockPanel>
+                                <TextBlock Text="Clients"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                <Border DockPanel.Dock="Right"
+                                        Padding="10,5"
+                                        Background="{DynamicResource SummaryMintBackgroundBrush}"
+                                        BorderBrush="{DynamicResource SummaryMintBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <TextBlock Text="{Binding Clients.Count, StringFormat={}{0}}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
+                                </Border>
+                            </DockPanel>
+
+                            <ListBox x:Name="ClientsListBox"
+                                     Grid.Row="1"
+                                     Margin="0,16,0,14"
+                                     MinHeight="260"
+                                     ItemsSource="{Binding Clients}"
+                                     SelectionChanged="ClientsListBox_SelectionChanged"/>
+
+                            <TextBox x:Name="ClientValueTextBox"
+                                     Grid.Row="2"
+                                     Style="{StaticResource RoundedTextBoxStyle}"
+                                     VerticalContentAlignment="Center"/>
+
+                            <WrapPanel Grid.Row="3"
+                                       Margin="0,14,0,0">
+                                <Button Content="Ajouter"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Click="AddClient_Click"/>
+                                <Button Content="Renommer"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Click="RenameClient_Click"/>
+                                <Button Content="Supprimer"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Click="DeleteClient_Click"/>
+                            </WrapPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Style="{StaticResource PropertyPanelStyle}"
+                            Margin="10,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <DockPanel>
+                                <TextBlock Text="Demandeurs"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                <Border DockPanel.Dock="Right"
+                                        Padding="10,5"
+                                        Background="{DynamicResource SummaryWarmBackgroundBrush}"
+                                        BorderBrush="{DynamicResource SummaryWarmBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <TextBlock Text="{Binding Demandeurs.Count, StringFormat={}{0}}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
+                                </Border>
+                            </DockPanel>
+
+                            <ListBox x:Name="DemandeursListBox"
+                                     Grid.Row="1"
+                                     Margin="0,16,0,14"
+                                     MinHeight="260"
+                                     ItemsSource="{Binding Demandeurs}"
+                                     SelectionChanged="DemandeursListBox_SelectionChanged"/>
+
+                            <TextBox x:Name="DemandeurValueTextBox"
+                                     Grid.Row="2"
+                                     Style="{StaticResource RoundedTextBoxStyle}"
+                                     VerticalContentAlignment="Center"/>
+
+                            <WrapPanel Grid.Row="3"
+                                       Margin="0,14,0,0">
+                                <Button Content="Ajouter"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Click="AddDemandeur_Click"/>
+                                <Button Content="Renommer"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Click="RenameDemandeur_Click"/>
+                                <Button Content="Supprimer"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Click="DeleteDemandeur_Click"/>
+                            </WrapPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="0,18,0,0"
+                        Style="{StaticResource PropertyPanelStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="Essais par défaut"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                <TextBlock Text="{Binding EssaisParDefautSummary}"
+                                           Margin="0,4,0,0"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="1"
+                                      MinWidth="220"
+                                      Margin="18,0,0,0"
+                                      VerticalAlignment="Top"
+                                      ItemsSource="{Binding FamillesProduit}"
+                                      SelectedItem="{Binding SelectedEssaisDefaultFamille, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="1"
+                                      Margin="0,16,0,0"
+                                      MaxHeight="230"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding EssaisParDefautSelection}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,10,10"
+                                                Padding="10,8"
+                                                Background="#FFFFFF"
+                                                BorderBrush="{DynamicResource DataGridSurfaceBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="12">
+                                            <CheckBox Content="{Binding NomEssai}"
+                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                      FontSize="13"
+                                                      FontWeight="SemiBold"
+                                                      Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <WrapPanel Grid.Row="2"
+                                   Margin="0,14,0,0"
+                                   VerticalAlignment="Bottom">
+                            <Button Content="Tout sélectionner"
+                                    Style="{StaticResource ActionButtonStyle}"
+                                    Click="SelectAllDefaultEssais_Click"/>
+                            <Button Content="Tout désélectionner"
+                                    Style="{StaticResource ActionButtonStyle}"
+                                    Click="ClearDefaultEssais_Click"/>
+                            <Button Content="Enregistrer"
+                                    Style="{StaticResource ActionButtonStyle}"
+                                    Click="SaveDefaultEssais_Click"/>
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2"
+                        Margin="0,18,0,0"
+                        Padding="14,10"
+                        Background="{DynamicResource SummaryCardBackgroundBrush}"
+                        BorderBrush="{DynamicResource SummaryCardBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="14">
+                    <TextBlock x:Name="StatusTextBlock"
+                               Text="Sélectionne une valeur pour la modifier, ou saisis une nouvelle valeur."
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource SummaryValueBrush}"
+                               TextWrapping="Wrap"/>
+                </Border>
             </Grid>
         </Border>
     </Grid>

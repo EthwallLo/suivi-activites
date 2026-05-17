@@ -39,88 +39,6 @@ namespace MonTableurApp.Views
             "CPR"
         };
 
-        private static readonly string[] TousLesEssais =
-        {
-            "Traction 100m",
-            "Cyclage thermique",
-            "OTDR",
-            "Statique Bending",
-            "Vieillissement",
-            "Dimensionnel",
-            "Crush",
-            "Cut through",
-            "Traction verticale",
-            "Kink",
-            "Repeated bending",
-            "Torsion",
-            "Abrasion marquage",
-            "Abrasion gaine",
-            "Friction gaine",
-            "Traction pince",
-            "Traction spiralé",
-            "Pénétration d'eau",
-            "Petite flamme",
-            "Vibration éolienne",
-            "Collage",
-            "Exposition UV",
-            "CPR"
-        };
-
-        private static readonly string[] EssaisCordon =
-        {
-            "Traction 100m",
-            "Statique Bending"
-        };
-
-        private static readonly Dictionary<string, HashSet<string>> EssaisPresetsParFamille = new(StringComparer.Ordinal)
-        {
-            [FamilleCableIndoor] = new HashSet<string>(TousLesEssais, StringComparer.Ordinal),
-            [FamilleCableOutdoor] = new HashSet<string>(TousLesEssais, StringComparer.Ordinal),
-            [FamilleCableDrop] = new HashSet<string>(TousLesEssais, StringComparer.Ordinal),
-            [FamilleCordon] = new HashSet<string>(new[]
-            {
-                "Traction 100m",
-                "OTDR",
-                "Statique Bending",
-                "Repeated bending",
-                "Torsion",
-                "Exposition UV"
-            }, StringComparer.Ordinal),
-            [FamillePatchcords] = new HashSet<string>(new[]
-            {
-                "Traction 100m",
-                "OTDR",
-                "Statique Bending",
-                "Repeated bending",
-                "Cut through",
-                "Abrasion gaine",
-                "CPR"
-            }, StringComparer.Ordinal),
-            [FamilleAramides] = new HashSet<string>(new[]
-            {
-                "Traction verticale"
-            }, StringComparer.Ordinal),
-            [FamilleRipcords] = new HashSet<string>(new[]
-            {
-                "Traction verticale"
-            }, StringComparer.Ordinal),
-            [FamilleFrp] = new HashSet<string>(new[]
-            {
-                "Traction verticale",
-                "Vieillissement"
-            }, StringComparer.Ordinal),
-            [FamilleAutre] = new HashSet<string>(new[]
-            {
-                "Cyclage thermique",
-                "OTDR",
-                "Dimensionnel",
-                "Crush",
-                "Friction gaine",
-                "Pénétration d'eau",
-                "Collage"
-            }, StringComparer.Ordinal)
-        };
-
         public ObservableCollection<EssaiSelectionItem> EssaisPreQualificationSelection { get; } = new();
         public ObservableCollection<EssaiSelectionItem> EssaisQualificationSelection { get; } = new();
         public ObservableCollection<EssaiSelectionItem> EssaisExterieursSelection { get; } = new();
@@ -143,8 +61,12 @@ namespace MonTableurApp.Views
 
             if (FamilleProduitComboBox.SelectedItem == null && viewModel.FamillesProduit.Count > 0)
             {
-                FamilleProduitComboBox.SelectedItem = FamilleCableIndoor;
+                FamilleProduitComboBox.SelectedItem = viewModel.FamillesProduit.Contains(FamilleCableIndoor)
+                    ? FamilleCableIndoor
+                    : viewModel.FamillesProduit[0];
             }
+
+            ApplyDefaultEssaisForSelectedFamily(viewModel);
 
             if (ClientComboBox.SelectedItem == null && viewModel.Clients.Count > 0)
             {
@@ -241,13 +163,6 @@ namespace MonTableurApp.Views
             DateFinCalendar.SelectedDate = null;
             CommentairesTextBox.Clear();
 
-            foreach (EssaiSelectionItem item in GetAllEssaisSelectionItems())
-            {
-                item.IsSelected = true;
-            }
-
-            UpdateToggleEssaisSelectionButtonText();
-
             if (DataContext is not MainViewModel viewModel)
             {
                 return;
@@ -255,7 +170,10 @@ namespace MonTableurApp.Views
 
             ClientComboBox.SelectedItem = viewModel.Clients.Count > 0 ? viewModel.Clients[0] : null;
             DemandeurComboBox.SelectedItem = viewModel.Demandeurs.Count > 0 ? viewModel.Demandeurs[0] : null;
-            FamilleProduitComboBox.SelectedItem = viewModel.FamillesProduit.Count > 0 ? FamilleCableIndoor : null;
+            FamilleProduitComboBox.SelectedItem = viewModel.FamillesProduit.Contains(FamilleCableIndoor)
+                ? FamilleCableIndoor
+                : viewModel.FamillesProduit.FirstOrDefault();
+            ApplyDefaultEssaisForSelectedFamily(viewModel);
             TypeActiviteComboBox.SelectedItem = viewModel.TypesActivite.Count > 0 ? viewModel.TypesActivite[0] : null;
             StatutComboBox.SelectedItem = viewModel.Statuts.Count > 0 ? viewModel.Statuts[0] : null;
             NumeroProjetTextBox.Focus();
@@ -296,13 +214,17 @@ namespace MonTableurApp.Views
                 return;
             }
 
-            string? famille = FamilleProduitComboBox.SelectedItem as string;
-            if (!string.IsNullOrWhiteSpace(famille) &&
-                     EssaisPresetsParFamille.TryGetValue(famille, out HashSet<string>? essaisPreselectionnes))
+            if (DataContext is MainViewModel viewModel)
             {
-                SetEssaisSelectionState(item => essaisPreselectionnes.Contains(item.NomEssai));
+                ApplyDefaultEssaisForSelectedFamily(viewModel);
             }
+        }
 
+        private void ApplyDefaultEssaisForSelectedFamily(MainViewModel viewModel)
+        {
+            IReadOnlyCollection<string> essaisPreselectionnes =
+                viewModel.GetDefaultEssaisForFamille(FamilleProduitComboBox.SelectedItem as string);
+            SetEssaisSelectionState(item => essaisPreselectionnes.Contains(item.NomEssai, StringComparer.OrdinalIgnoreCase));
             UpdateToggleEssaisSelectionButtonText();
         }
 

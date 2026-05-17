@@ -1,12 +1,8 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Media;
-using Microsoft.Win32;
 using MonTableurApp.ViewModels;
 using MonTableurApp.Views;
 
@@ -16,8 +12,8 @@ namespace MonTableurApp
     {
         private const string ThemeRose = "rose";
         private const string ThemeBlue = "blue";
-        private const int MonitorDefaultToNearest = 2;
-        private const int MonitorInfoFlagPrimary = 1;
+        private const double SidebarExpandedWidth = 315;
+        private const double SidebarCollapsedWidth = 144;
         private static readonly string ThemeSettingsPath = Path.Combine(AppContext.BaseDirectory, "ui-settings.json");
 
         private readonly MainViewModel viewModel = new MainViewModel();
@@ -27,9 +23,8 @@ namespace MonTableurApp
         private readonly VueModifierProprietesView vueModifierProprietes;
         private readonly VueEnCoursView vueEnCours;
         private readonly VueAgendaView vueAgenda;
-        private bool isUpdatingWindowBounds;
-        private string? currentScreenDeviceName;
         private bool isBlueTheme;
+        private bool isSidebarCollapsed;
 
         public MainWindow()
         {
@@ -43,21 +38,16 @@ namespace MonTableurApp
             vueAgenda = new VueAgendaView { DataContext = viewModel };
 
             isBlueTheme = LoadSavedTheme() == ThemeBlue;
+            isSidebarCollapsed = LoadSavedSidebarCollapsed();
             ApplyCurrentTheme();
+            ApplySidebarState();
             AfficherVueGenerale();
             Closing += MainWindow_Closing;
-            LocationChanged += MainWindow_LocationChanged;
-            SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
         }
 
         private void VueGenerale_Click(object sender, RoutedEventArgs e)
         {
             AfficherVueGenerale();
-        }
-
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            ApplyPreferredScreenBounds(forceReposition: true);
         }
 
         private void SuiviEssais_Click(object sender, RoutedEventArgs e)
@@ -91,21 +81,16 @@ namespace MonTableurApp
             ApplyCurrentTheme();
         }
 
-        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        private void SidebarToggle_Click(object sender, RoutedEventArgs e)
         {
-            LocationChanged -= MainWindow_LocationChanged;
-            SystemEvents.DisplaySettingsChanged -= SystemEvents_DisplaySettingsChanged;
+            isSidebarCollapsed = !isSidebarCollapsed;
+            ApplySidebarState();
             SaveTheme();
         }
 
-        private void MainWindow_LocationChanged(object? sender, EventArgs e)
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            ApplyCurrentScreenBounds();
-        }
-
-        private void SystemEvents_DisplaySettingsChanged(object? sender, EventArgs e)
-        {
-            Dispatcher.Invoke(() => ApplyPreferredScreenBounds(forceReposition: true));
+            SaveTheme();
         }
 
         private void AfficherVueGenerale()
@@ -182,155 +167,43 @@ namespace MonTableurApp
             activeButton.Tag = "Active";
         }
 
-        private void ApplyPreferredScreenBounds(bool forceReposition = false)
+        private void ApplySidebarState()
         {
-            if (TryGetPreferredMonitorInfo(out MONITORINFO preferredMonitor))
-            {
-                ApplyMonitorBounds(preferredMonitor, forceReposition);
-                return;
-            }
+            SidebarColumn.Width = new GridLength(isSidebarCollapsed ? SidebarCollapsedWidth : SidebarExpandedWidth);
+            SidebarBorder.Margin = isSidebarCollapsed ? new Thickness(12) : new Thickness(18);
+            SidebarInnerGrid.Margin = isSidebarCollapsed ? new Thickness(14) : new Thickness(28);
+            NavigationPanel.Margin = isSidebarCollapsed ? new Thickness(0, 22, 0, 0) : new Thickness(0, 38, 0, 0);
 
-            ApplyCurrentScreenBounds(forceReposition);
+            UserGreetingPanel.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+            AppTitleText.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+
+            LogoChip.Width = isSidebarCollapsed ? 54 : 84;
+            LogoChip.Height = isSidebarCollapsed ? 54 : 84;
+            LogoChip.CornerRadius = isSidebarCollapsed ? new CornerRadius(18) : new CornerRadius(26);
+            LogoImage.Width = isSidebarCollapsed ? 42 : 64;
+            LogoImage.Height = isSidebarCollapsed ? 42 : 64;
+
+            SidebarToggleButton.Width = isSidebarCollapsed ? 34 : 42;
+            SidebarToggleButton.Height = isSidebarCollapsed ? 32 : 36;
+            SidebarToggleButton.Content = isSidebarCollapsed ? ">>" : "<<";
+            SidebarToggleButton.ToolTip = isSidebarCollapsed
+                ? "Afficher le bandeau de navigation"
+                : "Réduire le bandeau de navigation";
+
+            SetNavigationButtonLabel(VueGeneraleButton, "Vue générale", "V");
+            SetNavigationButtonLabel(SuiviEssaisButton, "Suivi des essais", "S");
+            SetNavigationButtonLabel(AjouterProjetButton, "Ajouter un projet", "+");
+            SetNavigationButtonLabel(EnCoursButton, "En cours", "C");
+            SetNavigationButtonLabel(AgendaButton, "Agenda", "A");
+            SetNavigationButtonLabel(ModifierProprietesButton, "Modifier des propriétés", "M");
         }
 
-        private void ApplyCurrentScreenBounds(bool forceReposition = false)
+        private void SetNavigationButtonLabel(Button button, string fullLabel, string compactLabel)
         {
-            if (isUpdatingWindowBounds)
-            {
-                return;
-            }
-
-            IntPtr handle = new WindowInteropHelper(this).Handle;
-            if (handle == IntPtr.Zero)
-            {
-                return;
-            }
-
-            IntPtr monitor = MonitorFromWindow(handle, MonitorDefaultToNearest);
-            if (monitor == IntPtr.Zero)
-            {
-                return;
-            }
-
-            MONITORINFO monitorInfo = new()
-            {
-                cbSize = Marshal.SizeOf<MONITORINFO>()
-            };
-
-            if (!GetMonitorInfo(monitor, ref monitorInfo))
-            {
-                return;
-            }
-
-            ApplyMonitorBounds(monitorInfo, forceReposition);
-        }
-
-        private void ApplyMonitorBounds(MONITORINFO monitorInfo, bool forceReposition)
-        {
-            if (isUpdatingWindowBounds)
-            {
-                return;
-            }
-
-            string deviceName = monitorInfo.szDevice ?? string.Empty;
-            if (!forceReposition && deviceName == currentScreenDeviceName)
-            {
-                return;
-            }
-
-            RECT area = monitorInfo.rcWork;
-
-            isUpdatingWindowBounds = true;
-            try
-            {
-                currentScreenDeviceName = deviceName;
-                Left = area.Left;
-                Top = area.Top;
-                Width = area.Right - area.Left;
-                Height = area.Bottom - area.Top;
-                MinWidth = area.Right - area.Left;
-                MinHeight = area.Bottom - area.Top;
-                MaxWidth = area.Right - area.Left;
-                MaxHeight = area.Bottom - area.Top;
-            }
-            finally
-            {
-                isUpdatingWindowBounds = false;
-            }
-        }
-
-        private static bool TryGetPreferredMonitorInfo(out MONITORINFO preferredMonitor)
-        {
-            List<MONITORINFO> monitors = new();
-
-            EnumDisplayMonitors(
-                IntPtr.Zero,
-                IntPtr.Zero,
-                (monitor, _, _, _) =>
-                {
-                    MONITORINFO info = new()
-                    {
-                        cbSize = Marshal.SizeOf<MONITORINFO>()
-                    };
-
-                    if (GetMonitorInfo(monitor, ref info))
-                    {
-                        monitors.Add(info);
-                    }
-
-                    return true;
-                },
-                IntPtr.Zero);
-
-            foreach (MONITORINFO monitor in monitors)
-            {
-                if ((monitor.dwFlags & MonitorInfoFlagPrimary) == 0)
-                {
-                    preferredMonitor = monitor;
-                    return true;
-                }
-            }
-
-            preferredMonitor = default;
-            return false;
-        }
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EnumDisplayMonitors(
-            IntPtr hdc,
-            IntPtr lprcClip,
-            MonitorEnumProc lpfnEnum,
-            IntPtr dwData);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
-
-        private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, IntPtr lprcMonitor, IntPtr dwData);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        private struct MONITORINFO
-        {
-            public int cbSize;
-            public RECT rcMonitor;
-            public RECT rcWork;
-            public uint dwFlags;
-
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-            public string? szDevice;
+            button.Content = isSidebarCollapsed ? compactLabel : fullLabel;
+            button.ToolTip = isSidebarCollapsed ? fullLabel : null;
+            button.HorizontalContentAlignment = isSidebarCollapsed ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+            button.Padding = isSidebarCollapsed ? new Thickness(6, 12, 6, 14) : new Thickness(10, 12, 10, 14);
         }
 
         private void ApplyCurrentTheme()
@@ -366,11 +239,31 @@ namespace MonTableurApp
             }
         }
 
+        private static bool LoadSavedSidebarCollapsed()
+        {
+            if (!File.Exists(ThemeSettingsPath))
+            {
+                return false;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(ThemeSettingsPath);
+                ThemeSettings? settings = JsonSerializer.Deserialize<ThemeSettings>(json);
+                return settings?.SidebarCollapsed == true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void SaveTheme()
         {
             var settings = new ThemeSettings
             {
-                Theme = isBlueTheme ? ThemeBlue : ThemeRose
+                Theme = isBlueTheme ? ThemeBlue : ThemeRose,
+                SidebarCollapsed = isSidebarCollapsed
             };
 
             string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
@@ -548,6 +441,8 @@ namespace MonTableurApp
         private sealed class ThemeSettings
         {
             public string Theme { get; set; } = ThemeRose;
+
+            public bool SidebarCollapsed { get; set; }
         }
     }
 }

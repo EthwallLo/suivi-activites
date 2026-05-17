@@ -18,9 +18,42 @@ namespace MonTableurApp.Models
         public string NumeroProjet { get; set; } = string.Empty;
         public string NomProduit { get; set; } = string.Empty;
         public string NomEssai { get; set; } = string.Empty;
-        public double DureeJours { get; set; }
-        public double DureeHeures { get; set; }
-        public string DureeLabel => $"{DureeJours:0.##} j";
+        private double dureeJours;
+        private double dureeHeures;
+
+        public double DureeJours
+        {
+            get => dureeJours;
+            set
+            {
+                if (dureeJours == value)
+                {
+                    return;
+                }
+
+                dureeJours = value;
+                OnPropertyChanged(nameof(DureeJours));
+                OnPropertyChanged(nameof(DureeLabel));
+            }
+        }
+
+        public double DureeHeures
+        {
+            get => dureeHeures;
+            set
+            {
+                if (dureeHeures == value)
+                {
+                    return;
+                }
+
+                dureeHeures = value;
+                OnPropertyChanged(nameof(DureeHeures));
+                OnPropertyChanged(nameof(DureeLabel));
+            }
+        }
+
+        public string DureeLabel => AgendaDurationFormatter.Format(DureeHeures, DureeJours);
 
         public int? ScheduledStartMinutes
         {

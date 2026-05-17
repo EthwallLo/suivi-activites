@@ -144,6 +144,53 @@
             </Setter>
         </Style>
 
+        <Style x:Key="ArchiveCellButtonStyle" TargetType="Button">
+            <Setter Property="MinWidth" Value="86"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ArchiveBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ArchiveBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                                <Setter TargetName="ArchiveBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ArchiveBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PeutAfficherActionArchive}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding EstArchive}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource DataGridHeaderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource DataGridHeaderForegroundBrush}"/>
@@ -950,7 +997,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="1.45*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1.05*"/>
                 </Grid.ColumnDefinitions>
 
                 <Button Click="TousProjets_Click">
@@ -1086,10 +1134,44 @@
                     </Grid>
                 </Button>
 
-                <Border Grid.Column="4"
+                <Button Grid.Column="4"
+                        Click="Archives_Click">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SummaryCardButtonStyle}">
+                            <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsArchivedFilterActive}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryTitleBrush}"/>
+                                    <Setter Property="BorderThickness" Value="2"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Grid VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Archives"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                   Opacity="0.82"
+                                   FontSize="14"/>
+                        <TextBlock Grid.Row="1"
+                                   Text="{Binding ProjetsArchives}"
+                                   Margin="0,8,0,0"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                   FontSize="32"
+                                   FontWeight="Bold"/>
+                    </Grid>
+                </Button>
+
+                <Border Grid.Column="5"
                         Margin="0"
-                        Padding="14"
-                        MinHeight="88"
+                        Padding="10"
+                        MinHeight="78"
                         CornerRadius="18"
                         Background="{DynamicResource SearchCardBackgroundBrush}"
                         BorderBrush="{DynamicResource SearchCardBorderBrush}"
@@ -1106,10 +1188,10 @@
                                    FontWeight="SemiBold"/>
 
                         <Grid Grid.Row="1"
-                              Margin="0,8,0,0">
+                              Margin="0,6,0,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="148"/>
-                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="112"/>
+                                <ColumnDefinition Width="8"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
@@ -1445,6 +1527,18 @@
                                         ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
                                         EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="1.7*"/>
+                    <DataGridTemplateColumn Header="Archive"
+                                            Width="1.05*"
+                                            IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding LibelleActionArchive}"
+                                        ToolTip="{Binding InfoActionArchive}"
+                                        Style="{StaticResource ArchiveCellButtonStyle}"
+                                        Click="ToggleArchiveProjet_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

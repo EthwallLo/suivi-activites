@@ -28,6 +28,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="ClipToBounds" Value="True"/>
         </Style>
 
         <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
@@ -52,11 +53,75 @@
             </Setter>
         </Style>
 
+        <Style x:Key="AgendaSummaryPillStyle" TargetType="Border">
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+        </Style>
+
+        <Style x:Key="CompactAgendaButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MiniAgendaButtonStyle" TargetType="Button" BasedOn="{StaticResource CompactAgendaButtonStyle}">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+        </Style>
+
         <Style x:Key="HourStripeStyle" TargetType="Border">
             <Setter Property="Height" Value="48"/>
             <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,1,0,0"/>
             <Setter Property="Background" Value="#FFFCFE"/>
+        </Style>
+
+        <Style x:Key="NonWorkingTimeBlockStyle" TargetType="Border">
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Background" Value="#E8EBEF"/>
+            <Setter Property="BorderBrush" Value="#D3D8E0"/>
+            <Setter Property="BorderThickness" Value="0,1,0,1"/>
+            <Setter Property="ClipToBounds" Value="True"/>
         </Style>
 
         <Style TargetType="ListBox">
@@ -74,46 +139,7 @@
     </UserControl.Resources>
 
     <Grid Margin="6">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <Border Style="{StaticResource SectionCardStyle}"
-                Padding="24">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel>
-                    <TextBlock Text="Agenda de la semaine"
-                               FontSize="26"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                    <TextBlock Text="{Binding AgendaWeekTitle}"
-                               Margin="0,8,0,0"
-                               FontSize="15"
-                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                </StackPanel>
-
-                <Border Grid.Column="1"
-                        Padding="14,10"
-                        Background="{DynamicResource SummaryCardBackgroundBrush}"
-                        BorderBrush="{DynamicResource SummaryCardBorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="16"
-                        VerticalAlignment="Top">
-                    <TextBlock Text="1 j = 8 h"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource SummaryValueBrush}"/>
-                </Border>
-            </Grid>
-        </Border>
-
-        <Grid Grid.Row="1"
-              Margin="0,18,0,0">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280"/>
                 <ColumnDefinition Width="18"/>
@@ -124,6 +150,7 @@
                     Padding="18">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -139,6 +166,12 @@
                                        FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                            <TextBlock Text="{Binding AgendaWeekTitle}"
+                                       Margin="0,4,12,0"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       TextWrapping="Wrap"/>
                         </StackPanel>
 
                         <Border Grid.Column="1"
@@ -148,7 +181,7 @@
                                 BorderThickness="1"
                                 CornerRadius="12"
                                 VerticalAlignment="Top">
-                            <TextBlock Text="{Binding AgendaBacklogVisibleCount, StringFormat={}{0} restant(s)}"
+                            <TextBlock Text="{Binding AgendaBacklogFilterSummary}"
                                        FontSize="12"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
@@ -156,7 +189,54 @@
                     </Grid>
 
                     <Grid Grid.Row="1"
-                          Margin="0,16,0,0">
+                          Margin="0,14,0,0">
+                        <TextBox x:Name="AgendaSearchTextBox"
+                                 Style="{StaticResource RoundedTextBoxStyle}"
+                                 ToolTip="Filtrer les essais par projet, produit ou type d'essai"
+                                 Text="{Binding AgendaSearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Margin="12,0,34,0"
+                                   Text="Filtrer..."
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=AgendaSearchTextBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Text, ElementName=AgendaSearchTextBox}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button Content="×"
+                                Width="24"
+                                Height="24"
+                                Padding="0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,6,0"
+                                ToolTip="Effacer le filtre"
+                                Click="ClearAgendaSearch_Click">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource MiniAgendaButtonStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasAgendaSearch}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+
+                    <Grid Grid.Row="2"
+                          Margin="0,14,0,0">
                         <TextBlock Text="Tout est placé pour l'instant"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
@@ -192,25 +272,38 @@
 
                                             <StackPanel Grid.Column="1"
                                                         Margin="12">
-                                                <DockPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
                                                     <TextBlock Text="{Binding NomEssai}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold"
                                                                Foreground="{DynamicResource PrimaryTitleBrush}"
                                                                TextWrapping="Wrap"/>
-                                                    <Border DockPanel.Dock="Right"
+                                                    <Border Grid.Column="1"
                                                             Padding="8,4"
-                                                            Margin="10,0,0,0"
+                                                            Margin="8,0,0,0"
                                                             Background="{DynamicResource SummaryMintBackgroundBrush}"
                                                             BorderBrush="{DynamicResource SummaryMintBorderBrush}"
                                                             BorderThickness="1"
-                                                            CornerRadius="10">
+                                                            CornerRadius="10"
+                                                            VerticalAlignment="Top">
                                                         <TextBlock Text="{Binding DureeLabel}"
                                                                    FontSize="11"
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
                                                     </Border>
-                                                </DockPanel>
+                                                    <Button Grid.Column="2"
+                                                            Content="Planifier"
+                                                            Margin="8,0,0,0"
+                                                            VerticalAlignment="Top"
+                                                            Style="{StaticResource MiniAgendaButtonStyle}"
+                                                            Click="PlanifierEssai_Click"/>
+                                                </Grid>
                                                 <TextBlock Text="{Binding NomProduit}"
                                                            Margin="0,4,0,0"
                                                            FontSize="12"
@@ -233,8 +326,66 @@
             <Border Grid.Column="2"
                     Style="{StaticResource SectionCardStyle}"
                     Padding="18">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="12"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Agenda de travail"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                            <TextBlock Text="{Binding AgendaWeekTitle}"
+                                       Margin="0,3,0,0"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </StackPanel>
+
+                        <WrapPanel Grid.Column="1"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center">
+                            <Border Style="{StaticResource AgendaSummaryPillStyle}">
+                                <TextBlock FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTitleBrush}">
+                                    <Run Text="{Binding AgendaPlannedTaskCount, Mode=OneWay}"/>
+                                    <Run Text=" placé(s)"/>
+                                </TextBlock>
+                            </Border>
+                            <Border Style="{StaticResource AgendaSummaryPillStyle}">
+                                <TextBlock Text="{Binding AgendaPlannedDurationLabel}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SummaryValueBrush}"/>
+                            </Border>
+                            <Border Style="{StaticResource AgendaSummaryPillStyle}">
+                                <TextBlock FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="#D65C72">
+                                    <Run Text="{Binding AgendaOverflowTaskCount, Mode=OneWay}"/>
+                                    <Run Text=" à recaler"/>
+                                </TextBlock>
+                            </Border>
+                            <Button Content="Annuler"
+                                    Style="{StaticResource CompactAgendaButtonStyle}"
+                                    IsEnabled="{Binding CanUndoAgenda}"
+                                    Click="UndoAgenda_Click"/>
+                        </WrapPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="2"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -265,14 +416,60 @@
                                             BorderThickness="1"
                                             CornerRadius="20">
                                         <StackPanel>
-                                            <TextBlock Text="{Binding DayLabel}"
-                                                       FontSize="16"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                            <TextBlock Text="{Binding DateLabel}"
-                                                       Margin="0,3,0,0"
-                                                       FontSize="12"
-                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding DayLabel}"
+                                                               FontSize="16"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                                    <TextBlock Text="{Binding DateLabel}"
+                                                               Margin="0,3,0,0"
+                                                               FontSize="12"
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1"
+                                                            HorizontalAlignment="Right">
+                                                    <Border Padding="7,3"
+                                                            Background="{DynamicResource SummaryCardBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource SummaryCardBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="10">
+                                                        <TextBlock FontSize="10"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource SummaryValueBrush}">
+                                                            <Run Text="{Binding PlannedTasks.Count, Mode=OneWay}"/>
+                                                            <Run Text=" essai(s)"/>
+                                                        </TextBlock>
+                                                    </Border>
+                                                    <Border Margin="0,5,0,0"
+                                                            Padding="7,3"
+                                                            Background="{DynamicResource SummaryMintBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource SummaryMintBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="10">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="Aujourd'hui"
+                                                                   FontSize="10"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
 
                                             <CheckBox Content="Jour travaillé"
                                                       Margin="0,10,0,0"
@@ -282,30 +479,73 @@
                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
                                             <Grid Margin="0,10,0,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBox Margin="0,0,4,0"
+                                                <TextBlock Text="Début"
+                                                           Margin="2,0,4,4"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="Fin"
+                                                           Margin="6,0,2,4"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                                <TextBox Grid.Row="1"
+                                                         Margin="0,0,4,0"
                                                          Style="{StaticResource RoundedTextBoxStyle}"
                                                          Text="{Binding StartTimeText, UpdateSourceTrigger=PropertyChanged}"/>
-                                                <TextBox Grid.Column="1"
+                                                <TextBox Grid.Row="1"
+                                                         Grid.Column="1"
                                                          Margin="4,0,0,0"
                                                          Style="{StaticResource RoundedTextBoxStyle}"
                                                          Text="{Binding EndTimeText, UpdateSourceTrigger=PropertyChanged}"/>
                                             </Grid>
 
+                                            <CheckBox Content="Pause midi"
+                                                      Margin="0,10,0,0"
+                                                      IsChecked="{Binding IsLunchBreakEnabled, Mode=TwoWay}"
+                                                      FontSize="12"
+                                                      FontWeight="SemiBold"
+                                                      Foreground="{DynamicResource PrimaryTitleBrush}"/>
+
                                             <Grid Margin="0,8,0,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBox Margin="0,0,4,0"
+                                                <TextBlock Text="De"
+                                                           Margin="2,0,4,4"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="À"
+                                                           Margin="6,0,2,4"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                                <TextBox Grid.Row="1"
+                                                         Margin="0,0,4,0"
                                                          Style="{StaticResource RoundedTextBoxStyle}"
                                                          Text="{Binding LunchStartText, UpdateSourceTrigger=PropertyChanged}"/>
-                                                <TextBox Grid.Column="1"
+                                                <TextBox Grid.Row="1"
+                                                         Grid.Column="1"
                                                          Margin="4,0,0,0"
                                                          Style="{StaticResource RoundedTextBoxStyle}"
                                                          Text="{Binding LunchEndText, UpdateSourceTrigger=PropertyChanged}"/>
@@ -375,12 +615,49 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
+                                            <ItemsControl ItemsSource="{Binding NonWorkingTimeBlocks}"
+                                                          IsHitTestVisible="False"
+                                                          Panel.ZIndex="1">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <Grid/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource NonWorkingTimeBlockStyle}"
+                                                                Margin="{Binding TimelineMargin}"
+                                                                Height="{Binding BlockHeight}">
+                                                            <TextBlock Text="{Binding Label}"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="#646A73"
+                                                                       TextTrimming="CharacterEllipsis">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding ShowLabel}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
                                             <TextBlock Text="Dépose les essais ici"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        FontSize="12"
                                                        Foreground="{DynamicResource SecondaryTextBrush}"
-                                                       IsHitTestVisible="False">
+                                                       IsHitTestVisible="False"
+                                                       Panel.ZIndex="1">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -394,7 +671,8 @@
                                             </TextBlock>
 
                                             <ItemsControl ItemsSource="{Binding DisplaySegments}"
-                                                          PreviewMouseMove="AgendaList_PreviewMouseMove">
+                                                          PreviewMouseMove="AgendaList_PreviewMouseMove"
+                                                          Panel.ZIndex="2">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <Grid/>
@@ -421,25 +699,38 @@
 
                                                                 <StackPanel Grid.Column="1"
                                                                             Margin="8,0,0,0">
-                                                                    <DockPanel LastChildFill="True">
+                                                                    <Grid>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                        </Grid.ColumnDefinitions>
                                                                         <TextBlock Text="{Binding NomEssai}"
                                                                                    FontSize="12"
                                                                                    FontWeight="SemiBold"
                                                                                    Foreground="{DynamicResource PrimaryTitleBrush}"
                                                                                    TextWrapping="Wrap"/>
-                                                                        <Border DockPanel.Dock="Right"
+                                                                        <Border Grid.Column="1"
                                                                                 Margin="8,0,0,0"
                                                                                 Padding="7,3"
                                                                                 Background="{DynamicResource SummaryWarmBackgroundBrush}"
                                                                                 BorderBrush="{DynamicResource SummaryWarmBorderBrush}"
                                                                                 BorderThickness="1"
-                                                                                CornerRadius="10">
+                                                                                CornerRadius="10"
+                                                                                VerticalAlignment="Top">
                                                                             <TextBlock Text="{Binding DureeLabel}"
                                                                                        FontSize="10"
                                                                                        FontWeight="SemiBold"
                                                                                        Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
                                                                         </Border>
-                                                                    </DockPanel>
+                                                                        <Button Grid.Column="2"
+                                                                                Content="Retirer"
+                                                                                Margin="8,0,0,0"
+                                                                                VerticalAlignment="Top"
+                                                                                ToolTip="Remettre dans À planifier"
+                                                                                Style="{StaticResource MiniAgendaButtonStyle}"
+                                                                                Click="RetirerEssaiAgenda_Click"/>
+                                                                    </Grid>
 
                                                                     <TextBlock Text="{Binding TimeRangeLabel}"
                                                                                Margin="0,4,0,0"
@@ -504,7 +795,8 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Grid>
-                </ScrollViewer>
+                    </ScrollViewer>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

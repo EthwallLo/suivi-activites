@@ -56,10 +56,32 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void Archives_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.SetQuickFilterToArchived();
+            }
+        }
+
         private void ExporterTableau_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainViewModel viewModel)
             {
+                return;
+            }
+
+            ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+            ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+
+            List<Projet> projets = viewModel.ProjetsView.Cast<Projet>().ToList();
+            if (projets.Count == 0)
+            {
+                MessageBox.Show(
+                    "Aucun projet n'est visible dans la vue générale avec les filtres actuels.",
+                    "Export Excel",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 return;
             }
 
@@ -69,16 +91,38 @@ namespace MonTableurApp.Views
                 Filter = "Classeur Excel (*.xlsx)|*.xlsx",
                 DefaultExt = ".xlsx",
                 AddExtension = true,
-                FileName = "suivi-projets.xlsx"
+                FileName = $"suivi-projets-{DateTime.Now:yyyy-MM-dd}.xlsx"
             };
 
-            if (dialog.ShowDialog() != true)
+            Window? owner = Window.GetWindow(this);
+            bool? result = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+            if (result != true)
             {
                 return;
             }
 
-            List<Projet> projets = viewModel.ProjetsView.Cast<Projet>().ToList();
-            XlsxExportService.ExportProjects(dialog.FileName, projets);
+            try
+            {
+                XlsxExportService.ExportProjects(dialog.FileName, projets);
+            }
+            catch (IOException)
+            {
+                MessageBox.Show(
+                    "L'export n'a pas pu être écrit. Vérifie que le fichier n'est pas déjà ouvert dans Excel, puis réessaie.",
+                    "Export Excel",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show(
+                    "L'export n'a pas pu être écrit à cet emplacement. Choisis un dossier où tu as les droits d'écriture.",
+                    "Export Excel",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
 
             MessageBox.Show(
                 $"Export terminé.\n\n{projets.Count} projet(s) exporté(s).",
@@ -115,6 +159,46 @@ namespace MonTableurApp.Views
             {
                 projet.DossierRacine = dialog.FolderName;
             }
+        }
+
+        private void ToggleArchiveProjet_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.DataContext is not Projet projet ||
+                DataContext is not MainViewModel viewModel)
+            {
+                return;
+            }
+
+            if (!projet.EstArchive && !projet.PeutArchiver)
+            {
+                MessageBox.Show(
+                    "Seuls les projets terminés peuvent être archivés.",
+                    "Archivage",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            string nomProjet = string.IsNullOrWhiteSpace(projet.NomProduit)
+                ? projet.NumeroProjet ?? "ce projet"
+                : projet.NomProduit;
+
+            string message = projet.EstArchive
+                ? $"Désarchiver \"{nomProjet}\" et le remettre dans les vues de travail ?"
+                : $"Archiver le projet terminé \"{nomProjet}\" ?\n\nIl sera masqué des vues de travail et restera disponible dans le filtre Archives.";
+
+            MessageBoxResult result = MessageBox.Show(
+                message,
+                "Archivage",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            viewModel.ToggleProjetArchive(projet);
         }
 
         private void ProjectTableDatePopup_Opened(object sender, EventArgs e)

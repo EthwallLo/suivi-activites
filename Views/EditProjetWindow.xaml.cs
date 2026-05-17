@@ -109,6 +109,7 @@ namespace MonTableurApp.Views
             sourceProjet.TypeActivite = EditableProjet.TypeActivite;
             sourceProjet.DossierRacine = EditableProjet.DossierRacine;
             sourceProjet.Statut = EditableProjet.Statut;
+            sourceProjet.EstArchive = EditableProjet.EstArchive;
             sourceProjet.DateDebut = EditableProjet.DateDebut;
             sourceProjet.DatePrevisionnelle = EditableProjet.DatePrevisionnelle;
             sourceProjet.DateFin = EditableProjet.DateFin;
@@ -128,6 +129,7 @@ namespace MonTableurApp.Views
                 TypeActivite = projet.TypeActivite,
                 DossierRacine = projet.DossierRacine,
                 Statut = projet.Statut,
+                EstArchive = projet.EstArchive,
                 DateDebut = projet.DateDebut,
                 DatePrevisionnelle = projet.DatePrevisionnelle,
                 DateFin = projet.DateFin,

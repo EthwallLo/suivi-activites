@@ -35,6 +35,7 @@
         <Style x:Key="DoneChipStyle" TargetType="Border">
             <Setter Property="Padding" Value="9,4"/>
             <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Background" Value="#E7F6EC"/>
             <Setter Property="BorderBrush" Value="#B7DFC2"/>
@@ -44,6 +45,7 @@
         <Style x:Key="PendingChipStyle" TargetType="Border">
             <Setter Property="Padding" Value="9,4"/>
             <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Background" Value="#FFF6DE"/>
             <Setter Property="BorderBrush" Value="#F2D48A"/>
@@ -70,11 +72,6 @@
                     </Grid.RowDefinitions>
 
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
                         <StackPanel>
                             <TextBlock Text="{Binding NomProduit}"
                                        FontSize="20"
@@ -90,34 +87,6 @@
                                        FontSize="12"
                                        Foreground="{DynamicResource SummaryValueBrush}"/>
                         </StackPanel>
-
-                        <Border Grid.Column="1"
-                                Padding="10,5"
-                                CornerRadius="13"
-                                BorderThickness="1"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Top">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Background" Value="#EAF3FF"/>
-                                    <Setter Property="BorderBrush" Value="#C3D8F6"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsAttentionRequired}" Value="True">
-                                            <Setter Property="Background" Value="#FFF1DD"/>
-                                            <Setter Property="BorderBrush" Value="#F0C77A"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsNearlyDone}" Value="True">
-                                            <Setter Property="Background" Value="#E7F6EC"/>
-                                            <Setter Property="BorderBrush" Value="#B7DFC2"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding EtatPilotage}"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                        </Border>
                     </Grid>
 
                     <Grid Grid.Row="1" Margin="0,16,0,0">
@@ -271,7 +240,7 @@
                             </Border>
 
                             <TextBlock Margin="0,10,0,0"
-                                       Text="Aucun essai termine pour l'instant"
+                                       Text="Aucun essai terminé pour l'instant"
                                        FontSize="11"
                                        Foreground="{DynamicResource SecondaryTextBrush}">
                                 <TextBlock.Style>
@@ -288,7 +257,7 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,16,0,0">
-                            <TextBlock Text="A suivre"
+                            <TextBlock Text="À suivre"
                                        FontSize="12"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
@@ -339,7 +308,7 @@
                             </Border>
 
                             <TextBlock Margin="0,10,0,0"
-                                       Text="Tous les essais concernes sont termines"
+                                       Text="Tous les essais concernés sont terminés"
                                        FontSize="11"
                                        Foreground="{DynamicResource SecondaryTextBrush}">
                                 <TextBlock.Style>
@@ -395,7 +364,7 @@
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
                             <TextBlock Margin="0,10,0,0"
-                                       Text="Une vue de synthese pour presenter en quelques secondes l'etat d'avancement des produits, les essais deja boucles et les points qui demandent un suivi."
+                                       Text="Une vue de synthèse pour présenter en quelques secondes l'état d'avancement des produits, les essais déjà bouclés et les points qui demandent un suivi."
                                        FontSize="14"
                                        TextWrapping="Wrap"
                                        Foreground="{DynamicResource SecondaryTextBrush}"/>
@@ -436,7 +405,7 @@
 
                         <Border Style="{StaticResource SummaryTileStyle}">
                             <StackPanel>
-                                <TextBlock Text="Essais termines"
+                                <TextBlock Text="Essais terminés"
                                            FontSize="12"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Margin="0,6,0,0"
@@ -447,18 +416,6 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Style="{StaticResource SummaryTileStyle}">
-                            <StackPanel>
-                                <TextBlock Text="Points d'attention"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                <TextBlock Margin="0,6,0,0"
-                                           Text="{Binding ProjetsEnAttentionDashboardCount}"
-                                           FontSize="28"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                            </StackPanel>
-                        </Border>
                     </WrapPanel>
 
                     <Grid Margin="0,10,0,14">
@@ -474,7 +431,7 @@
 
                         <TextBlock Grid.Column="1"
                                    VerticalAlignment="Center"
-                                   Text="{Binding EssaisRestantsDashboardTotal, StringFormat={}{0} essais restants a traiter}"
+                                   Text="{Binding EssaisRestantsDashboardTotal, StringFormat={}{0} essais restants à traiter}"
                                    FontSize="12"
                                    Foreground="{DynamicResource SummaryValueBrush}"/>
                     </Grid>
@@ -516,8 +473,8 @@
                            FontWeight="SemiBold"
                            TextAlignment="Center"
                            Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                <TextBlock Margin="0,12,0,0"
-                           Text="La page se remplira automatiquement des qu'un projet aura un statut en cours."
+                    <TextBlock Margin="0,12,0,0"
+                               Text="La page se remplira automatiquement dès qu'un projet aura un statut en cours."
                            FontSize="14"
                            TextAlignment="Center"
                            TextWrapping="Wrap"

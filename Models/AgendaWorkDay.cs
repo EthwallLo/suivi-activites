@@ -8,6 +8,7 @@ namespace MonTableurApp.Models
     {
         private bool isWorkingDay = true;
         private string startTimeText = "08:00";
+        private bool isLunchBreakEnabled = true;
         private string lunchStartText = "13:00";
         private string lunchEndText = "13:30";
         private string endTimeText = "16:00";
@@ -28,9 +29,13 @@ namespace MonTableurApp.Models
 
         public string DateLabel => Date.ToString("dd/MM");
 
+        public bool IsToday => Date.Date == DateTime.Today;
+
         public ObservableCollection<AgendaTaskItem> PlannedTasks { get; } = new();
 
         public ObservableCollection<AgendaTaskSegment> DisplaySegments { get; } = new();
+
+        public ObservableCollection<AgendaTimeBlock> NonWorkingTimeBlocks { get; } = new();
 
         public ObservableCollection<string> HourSlots { get; } = new();
 
@@ -61,6 +66,21 @@ namespace MonTableurApp.Models
 
                 startTimeText = value;
                 OnPropertyChanged(nameof(StartTimeText));
+            }
+        }
+
+        public bool IsLunchBreakEnabled
+        {
+            get => isLunchBreakEnabled;
+            set
+            {
+                if (isLunchBreakEnabled == value)
+                {
+                    return;
+                }
+
+                isLunchBreakEnabled = value;
+                OnPropertyChanged(nameof(IsLunchBreakEnabled));
             }
         }
 

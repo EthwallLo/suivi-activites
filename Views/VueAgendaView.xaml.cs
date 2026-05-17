@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using MonTableurApp.Models;
 using MonTableurApp.ViewModels;
@@ -21,6 +22,11 @@ namespace MonTableurApp.Views
             }
 
             DependencyObject? source = e.OriginalSource as DependencyObject;
+            if (FindVisualParent<ButtonBase>(source) is not null)
+            {
+                return;
+            }
+
             while (source != null)
             {
                 if (source is FrameworkElement segmentElement && segmentElement.DataContext is AgendaTaskSegment segment)
@@ -81,6 +87,54 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void PlanifierEssai_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainViewModel viewModel ||
+                (sender as FrameworkElement)?.DataContext is not AgendaTaskItem task)
+            {
+                return;
+            }
+
+            viewModel.PlanAgendaTaskAtFirstAvailableSlot(task);
+        }
+
+        private void RetirerEssaiAgenda_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainViewModel viewModel)
+            {
+                return;
+            }
+
+            AgendaTaskItem? task = (sender as FrameworkElement)?.DataContext switch
+            {
+                AgendaTaskSegment segment => segment.SourceTask,
+                AgendaTaskItem agendaTask => agendaTask,
+                _ => null
+            };
+
+            if (task is not null)
+            {
+                viewModel.MoveAgendaTaskToBacklog(task);
+                e.Handled = true;
+            }
+        }
+
+        private void ClearAgendaSearch_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.ClearAgendaSearch();
+            }
+        }
+
+        private void UndoAgenda_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel && viewModel.CanUndoAgenda)
+            {
+                viewModel.UndoAgendaLastAction();
+            }
+        }
+
         private void VueAgendaView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)
@@ -100,6 +154,21 @@ namespace MonTableurApp.Views
 
             viewModel.UndoAgendaLastAction();
             e.Handled = true;
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
+        {
+            while (child is not null)
+            {
+                if (child is T match)
+                {
+                    return match;
+                }
+
+                child = System.Windows.Media.VisualTreeHelper.GetParent(child);
+            }
+
+            return null;
         }
     }
 }

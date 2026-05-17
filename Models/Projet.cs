@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace MonTableurApp.Models
@@ -93,8 +94,47 @@ namespace MonTableurApp.Models
         public string? Statut
         {
             get => statut;
-            set { statut = value; OnPropertyChanged(nameof(Statut)); }
+            set
+            {
+                statut = value;
+                OnPropertyChanged(nameof(Statut));
+                NotifyArchiveActionPropertiesChanged();
+            }
         }
+
+        private bool estArchive;
+        public bool EstArchive
+        {
+            get => estArchive;
+            set
+            {
+                if (estArchive == value)
+                {
+                    return;
+                }
+
+                estArchive = value;
+                OnPropertyChanged(nameof(EstArchive));
+                NotifyArchiveActionPropertiesChanged();
+            }
+        }
+
+        [JsonIgnore]
+        public bool EstTermine => IsStatutTermine(statut);
+
+        [JsonIgnore]
+        public bool PeutArchiver => EstTermine && !EstArchive;
+
+        [JsonIgnore]
+        public bool PeutAfficherActionArchive => EstArchive || EstTermine;
+
+        [JsonIgnore]
+        public string LibelleActionArchive => EstArchive ? "Désarchiver" : "Archiver";
+
+        [JsonIgnore]
+        public string InfoActionArchive => EstArchive
+            ? "Remettre ce projet dans les vues de travail."
+            : "Archiver ce projet terminé.";
 
         private string? dateDebut;
         public string? DateDebut
@@ -188,6 +228,43 @@ namespace MonTableurApp.Models
             return DateTime.TryParse(value, DateCulture, DateTimeStyles.None, out parsedDate)
                 ? parsedDate.Date
                 : null;
+        }
+
+        private void NotifyArchiveActionPropertiesChanged()
+        {
+            OnPropertyChanged(nameof(EstTermine));
+            OnPropertyChanged(nameof(PeutArchiver));
+            OnPropertyChanged(nameof(PeutAfficherActionArchive));
+            OnPropertyChanged(nameof(LibelleActionArchive));
+            OnPropertyChanged(nameof(InfoActionArchive));
+        }
+
+        private static bool IsStatutTermine(string? value)
+        {
+            string normalizedValue = NormalizeValue(value);
+            return normalizedValue == "fait" ||
+                   normalizedValue.Contains("termine");
+        }
+
+        private static string NormalizeValue(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            string normalized = value.Trim().Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder(normalized.Length);
+
+            foreach (char character in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(character) != UnicodeCategory.NonSpacingMark)
+                {
+                    builder.Append(char.ToLowerInvariant(character));
+                }
+            }
+
+            return builder.ToString().Normalize(NormalizationForm.FormC);
         }
 
         private void SetDateDebutText(string? value)
