@@ -41,6 +41,7 @@ namespace MonTableurApp
             isSidebarCollapsed = LoadSavedSidebarCollapsed();
             ApplyCurrentTheme();
             ApplySidebarState();
+            ApplySavedWindowPlacement();
             AfficherVueGenerale();
             Closing += MainWindow_Closing;
         }
@@ -222,48 +223,109 @@ namespace MonTableurApp
 
         private static string LoadSavedTheme()
         {
-            if (!File.Exists(ThemeSettingsPath))
-            {
-                return ThemeRose;
-            }
-
-            try
-            {
-                string json = File.ReadAllText(ThemeSettingsPath);
-                ThemeSettings? settings = JsonSerializer.Deserialize<ThemeSettings>(json);
-                return settings?.Theme == ThemeBlue ? ThemeBlue : ThemeRose;
-            }
-            catch
-            {
-                return ThemeRose;
-            }
+            ThemeSettings? settings = LoadThemeSettings();
+            return settings?.Theme == ThemeBlue ? ThemeBlue : ThemeRose;
         }
 
         private static bool LoadSavedSidebarCollapsed()
         {
+            ThemeSettings? settings = LoadThemeSettings();
+            return settings?.SidebarCollapsed == true;
+        }
+
+        private static ThemeSettings? LoadThemeSettings()
+        {
             if (!File.Exists(ThemeSettingsPath))
             {
-                return false;
+                return null;
             }
 
             try
             {
                 string json = File.ReadAllText(ThemeSettingsPath);
-                ThemeSettings? settings = JsonSerializer.Deserialize<ThemeSettings>(json);
-                return settings?.SidebarCollapsed == true;
+                return JsonSerializer.Deserialize<ThemeSettings>(json);
             }
             catch
             {
+                return null;
+            }
+        }
+
+        private void ApplySavedWindowPlacement()
+        {
+            ThemeSettings? settings = LoadThemeSettings();
+            if (settings == null)
+            {
+                return;
+            }
+
+            if (IsValidWindowSize(settings.WindowWidth, settings.WindowHeight))
+            {
+                Width = Math.Max(MinWidth, settings.WindowWidth!.Value);
+                Height = Math.Max(MinHeight, settings.WindowHeight!.Value);
+
+                if (IsValidWindowPosition(settings.WindowLeft, settings.WindowTop, Width, Height))
+                {
+                    WindowStartupLocation = WindowStartupLocation.Manual;
+                    Left = settings.WindowLeft!.Value;
+                    Top = settings.WindowTop!.Value;
+                }
+            }
+
+            if (Enum.TryParse(settings.WindowState, out WindowState savedState) &&
+                savedState != WindowState.Minimized)
+            {
+                WindowState = savedState;
+            }
+        }
+
+        private static bool IsValidWindowSize(double? width, double? height)
+        {
+            return width.HasValue &&
+                   height.HasValue &&
+                   double.IsFinite(width.Value) &&
+                   double.IsFinite(height.Value) &&
+                   width.Value > 0 &&
+                   height.Value > 0;
+        }
+
+        private static bool IsValidWindowPosition(double? left, double? top, double width, double height)
+        {
+            if (!left.HasValue ||
+                !top.HasValue ||
+                !double.IsFinite(left.Value) ||
+                !double.IsFinite(top.Value))
+            {
                 return false;
             }
+
+            var savedBounds = new Rect(left.Value, top.Value, width, height);
+            var virtualScreen = new Rect(
+                SystemParameters.VirtualScreenLeft,
+                SystemParameters.VirtualScreenTop,
+                SystemParameters.VirtualScreenWidth,
+                SystemParameters.VirtualScreenHeight);
+
+            return savedBounds.IntersectsWith(virtualScreen);
         }
 
         private void SaveTheme()
         {
+            Rect normalBounds = WindowState == WindowState.Normal
+                ? new Rect(Left, Top, Width, Height)
+                : RestoreBounds;
+
             var settings = new ThemeSettings
             {
                 Theme = isBlueTheme ? ThemeBlue : ThemeRose,
-                SidebarCollapsed = isSidebarCollapsed
+                SidebarCollapsed = isSidebarCollapsed,
+                WindowLeft = normalBounds.Left,
+                WindowTop = normalBounds.Top,
+                WindowWidth = normalBounds.Width,
+                WindowHeight = normalBounds.Height,
+                WindowState = WindowState == WindowState.Minimized
+                    ? nameof(WindowState.Normal)
+                    : WindowState.ToString()
             };
 
             string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
@@ -443,6 +505,16 @@ namespace MonTableurApp
             public string Theme { get; set; } = ThemeRose;
 
             public bool SidebarCollapsed { get; set; }
+
+            public double? WindowLeft { get; set; }
+
+            public double? WindowTop { get; set; }
+
+            public double? WindowWidth { get; set; }
+
+            public double? WindowHeight { get; set; }
+
+            public string? WindowState { get; set; }
         }
     }
 }

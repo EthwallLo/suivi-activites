@@ -14,6 +14,7 @@ namespace MonTableurApp.Models
         private string? nomEssai;
         private string? statut;
         private string? resultatTraitement;
+        private string? categorie;
         private List<string> statutsDisponibles = new();
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -56,6 +57,22 @@ namespace MonTableurApp.Models
                 OnPropertyChanged(nameof(CouleurIndicateurEtat));
                 OnPropertyChanged(nameof(ProgressionPourcentage));
                 OnPropertyChanged(nameof(ProgressionTexte));
+            }
+        }
+
+        [JsonIgnore]
+        public string? Categorie
+        {
+            get => categorie;
+            set
+            {
+                if (categorie == value)
+                {
+                    return;
+                }
+
+                categorie = value;
+                OnPropertyChanged(nameof(Categorie));
             }
         }
 
@@ -210,19 +227,31 @@ namespace MonTableurApp.Models
         private static string RepairMojibakeIfNeeded(string? value)
         {
             string input = value ?? string.Empty;
-            if (!input.Contains('\u00C3') && !input.Contains('\u00C2') && !input.Contains('\u00E2'))
+            if (!input.Contains('\u00C3') &&
+                !input.Contains('\u00C2') &&
+                !input.Contains('\u00E2') &&
+                !input.Contains('\uFFFD'))
             {
                 return input;
             }
 
             try
             {
-                return Encoding.UTF8.GetString(Encoding.Latin1.GetBytes(input));
+                if (input.Contains('\u00C3') || input.Contains('\u00C2') || input.Contains('\u00E2'))
+                {
+                    input = Encoding.UTF8.GetString(Encoding.Latin1.GetBytes(input));
+                }
             }
             catch (ArgumentException)
             {
-                return input;
             }
+
+            return input
+                .Replace("C\uFFFDbles", "Câbles")
+                .Replace("C\uFFFDble", "Câble")
+                .Replace("activit\uFFFDs", "activités")
+                .Replace("Activit\uFFFDs", "Activités")
+                .Replace("P\uFFFDtroth\uFFFDne", "Pétrothène");
         }
     }
 }

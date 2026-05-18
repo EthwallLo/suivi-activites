@@ -1,7 +1,9 @@
-﻿[
+[
   {
     "NumeroProjet": "DC_107",
     "NomProduit": "LM053DSR",
+    "FamilleProduit": "",
+    "ReferenceProduit": "",
     "Client": "Free",
     "Demandeur": "RUC",
     "TypeActivite": "Qualification",
@@ -10,11 +12,130 @@
     "DateDebut": "07/04/2026",
     "DatePrevisionnelle": "17/06/2026",
     "DateFin": "",
-    "Commentaires": ""
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
   },
   {
     "NumeroProjet": "AO_2604",
     "NomProduit": "AO_Bouygues",
+    "FamilleProduit": "",
+    "ReferenceProduit": "",
     "Client": "Bouygues",
     "Demandeur": "RUC",
     "TypeActivite": "Appel d'offre",
@@ -23,11 +144,130 @@
     "DateDebut": "09/04/2026",
     "DatePrevisionnelle": "",
     "DateFin": "14/04/2026",
-    "Commentaires": ""
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
   },
   {
     "NumeroProjet": "DC_100",
     "NomProduit": "LX030PU-TPE",
+    "FamilleProduit": "",
+    "ReferenceProduit": "",
     "Client": "N/A",
     "Demandeur": "RUC",
     "TypeActivite": "Investigation",
@@ -36,11 +276,130 @@
     "DateDebut": "",
     "DatePrevisionnelle": "",
     "DateFin": "",
-    "Commentaires": ""
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "Fait",
+        "ResultatTraitement": "OK"
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
   },
   {
     "NumeroProjet": "25LB_048",
     "NomProduit": "Invisible cable",
+    "FamilleProduit": "",
+    "ReferenceProduit": "",
     "Client": "DTAG",
     "Demandeur": "XAL",
     "TypeActivite": "Qualification",
@@ -49,11 +408,130 @@
     "DateDebut": "",
     "DatePrevisionnelle": "",
     "DateFin": "",
-    "Commentaires": ""
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
   },
   {
     "NumeroProjet": "AO_2606",
     "NomProduit": "AO Openreach BT",
+    "FamilleProduit": "",
+    "ReferenceProduit": "",
     "Client": "BT",
     "Demandeur": "RUC",
     "TypeActivite": "Appel d'offre",
@@ -62,7 +540,783 @@
     "DateDebut": "",
     "DatePrevisionnelle": "",
     "DateFin": "",
-    "Commentaires": ""
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
+  },
+  {
+    "NumeroProjet": "25LB_050",
+    "NomProduit": "FRP 1mm promocore",
+    "FamilleProduit": "FRP",
+    "ReferenceProduit": "",
+    "Client": "Orange",
+    "Demandeur": "RUC",
+    "TypeActivite": "Qualification",
+    "DossierRacine": "",
+    "Statut": "Rapport en cours",
+    "DateDebut": "",
+    "DatePrevisionnelle": "",
+    "DateFin": "",
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "Fait",
+        "ResultatTraitement": "OK"
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "Fait",
+        "ResultatTraitement": "OK"
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      }
+    ]
+  },
+  {
+    "NumeroProjet": "DC_XXX",
+    "NomProduit": "L1084 61F",
+    "FamilleProduit": "Câble drop",
+    "ReferenceProduit": "",
+    "Client": "Orange",
+    "Demandeur": "RUC",
+    "TypeActivite": "Qualification",
+    "DossierRacine": "",
+    "Statut": "À faire",
+    "DateDebut": "",
+    "DatePrevisionnelle": "",
+    "DateFin": "",
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "Fait",
+        "ResultatTraitement": "OK"
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
+  },
+  {
+    "NumeroProjet": "26LB_061",
+    "NomProduit": "LM4 Pétrothène",
+    "FamilleProduit": "Câble drop",
+    "ReferenceProduit": "",
+    "Client": "N/A",
+    "Demandeur": "RUC",
+    "TypeActivite": "Qualification",
+    "DossierRacine": "",
+    "Statut": "À faire",
+    "DateDebut": "",
+    "DatePrevisionnelle": "",
+    "DateFin": "",
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
+  },
+  {
+    "NumeroProjet": "26LB_061",
+    "NomProduit": "LM051 Pétrothène",
+    "FamilleProduit": "Câble drop",
+    "ReferenceProduit": "",
+    "Client": "Orange",
+    "Demandeur": "RUC",
+    "TypeActivite": "Qualification",
+    "DossierRacine": "",
+    "Statut": "À faire",
+    "DateDebut": "",
+    "DatePrevisionnelle": "",
+    "DateFin": "",
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      }
+    ]
+  },
+  {
+    "NumeroProjet": "X",
+    "NomProduit": "SEPAP 1000h ECO0350 / BENVIC HFM 204",
+    "FamilleProduit": "Autre",
+    "ReferenceProduit": "",
+    "Client": "Orange",
+    "Demandeur": "RUC",
+    "TypeActivite": "Qualification",
+    "DossierRacine": "W:\\Courant\\Quentin\\Essais en cours\\Traction matières\\SEPAP 1000h",
+    "Statut": "Pré-qualification en cours",
+    "DateDebut": "13/05/2026",
+    "DatePrevisionnelle": "22/05/2026",
+    "DateFin": "22/05/2026",
+    "Commentaires": "",
+    "Essais": [
+      {
+        "NomEssai": "Traction 100m",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cyclage thermique",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Statique Bending",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vieillissement",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "OTDR",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Dimensionnel",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Crush",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Cut through",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction verticale",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Kink",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Repeated bending",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Torsion",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion marquage",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Abrasion gaine",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Friction gaine",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction pince",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Traction spiralé",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Pénétration d'eau",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Petite flamme",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Vibration éolienne",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Collage",
+        "Statut": "À faire",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "Exposition UV",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      },
+      {
+        "NomEssai": "CPR",
+        "Statut": "Non concerné",
+        "ResultatTraitement": ""
+      }
+    ]
   }
 ]
-

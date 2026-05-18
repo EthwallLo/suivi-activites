@@ -1221,7 +1221,7 @@
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="True"
-                      CanUserResizeColumns="False"
+                      CanUserResizeColumns="True"
                       GridLinesVisibility="None"
                       HeadersVisibility="Column"
                       RowHeaderWidth="0"

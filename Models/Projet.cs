@@ -201,17 +201,32 @@ namespace MonTableurApp.Models
 
         [JsonIgnore]
         public IEnumerable<EssaiSuivi> EssaisPreQualification =>
-            Essais.Where(essai => EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty));
+            Essais.Where(essai => IsPreQualificationEssai(essai));
 
         [JsonIgnore]
         public IEnumerable<EssaiSuivi> EssaisQualification =>
-            Essais.Where(essai =>
-                !EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty) &&
-                !EssaisExterieursNames.Contains(essai.NomEssai ?? string.Empty));
+            Essais.Where(essai => IsQualificationEssai(essai));
 
         [JsonIgnore]
         public IEnumerable<EssaiSuivi> EssaisExterieurs =>
-            Essais.Where(essai => EssaisExterieursNames.Contains(essai.NomEssai ?? string.Empty));
+            Essais.Where(essai => IsExterieurEssai(essai));
+
+        private static bool IsPreQualificationEssai(EssaiSuivi essai)
+        {
+            return string.Equals(essai.Categorie, "Pré-qualification", System.StringComparison.OrdinalIgnoreCase) ||
+                   (string.IsNullOrWhiteSpace(essai.Categorie) && EssaisPreQualificationNames.Contains(essai.NomEssai ?? string.Empty));
+        }
+
+        private static bool IsExterieurEssai(EssaiSuivi essai)
+        {
+            return string.Equals(essai.Categorie, "Extérieurs", System.StringComparison.OrdinalIgnoreCase) ||
+                   (string.IsNullOrWhiteSpace(essai.Categorie) && EssaisExterieursNames.Contains(essai.NomEssai ?? string.Empty));
+        }
+
+        private static bool IsQualificationEssai(EssaiSuivi essai)
+        {
+            return !IsPreQualificationEssai(essai) && !IsExterieurEssai(essai);
+        }
 
         private static DateTime? ParseDate(string? value)
         {

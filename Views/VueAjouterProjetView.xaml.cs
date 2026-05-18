@@ -237,22 +237,20 @@ namespace MonTableurApp.Views
                 return;
             }
 
-            IEnumerable<string> essaisQualification = viewModel.NomsEssais
-                .Where(nomEssai =>
-                    !EssaisPreQualification.Contains(nomEssai) &&
-                    !EssaisExterieurs.Contains(nomEssai));
-
-            foreach (string nomEssai in EssaisPreQualification)
+            foreach (string nomEssai in viewModel.NomsEssais.Where(nomEssai =>
+                         string.Equals(viewModel.GetEssaiCategory(nomEssai), "Pré-qualification", StringComparison.OrdinalIgnoreCase)))
             {
                 AddEssaiSelectionItem(EssaisPreQualificationSelection, nomEssai);
             }
 
-            foreach (string nomEssai in essaisQualification)
+            foreach (string nomEssai in viewModel.NomsEssais.Where(nomEssai =>
+                         string.Equals(viewModel.GetEssaiCategory(nomEssai), "Qualification", StringComparison.OrdinalIgnoreCase)))
             {
                 AddEssaiSelectionItem(EssaisQualificationSelection, nomEssai);
             }
 
-            foreach (string nomEssai in EssaisExterieurs)
+            foreach (string nomEssai in viewModel.NomsEssais.Where(nomEssai =>
+                         string.Equals(viewModel.GetEssaiCategory(nomEssai), "Extérieurs", StringComparison.OrdinalIgnoreCase)))
             {
                 AddEssaiSelectionItem(EssaisExterieursSelection, nomEssai);
             }
@@ -275,10 +273,13 @@ namespace MonTableurApp.Views
 
         private IEnumerable<EssaiSuivi> BuildEssaisForNewProject()
         {
+            MainViewModel? viewModel = DataContext as MainViewModel;
+
             return GetAllEssaisSelectionItems()
                 .Select(item => new EssaiSuivi
                 {
                     NomEssai = item.NomEssai,
+                    Categorie = viewModel?.GetEssaiCategory(item.NomEssai),
                     Statut = item.IsSelected ? "À faire" : "Non concerné"
                 })
                 .ToList();

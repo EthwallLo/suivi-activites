@@ -53,7 +53,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,10"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="MinHeight" Value="48"/>
+            <Setter Property="MinHeight" Value="56"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">

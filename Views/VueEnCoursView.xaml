@@ -57,6 +57,26 @@
             <Setter Property="Maximum" Value="100"/>
             <Setter Property="Foreground" Value="{DynamicResource InfoCardAccentBrush}"/>
             <Setter Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                ClipToBounds="True"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Border x:Name="PART_Track"
+                                        Background="Transparent"
+                                        CornerRadius="5"/>
+                                <Border x:Name="PART_Indicator"
+                                        HorizontalAlignment="Left"
+                                        Background="{TemplateBinding Foreground}"
+                                        CornerRadius="5"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <DataTemplate x:Key="ProjetEnCoursCardTemplate">
@@ -90,17 +110,13 @@
                     </Grid>
 
                     <Grid Grid.Row="1" Margin="0,16,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
                         <TextBlock Text="{Binding Statut}"
                                    FontSize="13"
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource PrimaryTitleBrush}"
                                    TextWrapping="Wrap"/>
-                        <TextBlock Grid.Column="1"
+                        <TextBlock Visibility="Collapsed"
+                                   Grid.Column="1"
                                    Text="{Binding DateDebutLabel, StringFormat=Debut {0}}"
                                    FontSize="12"
                                    Foreground="{DynamicResource SecondaryTextBrush}"
@@ -128,10 +144,6 @@
                                      Value="{Binding ProgressionPourcentage, Mode=OneWay}"
                                      Style="{StaticResource EnCoursProgressBarStyle}"/>
 
-                        <TextBlock Margin="0,8,0,0"
-                                   Text="{Binding ResumeEtat}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource SummaryValueBrush}"/>
                     </StackPanel>
 
                     <Grid Grid.Row="3" Margin="0,18,0,0">
@@ -345,7 +357,8 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
-                    <Border Padding="26"
+                    <Border Visibility="Collapsed"
+                            Padding="26"
                             CornerRadius="30"
                             BorderThickness="1"
                             BorderBrush="{DynamicResource InfoCardBorderBrush}"
@@ -429,11 +442,6 @@
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                        <TextBlock Grid.Column="1"
-                                   VerticalAlignment="Center"
-                                   Text="{Binding EssaisRestantsDashboardTotal, StringFormat={}{0} essais restants à traiter}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource SummaryValueBrush}"/>
                     </Grid>
 
                     <ItemsControl ItemsSource="{Binding ProjetsEnCoursDashboard}"

@@ -23,8 +23,8 @@
 
         <Style x:Key="TimelineTaskCardStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="Background" Value="{DynamicResource SummaryLavenderBackgroundBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource SummaryLavenderBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="Margin" Value="10,0"/>
@@ -48,6 +48,89 @@
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="{TemplateBinding Padding}"/>
                         </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TimeEditTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource RoundedTextBoxStyle}">
+            <Setter Property="Width" Value="56"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="7,3"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="InvisibleRepeatButtonStyle" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Rectangle Fill="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CuteThumbStyle" TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="ThumbBorder"
+                                Background="{DynamicResource ScrollThumbBrush}"
+                                CornerRadius="8"
+                                Margin="1"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ThumbBorder" Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Border x:Name="TrackBorder"
+                                    Background="{DynamicResource ScrollTrackBrush}"
+                                    CornerRadius="8"/>
+                            <Track x:Name="PART_Track"
+                                   IsDirectionReversed="False">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton x:Name="DecreaseButton"
+                                                  Style="{StaticResource InvisibleRepeatButtonStyle}"
+                                                  Command="ScrollBar.PageLeftCommand"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource CuteThumbStyle}"/>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton x:Name="IncreaseButton"
+                                                  Style="{StaticResource InvisibleRepeatButtonStyle}"
+                                                  Command="ScrollBar.PageRightCommand"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter TargetName="TrackBorder" Property="Height" Value="12"/>
+                                <Setter TargetName="TrackBorder" Property="Margin" Value="0,10,0,2"/>
+                                <Setter Property="Height" Value="24"/>
+                            </Trigger>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter TargetName="TrackBorder" Property="Width" Value="12"/>
+                                <Setter TargetName="TrackBorder" Property="Margin" Value="2,0,0,0"/>
+                                <Setter Property="Width" Value="16"/>
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
+                                <Setter TargetName="DecreaseButton" Property="Command" Value="ScrollBar.PageUpCommand"/>
+                                <Setter TargetName="IncreaseButton" Property="Command" Value="ScrollBar.PageDownCommand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -109,6 +192,54 @@
             <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
         </Style>
 
+        <Style x:Key="AgendaCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border x:Name="CheckBorder"
+                                    Width="22"
+                                    Height="22"
+                                    Background="{DynamicResource SearchInputBackgroundBrush}"
+                                    BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                                    BorderThickness="1.5"
+                                    CornerRadius="11"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="CheckMark"
+                                           Text="&#xE73E;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="10"
+                                           Foreground="{DynamicResource PrimaryTitleBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Opacity="0"/>
+                            </Border>
+
+                            <ContentPresenter Grid.Column="1"
+                                              Margin="9,0,0,0"
+                                              VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                                <Setter TargetName="CheckMark" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="HourStripeStyle" TargetType="Border">
             <Setter Property="Height" Value="48"/>
             <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
@@ -118,8 +249,8 @@
 
         <Style x:Key="NonWorkingTimeBlockStyle" TargetType="Border">
             <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="Background" Value="#E8EBEF"/>
-            <Setter Property="BorderBrush" Value="#D3D8E0"/>
+            <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,1,0,1"/>
             <Setter Property="ClipToBounds" Value="True"/>
         </Style>
@@ -384,7 +515,7 @@
                     </Grid>
 
                     <ScrollViewer Grid.Row="2"
-                                  HorizontalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -474,6 +605,7 @@
                                             <CheckBox Content="Jour travaillé"
                                                       Margin="0,10,0,0"
                                                       IsChecked="{Binding IsWorkingDay, Mode=TwoWay}"
+                                                      Style="{StaticResource AgendaCheckBoxStyle}"
                                                       FontSize="12"
                                                       FontWeight="SemiBold"
                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
@@ -514,6 +646,7 @@
                                             <CheckBox Content="Pause midi"
                                                       Margin="0,10,0,0"
                                                       IsChecked="{Binding IsLunchBreakEnabled, Mode=TwoWay}"
+                                                      Style="{StaticResource AgendaCheckBoxStyle}"
                                                       FontSize="12"
                                                       FontWeight="SemiBold"
                                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
@@ -633,7 +766,7 @@
                                                                        VerticalAlignment="Center"
                                                                        FontSize="10"
                                                                        FontWeight="SemiBold"
-                                                                       Foreground="#646A73"
+                                                                       Foreground="{DynamicResource SummaryValueBrush}"
                                                                        TextTrimming="CharacterEllipsis">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
@@ -662,9 +795,13 @@
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding DisplaySegments.Count}" Value="0">
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding DisplaySegments.Count}" Value="0"/>
+                                                                    <Condition Binding="{Binding IsWorkingDay}" Value="True"/>
+                                                                </MultiDataTrigger.Conditions>
                                                                 <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
+                                                            </MultiDataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </TextBlock.Style>
@@ -694,14 +831,14 @@
                                                                     <ColumnDefinition Width="*"/>
                                                                 </Grid.ColumnDefinitions>
 
-                                                                <Border Background="{DynamicResource SummaryLavenderForegroundBrush}"
+                                                                <Border Background="{DynamicResource InfoCardAccentBrush}"
                                                                         CornerRadius="16,0,0,16"/>
 
                                                                 <StackPanel Grid.Column="1"
                                                                             Margin="8,0,0,0">
                                                                     <Grid>
                                                                         <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="*" MinWidth="0"/>
                                                                             <ColumnDefinition Width="Auto"/>
                                                                             <ColumnDefinition Width="Auto"/>
                                                                         </Grid.ColumnDefinitions>
@@ -709,7 +846,7 @@
                                                                                    FontSize="12"
                                                                                    FontWeight="SemiBold"
                                                                                    Foreground="{DynamicResource PrimaryTitleBrush}"
-                                                                                   TextWrapping="Wrap"/>
+                                                                                   TextTrimming="CharacterEllipsis"/>
                                                                         <Border Grid.Column="1"
                                                                                 Margin="8,0,0,0"
                                                                                 Padding="7,3"
@@ -732,11 +869,95 @@
                                                                                 Click="RetirerEssaiAgenda_Click"/>
                                                                     </Grid>
 
-                                                                    <TextBlock Text="{Binding TimeRangeLabel}"
-                                                                               Margin="0,4,0,0"
-                                                                               FontSize="11"
-                                                                               FontWeight="SemiBold"
-                                                                               Foreground="{DynamicResource SummaryValueBrush}"/>
+                                                                    <StackPanel Margin="0,4,0,0"
+                                                                                Orientation="Horizontal">
+                                                                        <Grid>
+                                                                            <Border Padding="7,3"
+                                                                                    Background="{DynamicResource SearchInputBackgroundBrush}"
+                                                                                    BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                                                                                    BorderThickness="1"
+                                                                                    CornerRadius="10"
+                                                                                    Cursor="IBeam"
+                                                                                    MouseLeftButtonDown="SegmentStartTime_MouseLeftButtonDown">
+                                                                                <Border.Style>
+                                                                                    <Style TargetType="Border">
+                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding IsEditingStartTime}" Value="True">
+                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </Border.Style>
+                                                                                <TextBlock Text="{Binding StartTimeText}"
+                                                                                           FontSize="11"
+                                                                                           FontWeight="SemiBold"
+                                                                                           Foreground="{DynamicResource SummaryValueBrush}"/>
+                                                                            </Border>
+
+                                                                            <TextBox Text="{Binding StartTimeText, Mode=OneWay}"
+                                                                                     PreviewKeyDown="SegmentTimeEdit_PreviewKeyDown"
+                                                                                     LostFocus="SegmentStartTimeEdit_LostFocus">
+                                                                                <TextBox.Style>
+                                                                                    <Style TargetType="TextBox" BasedOn="{StaticResource TimeEditTextBoxStyle}">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding IsEditingStartTime}" Value="True">
+                                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </TextBox.Style>
+                                                                            </TextBox>
+                                                                        </Grid>
+
+                                                                        <TextBlock Text="-"
+                                                                                   Margin="5,0"
+                                                                                   FontSize="11"
+                                                                                   FontWeight="SemiBold"
+                                                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                                   VerticalAlignment="Center"/>
+
+                                                                        <Grid>
+                                                                            <Border Padding="7,3"
+                                                                                    Background="{DynamicResource SearchInputBackgroundBrush}"
+                                                                                    BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                                                                                    BorderThickness="1"
+                                                                                    CornerRadius="10"
+                                                                                    Cursor="IBeam"
+                                                                                    MouseLeftButtonDown="SegmentEndTime_MouseLeftButtonDown">
+                                                                                <Border.Style>
+                                                                                    <Style TargetType="Border">
+                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding IsEditingEndTime}" Value="True">
+                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </Border.Style>
+                                                                                <TextBlock Text="{Binding EndTimeText}"
+                                                                                           FontSize="11"
+                                                                                           FontWeight="SemiBold"
+                                                                                           Foreground="{DynamicResource SummaryValueBrush}"/>
+                                                                            </Border>
+
+                                                                            <TextBox Text="{Binding EndTimeText, Mode=OneWay}"
+                                                                                     PreviewKeyDown="SegmentTimeEdit_PreviewKeyDown"
+                                                                                     LostFocus="SegmentEndTimeEdit_LostFocus">
+                                                                                <TextBox.Style>
+                                                                                    <Style TargetType="TextBox" BasedOn="{StaticResource TimeEditTextBoxStyle}">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding IsEditingEndTime}" Value="True">
+                                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </TextBox.Style>
+                                                                            </TextBox>
+                                                                        </Grid>
+                                                                    </StackPanel>
                                                                     <TextBlock Text="{Binding NomProduit}"
                                                                                Margin="0,3,0,0"
                                                                                FontSize="10"
@@ -769,7 +990,7 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
-                                            <Border Background="#A6F1F1F5"
+                                            <Border Background="{DynamicResource DataGridRowSelectedBrush}"
                                                     CornerRadius="18"
                                                     IsHitTestVisible="False">
                                                 <Border.Style>

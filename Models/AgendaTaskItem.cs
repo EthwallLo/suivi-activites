@@ -10,6 +10,7 @@ namespace MonTableurApp.Models
         private double timelineTop;
         private double blockHeight = 52;
         private int? scheduledStartMinutes;
+        private bool hasCustomDureeHeures;
         private Thickness timelineMargin = new(10, 0, 10, 0);
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -67,6 +68,21 @@ namespace MonTableurApp.Models
 
                 scheduledStartMinutes = value;
                 OnPropertyChanged(nameof(ScheduledStartMinutes));
+            }
+        }
+
+        public bool HasCustomDureeHeures
+        {
+            get => hasCustomDureeHeures;
+            set
+            {
+                if (hasCustomDureeHeures == value)
+                {
+                    return;
+                }
+
+                hasCustomDureeHeures = value;
+                OnPropertyChanged(nameof(HasCustomDureeHeures));
             }
         }
 
