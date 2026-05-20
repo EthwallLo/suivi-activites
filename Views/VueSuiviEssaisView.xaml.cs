@@ -103,6 +103,23 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void ConfigurerEssaiPlanning_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainViewModel viewModel ||
+                (sender as FrameworkElement)?.DataContext is not EssaiSuivi essai ||
+                viewModel.SelectedProjetEssais is not Projet projet)
+            {
+                return;
+            }
+
+            var window = new EditEssaiPlanningWindow(viewModel, projet, essai)
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            window.ShowDialog();
+        }
+
         private void VueSuiviEssaisView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)

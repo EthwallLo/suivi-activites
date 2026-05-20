@@ -15,7 +15,16 @@ namespace MonTableurApp.Models
         private string? statut;
         private string? resultatTraitement;
         private string? categorie;
+        private string? referenceProduitUtilisee;
+        private int nombrePassages;
+        private bool hasCustomPlanning;
+        private double customDureeMiseEnPlaceHeures;
+        private double customDureeEssaiHeures;
+        private double customDureeRepriseHeures;
+        private bool customEstArrierePlan;
         private List<string> statutsDisponibles = new();
+        private const int MaxNombrePassages = 5;
+        private static readonly IReadOnlyList<int> PassageCounts = Enumerable.Range(1, MaxNombrePassages).ToList();
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -31,6 +40,7 @@ namespace MonTableurApp.Models
 
                 nomEssai = value;
                 OnPropertyChanged(nameof(NomEssai));
+                OnPropertyChanged(nameof(AfficheNombrePassages));
             }
         }
 
@@ -92,6 +102,132 @@ namespace MonTableurApp.Models
                 OnPropertyChanged(nameof(CouleurIndicateurEtat));
             }
         }
+
+        public string? ReferenceProduitUtilisee
+        {
+            get => referenceProduitUtilisee;
+            set
+            {
+                if (referenceProduitUtilisee == value)
+                {
+                    return;
+                }
+
+                referenceProduitUtilisee = value;
+                OnPropertyChanged(nameof(ReferenceProduitUtilisee));
+                OnPropertyChanged(nameof(ReferenceProduitUtiliseeLabel));
+            }
+        }
+
+        [JsonIgnore]
+        public string ReferenceProduitUtiliseeLabel => string.IsNullOrWhiteSpace(ReferenceProduitUtilisee)
+            ? "Réf. à préciser"
+            : ReferenceProduitUtilisee;
+
+        public int NombrePassages
+        {
+            get => System.Math.Min(MaxNombrePassages, nombrePassages <= 0 ? 1 : nombrePassages);
+            set
+            {
+                int normalizedValue = System.Math.Min(MaxNombrePassages, System.Math.Max(1, value));
+                if (nombrePassages == normalizedValue)
+                {
+                    return;
+                }
+
+                nombrePassages = normalizedValue;
+                OnPropertyChanged(nameof(NombrePassages));
+                OnPropertyChanged(nameof(AfficheNombrePassages));
+            }
+        }
+
+        public bool HasCustomPlanning
+        {
+            get => hasCustomPlanning;
+            set
+            {
+                if (hasCustomPlanning == value)
+                {
+                    return;
+                }
+
+                hasCustomPlanning = value;
+                OnPropertyChanged(nameof(HasCustomPlanning));
+                OnPropertyChanged(nameof(PlanningConfigurationLabel));
+            }
+        }
+
+        public double CustomDureeMiseEnPlaceHeures
+        {
+            get => customDureeMiseEnPlaceHeures;
+            set
+            {
+                if (System.Math.Abs(customDureeMiseEnPlaceHeures - value) < 0.001)
+                {
+                    return;
+                }
+
+                customDureeMiseEnPlaceHeures = value;
+                OnPropertyChanged(nameof(CustomDureeMiseEnPlaceHeures));
+            }
+        }
+
+        public double CustomDureeEssaiHeures
+        {
+            get => customDureeEssaiHeures;
+            set
+            {
+                if (System.Math.Abs(customDureeEssaiHeures - value) < 0.001)
+                {
+                    return;
+                }
+
+                customDureeEssaiHeures = value;
+                OnPropertyChanged(nameof(CustomDureeEssaiHeures));
+            }
+        }
+
+        public double CustomDureeRepriseHeures
+        {
+            get => customDureeRepriseHeures;
+            set
+            {
+                if (System.Math.Abs(customDureeRepriseHeures - value) < 0.001)
+                {
+                    return;
+                }
+
+                customDureeRepriseHeures = value;
+                OnPropertyChanged(nameof(CustomDureeRepriseHeures));
+            }
+        }
+
+        public bool CustomEstArrierePlan
+        {
+            get => customEstArrierePlan;
+            set
+            {
+                if (customEstArrierePlan == value)
+                {
+                    return;
+                }
+
+                customEstArrierePlan = value;
+                OnPropertyChanged(nameof(CustomEstArrierePlan));
+            }
+        }
+
+        [JsonIgnore]
+        public bool HasNombrePassagesDefini => nombrePassages > 0;
+
+        [JsonIgnore]
+        public bool AfficheNombrePassages => IsRepeatedEssaiName(NomEssai) || NombrePassages > 1;
+
+        [JsonIgnore]
+        public IReadOnlyList<int> NombrePassagesDisponibles => PassageCounts;
+
+        [JsonIgnore]
+        public string PlanningConfigurationLabel => HasCustomPlanning ? "Perso" : "Défaut";
 
         [JsonIgnore]
         public List<string> StatutsDisponibles
@@ -199,6 +335,16 @@ namespace MonTableurApp.Models
             var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(color)!;
             brush.Freeze();
             return brush;
+        }
+
+        private static bool IsRepeatedEssaiName(string? nomEssai)
+        {
+            return NormalizeValue(nomEssai) is
+                "crush" or
+                "cut through" or
+                "traction pince" or
+                "traction spirale" or
+                "traction spiralin";
         }
 
         private static string NormalizeValue(string? value)

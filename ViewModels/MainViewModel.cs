@@ -112,12 +112,14 @@ namespace MonTableurApp.ViewModels
         private const string EssaisSortStartDate = "start-date";
         private const string EssaisSortStatus = "status";
         private const string EssaisSortRemainingTests = "remaining-tests";
+        private const int ReferencePropertiesVersion = 2;
         private const string EssaiCategoryPreQualification = "Pré-qualification";
         private const string EssaiCategoryQualification = "Qualification";
         private const string EssaiCategoryExterieurs = "Extérieurs";
         private const double AgendaHoursPerDay = 7.0;
-        private const double AgendaHourSlotHeight = 48.0;
+        private const double DefaultAgendaHourSlotHeight = 48.0;
         private const int AgendaSnapMinutes = 15;
+        private const int MaxEssaiRepetitions = 5;
         private const double AgendaScheduleEpsilon = 0.0001;
         private static readonly TimeSpan AgendaDisplayStartTime = TimeSpan.FromHours(7);
         private static readonly TimeSpan AgendaDisplayEndTime = TimeSpan.FromHours(18);
@@ -214,11 +216,13 @@ namespace MonTableurApp.ViewModels
         private int essaisRestantsDashboardTotal;
         private int avancementGlobalEnCoursPourcentage;
         private string agendaWeekTitle = string.Empty;
+        private double agendaHourSlotHeight = DefaultAgendaHourSlotHeight;
         private readonly Dictionary<string, HashSet<string>> essaisDefaultsByFamille = new(StringComparer.OrdinalIgnoreCase);
         private readonly Stack<AgendaUndoSnapshot> agendaUndoSnapshots = new();
         private readonly Stack<EssaisUndoSnapshot> essaisUndoSnapshots = new();
         private readonly Stack<ProjectTableUndoSnapshot> projectTableUndoSnapshots = new();
         private bool isRestoringAgendaState;
+        private bool isRefreshingEssaiDefinitionMetadata;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -667,6 +671,8 @@ namespace MonTableurApp.ViewModels
             }
         }
 
+        public double AgendaHourSlotHeight => agendaHourSlotHeight;
+
         public IEnumerable<string> AgendaDisplayGridSlots
         {
             get
@@ -681,6 +687,33 @@ namespace MonTableurApp.ViewModels
         }
 
         public double AgendaTimelineHeight => (AgendaDisplayEndTime - AgendaDisplayStartTime).TotalHours * AgendaHourSlotHeight;
+
+        public void UpdateAgendaTimelineViewportHeight(double availableHeight)
+        {
+            if (double.IsNaN(availableHeight) || double.IsInfinity(availableHeight) || availableHeight <= 0)
+            {
+                return;
+            }
+
+            double displayHours = (AgendaDisplayEndTime - AgendaDisplayStartTime).TotalHours;
+            if (displayHours <= 0)
+            {
+                return;
+            }
+
+            double newHourSlotHeight = Math.Max(
+                DefaultAgendaHourSlotHeight,
+                Math.Floor(availableHeight / displayHours));
+            if (Math.Abs(agendaHourSlotHeight - newHourSlotHeight) < 0.5)
+            {
+                return;
+            }
+
+            agendaHourSlotHeight = newHourSlotHeight;
+            RecalculateAgendaWeek();
+            OnPropertyChanged(nameof(AgendaHourSlotHeight));
+            RefreshAgendaCollections();
+        }
 
         public void AjouterProjet(Projet projet)
         {
@@ -1023,10 +1056,77 @@ namespace MonTableurApp.ViewModels
                    GetDefaultEssaiCategory(nomEssai);
         }
 
+        public EssaiPlanningValues GetDefaultEssaiPlanning(EssaiSuivi essai)
+        {
+            EssaiDefinitionItem? definition = EssaisDefinitions.FirstOrDefault(item =>
+                NormalizeText(item.Nom) == NormalizeText(essai.NomEssai));
+
+            return new EssaiPlanningValues(
+                definition?.DureeMiseEnPlaceHeures ?? GetDefaultEssaiSetupDurationHours(essai.NomEssai),
+                definition?.DureeEssaiHeures ?? GetDefaultEssaiDurationHours(essai.NomEssai),
+                definition?.DureeRepriseHeures ?? GetDefaultEssaiRecoveryDurationHours(essai.NomEssai),
+                definition?.EstArrierePlan ?? GetDefaultEssaiIsBackground(essai.NomEssai));
+        }
+
+        public EssaiPlanningValues GetEffectiveEssaiPlanning(EssaiSuivi essai)
+        {
+            if (essai.HasCustomPlanning)
+            {
+                return new EssaiPlanningValues(
+                    Math.Max(0, essai.CustomDureeMiseEnPlaceHeures),
+                    Math.Max(0, essai.CustomDureeEssaiHeures),
+                    Math.Max(0, essai.CustomDureeRepriseHeures),
+                    essai.CustomEstArrierePlan);
+            }
+
+            return GetDefaultEssaiPlanning(essai);
+        }
+
+        public bool ApplyEssaiPlanningConfiguration(
+            EssaiSuivi essai,
+            double dureeMiseEnPlaceHeures,
+            double dureeEssaiHeures,
+            double dureeRepriseHeures,
+            bool estArrierePlan,
+            out string message)
+        {
+            if (!ValidateEssaiDurations(
+                    dureeMiseEnPlaceHeures,
+                    dureeEssaiHeures,
+                    essai.NombrePassages,
+                    dureeRepriseHeures,
+                    out message))
+            {
+                return false;
+            }
+
+            essai.CustomDureeMiseEnPlaceHeures = dureeMiseEnPlaceHeures;
+            essai.CustomDureeEssaiHeures = dureeEssaiHeures;
+            essai.CustomDureeRepriseHeures = dureeRepriseHeures;
+            essai.CustomEstArrierePlan = estArrierePlan;
+            essai.HasCustomPlanning = true;
+
+            message = "Configuration personnalisée enregistrée.";
+            return true;
+        }
+
+        public void ResetEssaiPlanningConfiguration(EssaiSuivi essai)
+        {
+            essai.HasCustomPlanning = false;
+            essai.CustomDureeMiseEnPlaceHeures = 0;
+            essai.CustomDureeEssaiHeures = 0;
+            essai.CustomDureeRepriseHeures = 0;
+            essai.CustomEstArrierePlan = false;
+        }
+
         public bool AddEssaiDefinition(
             string? nomEssai,
             string? categorie,
-            double dureeHeures,
+            double dureeMiseEnPlaceHeures,
+            double dureeEssaiHeures,
+            int nombrePassages,
+            double dureeRepriseHeures,
+            bool estArrierePlan,
             IEnumerable<string>? statuts,
             out EssaiDefinitionItem? addedItem,
             out string message)
@@ -1046,16 +1146,24 @@ namespace MonTableurApp.ViewModels
                 return false;
             }
 
-            if (dureeHeures <= 0)
+            if (!ValidateEssaiDurations(
+                    dureeMiseEnPlaceHeures,
+                    dureeEssaiHeures,
+                    nombrePassages,
+                    dureeRepriseHeures,
+                    out message))
             {
-                message = "La durée doit être supérieure à 0.";
                 return false;
             }
 
             addedItem = new EssaiDefinitionItem(
                 normalizedName,
                 NormalizeEssaiCategory(categorie),
-                dureeHeures,
+                dureeMiseEnPlaceHeures,
+                dureeEssaiHeures,
+                nombrePassages,
+                dureeRepriseHeures,
+                estArrierePlan,
                 NormalizeEssaiStatuses(statuts, normalizedName));
             EssaisDefinitions.Add(addedItem);
             NomsEssais.Add(normalizedName);
@@ -1069,16 +1177,13 @@ namespace MonTableurApp.ViewModels
         public bool RenameEssaiDefinition(
             EssaiDefinitionItem? currentItem,
             string? nomEssai,
-            string? categorie,
-            double dureeHeures,
-            IEnumerable<string>? statuts,
             out EssaiDefinitionItem? updatedItem,
             out string message)
         {
             updatedItem = currentItem;
             if (currentItem == null || !EssaisDefinitions.Contains(currentItem))
             {
-                message = "Sélectionne un essai à modifier.";
+                message = "Sélectionne un essai à renommer.";
                 return false;
             }
 
@@ -1091,35 +1196,97 @@ namespace MonTableurApp.ViewModels
 
             int duplicateIndex = FindReferenceIndex(NomsEssais, normalizedName);
             int currentIndex = FindReferenceIndex(NomsEssais, currentItem.Nom);
+            if (currentIndex < 0)
+            {
+                message = "L'essai sélectionné n'est plus disponible.";
+                return false;
+            }
+
             if (duplicateIndex >= 0 && duplicateIndex != currentIndex)
             {
                 message = "Cet essai existe déjà.";
                 return false;
             }
 
-            if (dureeHeures <= 0)
+            if (string.Equals(NormalizeText(currentItem.Nom), NormalizeText(normalizedName), StringComparison.Ordinal) &&
+                string.Equals(currentItem.Nom, normalizedName, StringComparison.Ordinal))
             {
-                message = "La durée doit être supérieure à 0.";
-                return false;
+                message = "Le nom de l'essai est inchangé.";
+                return true;
             }
 
             string oldName = currentItem.Nom;
             currentItem.Nom = normalizedName;
-            currentItem.Categorie = NormalizeEssaiCategory(categorie);
-            currentItem.DureeHeures = dureeHeures;
-            currentItem.Statuts = NormalizeEssaiStatuses(statuts, normalizedName);
-
-            if (currentIndex >= 0)
-            {
-                NomsEssais[currentIndex] = normalizedName;
-            }
-
+            NomsEssais[currentIndex] = normalizedName;
             RenameEssaiInProjects(oldName, currentItem);
             RenameEssaiInDefaults(oldName, normalizedName);
             SaveReferenceProperties();
             RefreshEssaisParDefautSelection();
             RefreshAfterEssaiDefinitionEdit();
-            message = "Essai modifié.";
+            message = "Essai renommé.";
+            return true;
+        }
+
+        public bool UpdateEssaiDefinition(
+            EssaiDefinitionItem? currentItem,
+            string? nomEssai,
+            string? categorie,
+            double dureeMiseEnPlaceHeures,
+            double dureeEssaiHeures,
+            int nombrePassages,
+            double dureeRepriseHeures,
+            bool estArrierePlan,
+            IEnumerable<string>? statuts,
+            out EssaiDefinitionItem? updatedItem,
+            out string message)
+        {
+            updatedItem = currentItem;
+            if (currentItem == null || !EssaisDefinitions.Contains(currentItem))
+            {
+                message = "Sélectionne un essai à enregistrer.";
+                return false;
+            }
+
+            string normalizedName = NormalizeReferenceValue(nomEssai);
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                message = "Le nom de l'essai ne peut pas être vide.";
+                return false;
+            }
+
+            if (!string.Equals(NormalizeText(currentItem.Nom), NormalizeText(normalizedName), StringComparison.Ordinal))
+            {
+                message = "Utilise Renommer pour changer le nom de l'essai.";
+                return false;
+            }
+
+            if (!ValidateEssaiDurations(
+                    dureeMiseEnPlaceHeures,
+                    dureeEssaiHeures,
+                    nombrePassages,
+                    dureeRepriseHeures,
+                    out message))
+            {
+                return false;
+            }
+
+            string normalizedCategory = NormalizeEssaiCategory(categorie);
+            List<string> normalizedStatuses = NormalizeEssaiStatuses(statuts, currentItem.Nom);
+            bool projectEssaiMetadataChanged =
+                !string.Equals(currentItem.Categorie, normalizedCategory, StringComparison.Ordinal) ||
+                !HaveSameReferenceValues(currentItem.Statuts, normalizedStatuses);
+
+            currentItem.Categorie = normalizedCategory;
+            currentItem.DureeMiseEnPlaceHeures = dureeMiseEnPlaceHeures;
+            currentItem.DureeEssaiHeures = dureeEssaiHeures;
+            currentItem.NombrePassages = nombrePassages;
+            currentItem.DureeRepriseHeures = dureeRepriseHeures;
+            currentItem.EstArrierePlan = estArrierePlan;
+            currentItem.Statuts = normalizedStatuses;
+
+            SaveReferenceProperties();
+            RefreshAfterEssaiDefinitionEdit(false, projectEssaiMetadataChanged);
+            message = "Propriétés de l'essai enregistrées.";
             return true;
         }
 
@@ -1160,6 +1327,51 @@ namespace MonTableurApp.ViewModels
             message = updatedProjects == 0
                 ? "Essai supprimé."
                 : $"Essai supprimé et retiré de {updatedProjects} ligne(s) d'essai.";
+            return true;
+        }
+
+        private static bool ValidateEssaiDurations(
+            double dureeMiseEnPlaceHeures,
+            double dureeEssaiHeures,
+            int nombrePassages,
+            double dureeRepriseHeures,
+            out string message)
+        {
+            if (dureeMiseEnPlaceHeures < 0 || dureeEssaiHeures < 0 || dureeRepriseHeures < 0)
+            {
+                message = "Les durees ne peuvent pas etre negatives.";
+                return false;
+            }
+
+            if (nombrePassages < 1)
+            {
+                message = "Le nombre de repetitions doit etre au moins egal a 1.";
+                return false;
+            }
+
+            if (nombrePassages > MaxEssaiRepetitions)
+            {
+                message = $"Le nombre de repetitions ne peut pas depasser {MaxEssaiRepetitions}.";
+                return false;
+            }
+
+            if (nombrePassages > 1 && dureeEssaiHeures <= AgendaScheduleEpsilon)
+            {
+                message = "Un essai repete doit avoir une duree d'essai superieure a 0.";
+                return false;
+            }
+
+            double totalHours = dureeMiseEnPlaceHeures +
+                                (dureeEssaiHeures * nombrePassages) +
+                                (dureeRepriseHeures * Math.Max(0, nombrePassages - 1));
+
+            if (totalHours <= AgendaScheduleEpsilon)
+            {
+                message = "Indique au moins une duree superieure a 0.";
+                return false;
+            }
+
+            message = string.Empty;
             return true;
         }
 
@@ -1221,11 +1433,17 @@ namespace MonTableurApp.ViewModels
                 "Rapport terminé",
                 "Fait"
             };
-            EssaisDefinitions = BuildEssaiDefinitions(referenceSettings?.Essais);
+            bool shouldMigrateReferenceProperties = referenceSettings != null &&
+                                                    referenceSettings.Version < ReferencePropertiesVersion;
+            EssaisDefinitions = BuildEssaiDefinitions(referenceSettings?.Essais, shouldMigrateReferenceProperties);
             NomsEssais = new ObservableCollection<string>(EssaisDefinitions.Select(essai => essai.Nom));
             InitializeEssaisDefaults(referenceSettings?.EssaisParFamille);
             selectedEssaisDefaultFamille = FamillesProduit.FirstOrDefault();
             RefreshEssaisParDefautSelection();
+            if (shouldMigrateReferenceProperties)
+            {
+                SaveReferenceProperties();
+            }
             ProjetSearchFields = new List<SearchFieldOption>
             {
                 new("NomProduit", "Produit"),
@@ -1310,7 +1528,9 @@ namespace MonTableurApp.ViewModels
             return values;
         }
 
-        private static ObservableCollection<EssaiDefinitionItem> BuildEssaiDefinitions(IEnumerable<EssaiDefinitionSettings>? savedValues)
+        private static ObservableCollection<EssaiDefinitionItem> BuildEssaiDefinitions(
+            IEnumerable<EssaiDefinitionSettings>? savedValues,
+            bool applyDefaultPlanningValues)
         {
             IEnumerable<EssaiDefinitionSettings> sourceValues = savedValues?.Any() == true
                 ? savedValues
@@ -1318,7 +1538,11 @@ namespace MonTableurApp.ViewModels
                 {
                     Nom = nomEssai,
                     Categorie = GetDefaultEssaiCategory(nomEssai),
-                    DureeHeures = GetDefaultEssaiDurationHours(nomEssai),
+                    DureeMiseEnPlaceHeures = GetDefaultEssaiSetupDurationHours(nomEssai),
+                    DureeEssaiHeures = GetDefaultEssaiDurationHours(nomEssai),
+                    EstArrierePlan = GetDefaultEssaiIsBackground(nomEssai),
+                    NombrePassages = GetDefaultEssaiPassageCount(nomEssai),
+                    DureeRepriseHeures = GetDefaultEssaiRecoveryDurationHours(nomEssai),
                     Statuts = GetDefaultEssaiStatuses(nomEssai)
                 });
 
@@ -1333,10 +1557,39 @@ namespace MonTableurApp.ViewModels
                     continue;
                 }
 
+                double setupDurationHours = sourceValue.DureeMiseEnPlaceHeures.HasValue
+                    ? Math.Max(0, sourceValue.DureeMiseEnPlaceHeures.Value)
+                    : GetDefaultEssaiSetupDurationHours(nom);
+                double testDurationHours = sourceValue.DureeEssaiHeures.HasValue
+                    ? Math.Max(0, sourceValue.DureeEssaiHeures.Value)
+                    : sourceValue.DureeHeures.GetValueOrDefault() > 0
+                        ? sourceValue.DureeHeures.GetValueOrDefault()
+                        : GetDefaultEssaiDurationHours(nom);
+                int passageCount = sourceValue.NombrePassages.GetValueOrDefault() > 0
+                    ? sourceValue.NombrePassages.GetValueOrDefault()
+                    : GetDefaultEssaiPassageCount(nom);
+                double recoveryDurationHours = sourceValue.DureeRepriseHeures.HasValue
+                    ? Math.Max(0, sourceValue.DureeRepriseHeures.Value)
+                    : GetDefaultEssaiRecoveryDurationHours(nom);
+                bool isBackground = sourceValue.EstArrierePlan ?? GetDefaultEssaiIsBackground(nom);
+
+                if (applyDefaultPlanningValues && HasDefaultPlanningValues(nom))
+                {
+                    setupDurationHours = GetDefaultEssaiSetupDurationHours(nom);
+                    testDurationHours = GetDefaultEssaiDurationHours(nom);
+                    passageCount = GetDefaultEssaiPassageCount(nom);
+                    recoveryDurationHours = GetDefaultEssaiRecoveryDurationHours(nom);
+                    isBackground = GetDefaultEssaiIsBackground(nom);
+                }
+
                 values.Add(new EssaiDefinitionItem(
                     nom,
                     NormalizeEssaiCategory(sourceValue.Categorie),
-                    sourceValue.DureeHeures > 0 ? sourceValue.DureeHeures : GetDefaultEssaiDurationHours(nom),
+                    setupDurationHours,
+                    testDurationHours,
+                    passageCount,
+                    recoveryDurationHours,
+                    isBackground,
                     NormalizeEssaiStatuses(sourceValue.Statuts, nom)));
             }
 
@@ -1398,11 +1651,104 @@ namespace MonTableurApp.ViewModels
 
         private static double GetDefaultEssaiDurationHours(string? nomEssai)
         {
+            switch (NormalizeText(nomEssai))
+            {
+                case "traction 100m":
+                case "crush":
+                case "traction pince":
+                case "traction spirale":
+                case "traction spiralin":
+                case "repeated bending":
+                    return 1.5;
+                case "cut through":
+                    return 1;
+                case "penetration d'eau":
+                    return 49;
+                case "vibration eolienne":
+                    return 98;
+            }
+
             double dureeJours = AgendaDureesEssais.TryGetValue(nomEssai ?? string.Empty, out double value)
                 ? value
                 : 0.25;
 
             return dureeJours * AgendaHoursPerDay;
+        }
+
+        private static double GetDefaultEssaiSetupDurationHours(string? nomEssai)
+        {
+            switch (NormalizeText(nomEssai))
+            {
+                case "traction 100m":
+                    return 1;
+                case "crush":
+                case "cut through":
+                case "traction pince":
+                case "traction spirale":
+                case "traction spiralin":
+                    return 2;
+                case "repeated bending":
+                    return 0.5;
+                case "penetration d'eau":
+                    return 4;
+                case "vibration eolienne":
+                    return 3;
+            }
+
+            return 0.25;
+        }
+
+        private static bool GetDefaultEssaiIsBackground(string? nomEssai)
+        {
+            return NormalizeText(nomEssai) is
+                "traction 100m" or
+                "crush" or
+                "cut through" or
+                "traction pince" or
+                "traction spirale" or
+                "traction spiralin" or
+                "repeated bending" or
+                "penetration d'eau" or
+                "vibration eolienne";
+        }
+
+        private static int GetDefaultEssaiPassageCount(string? nomEssai)
+        {
+            return IsRepeatedEssai(nomEssai) ? MaxEssaiRepetitions : 1;
+        }
+
+        private static double GetDefaultEssaiRecoveryDurationHours(string? nomEssai)
+        {
+            return NormalizeText(nomEssai) switch
+            {
+                "crush" or "cut through" => 0.25,
+                "traction pince" or "traction spirale" or "traction spiralin" => 0.5,
+                _ => 0
+            };
+        }
+
+        private static bool IsRepeatedEssai(string? nomEssai)
+        {
+            return NormalizeText(nomEssai) is
+                "crush" or
+                "cut through" or
+                "traction pince" or
+                "traction spirale" or
+                "traction spiralin";
+        }
+
+        private static bool HasDefaultPlanningValues(string? nomEssai)
+        {
+            return NormalizeText(nomEssai) is
+                "traction 100m" or
+                "crush" or
+                "cut through" or
+                "traction pince" or
+                "traction spirale" or
+                "traction spiralin" or
+                "repeated bending" or
+                "penetration d'eau" or
+                "vibration eolienne";
         }
 
         private static List<string> GetDefaultEssaiStatuses(string? nomEssai)
@@ -1640,7 +1986,9 @@ namespace MonTableurApp.ViewModels
             }
         }
 
-        private void RefreshAfterEssaiDefinitionEdit(bool projectsWereUpdated = true)
+        private void RefreshAfterEssaiDefinitionEdit(
+            bool projectsWereUpdated = true,
+            bool refreshProjectEssaiMetadata = true)
         {
             OnPropertyChanged(nameof(NomsEssais));
             OnPropertyChanged(nameof(EssaisDefinitions));
@@ -1649,18 +1997,31 @@ namespace MonTableurApp.ViewModels
                 Sauvegarder();
             }
 
-            foreach (Projet projet in Projets)
+            if (refreshProjectEssaiMetadata)
             {
-                foreach (EssaiSuivi essai in projet.Essais)
+                isRefreshingEssaiDefinitionMetadata = true;
+
+                try
                 {
-                    essai.Categorie = GetEssaiCategory(essai.NomEssai);
-                    essai.StatutsDisponibles = CreateStatutsPourEssai(essai.NomEssai, essai.Statut);
+                    foreach (Projet projet in Projets)
+                    {
+                        foreach (EssaiSuivi essai in projet.Essais)
+                        {
+                            essai.Categorie = GetEssaiCategory(essai.NomEssai);
+                            essai.StatutsDisponibles = CreateStatutsPourEssai(essai.NomEssai, essai.Statut);
+                        }
+                    }
                 }
+                finally
+                {
+                    isRefreshingEssaiDefinitionMetadata = false;
+                }
+
+                ProjetsView.Refresh();
+                ProjetsEssaisView.Refresh();
+                RefreshSelectedProjectStatistics();
             }
 
-            ProjetsView.Refresh();
-            ProjetsEssaisView.Refresh();
-            RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
         }
 
@@ -1697,6 +2058,7 @@ namespace MonTableurApp.ViewModels
         {
             var settings = new ReferencePropertiesSettings
             {
+                Version = ReferencePropertiesVersion,
                 Clients = Clients.ToList(),
                 Demandeurs = Demandeurs.ToList(),
                 FamillesProduit = FamillesProduit.ToList(),
@@ -1706,7 +2068,12 @@ namespace MonTableurApp.ViewModels
                     {
                         Nom = essai.Nom,
                         Categorie = essai.Categorie,
-                        DureeHeures = essai.DureeHeures,
+                        DureeHeures = essai.DureeEssaiHeures,
+                        DureeMiseEnPlaceHeures = essai.DureeMiseEnPlaceHeures,
+                        DureeEssaiHeures = essai.DureeEssaiHeures,
+                        NombrePassages = essai.NombrePassages,
+                        DureeRepriseHeures = essai.DureeRepriseHeures,
+                        EstArrierePlan = essai.EstArrierePlan,
                         Statuts = essai.Statuts.ToList()
                     })
                     .ToList(),
@@ -1747,6 +2114,18 @@ namespace MonTableurApp.ViewModels
         private static string NormalizeReferenceValue(string? value)
         {
             return (value ?? string.Empty).Trim();
+        }
+
+        private static bool HaveSameReferenceValues(IEnumerable<string>? left, IEnumerable<string>? right)
+        {
+            string[] leftValues = (left ?? Enumerable.Empty<string>())
+                .Select(NormalizeText)
+                .ToArray();
+            string[] rightValues = (right ?? Enumerable.Empty<string>())
+                .Select(NormalizeText)
+                .ToArray();
+
+            return leftValues.SequenceEqual(rightValues);
         }
 
         private static string Capitalize(string value)
@@ -1880,13 +2259,24 @@ namespace MonTableurApp.ViewModels
 
         private void Projet_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName is nameof(Projet.ReferencesProduitDisponibles) or nameof(Projet.HasReferencesProduit))
+            {
+                return;
+            }
+
             if (e.PropertyName == nameof(Projet.NomProduit) ||
                 e.PropertyName == nameof(Projet.NumeroProjet) ||
+                e.PropertyName == nameof(Projet.ReferenceProduit) ||
                 e.PropertyName == nameof(Projet.Statut) ||
                 e.PropertyName == nameof(Projet.EstArchive) ||
                 e.PropertyName == nameof(Projet.DateDebut) ||
                 e.PropertyName == nameof(Projet.DateDebutValue))
             {
+                if (sender is Projet projet && e.PropertyName == nameof(Projet.ReferenceProduit))
+                {
+                    EnsureEssaisReferenceProduit(projet);
+                }
+
                 ProjetsView.Refresh();
                 ProjetsEssaisView.Refresh();
                 EnsureSelectedProjetEssais();
@@ -1944,6 +2334,12 @@ namespace MonTableurApp.ViewModels
 
         private void Essai_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (isRefreshingEssaiDefinitionMetadata &&
+                e.PropertyName is nameof(EssaiSuivi.Categorie) or nameof(EssaiSuivi.StatutsDisponibles))
+            {
+                return;
+            }
+
             if (sender is EssaiSuivi essai)
             {
                 Projet? projet = Projets.FirstOrDefault(item => item.Essais.Contains(essai));
@@ -2177,8 +2573,8 @@ namespace MonTableurApp.ViewModels
 
             foreach (EssaiSuivi essaiExistant in projet.Essais)
             {
-                essaiExistant.Categorie = GetEssaiCategory(essaiExistant.NomEssai);
-                essaiExistant.StatutsDisponibles = CreateStatutsPourEssai(essaiExistant.NomEssai, essaiExistant.Statut);
+                EnsureEssaiProjectMetadata(essaiExistant);
+                EnsureEssaiReferenceProduit(projet, essaiExistant);
             }
 
             foreach (string nomEssai in NomsEssais)
@@ -2188,20 +2584,86 @@ namespace MonTableurApp.ViewModels
 
                 if (existingEssai == null)
                 {
-                    projet.Essais.Add(new EssaiSuivi
+                    var nouvelEssai = new EssaiSuivi
                     {
                         NomEssai = nomEssai,
                         Statut = "\u00C0 faire",
+                        NombrePassages = GetDefaultPassageCountForProjectEssai(nomEssai),
                         Categorie = GetEssaiCategory(nomEssai),
                         StatutsDisponibles = CreateStatutsPourEssai(nomEssai, "\u00C0 faire")
-                    });
+                    };
+                    EnsureEssaiReferenceProduit(projet, nouvelEssai);
+                    projet.Essais.Add(nouvelEssai);
                 }
                 else
                 {
-                    existingEssai.Categorie = GetEssaiCategory(existingEssai.NomEssai);
-                    existingEssai.StatutsDisponibles = CreateStatutsPourEssai(existingEssai.NomEssai, existingEssai.Statut);
+                    EnsureEssaiProjectMetadata(existingEssai);
+                    EnsureEssaiReferenceProduit(projet, existingEssai);
                 }
             }
+        }
+
+        private void EnsureEssaiProjectMetadata(EssaiSuivi essai)
+        {
+            essai.Categorie = GetEssaiCategory(essai.NomEssai);
+            essai.StatutsDisponibles = CreateStatutsPourEssai(essai.NomEssai, essai.Statut);
+            if (!essai.HasNombrePassagesDefini)
+            {
+                essai.NombrePassages = GetDefaultPassageCountForProjectEssai(essai.NomEssai);
+            }
+        }
+
+        private static void EnsureEssaisReferenceProduit(Projet projet)
+        {
+            foreach (EssaiSuivi essai in projet.Essais)
+            {
+                EnsureEssaiReferenceProduit(projet, essai);
+            }
+        }
+
+        private static void EnsureEssaiReferenceProduit(Projet projet, EssaiSuivi essai)
+        {
+            IReadOnlyList<string> referencesProduit = projet.ReferencesProduitDisponibles;
+
+            if (referencesProduit.Count == 0)
+            {
+                if (!string.IsNullOrWhiteSpace(essai.ReferenceProduitUtilisee))
+                {
+                    essai.ReferenceProduitUtilisee = string.Empty;
+                }
+
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(essai.ReferenceProduitUtilisee))
+            {
+                if (referencesProduit.Count == 1)
+                {
+                    essai.ReferenceProduitUtilisee = referencesProduit[0];
+                }
+
+                return;
+            }
+
+            string? matchingReference = referencesProduit.FirstOrDefault(reference =>
+                string.Equals(reference, essai.ReferenceProduitUtilisee, StringComparison.OrdinalIgnoreCase));
+
+            if (matchingReference is null)
+            {
+                essai.ReferenceProduitUtilisee = string.Empty;
+                return;
+            }
+
+            if (!string.Equals(essai.ReferenceProduitUtilisee, matchingReference, StringComparison.Ordinal))
+            {
+                essai.ReferenceProduitUtilisee = matchingReference;
+            }
+        }
+
+        private int GetDefaultPassageCountForProjectEssai(string? nomEssai)
+        {
+            return EssaisDefinitions.FirstOrDefault(item => NormalizeText(item.Nom) == NormalizeText(nomEssai))?.NombrePassages ??
+                   GetDefaultEssaiPassageCount(nomEssai);
         }
 
         private List<string> CreateStatutsPourEssai(string? nomEssai, string? statutActuel)
@@ -2466,11 +2928,30 @@ namespace MonTableurApp.ViewModels
             bool isAttentionRequired = remainingCount > 0 && inProgressCount == 0;
             bool isNearlyDone = remainingCount <= 2 && totalEssais > 0;
 
-            IReadOnlyList<string> donePreview = essaisFaits.Take(4).ToList();
-            IReadOnlyList<string> remainingPreview = essaisEnCours
+            List<string> donePreview = essaisFaits.Take(4).ToList();
+            string doneOverflowText = essaisFaits.Count > donePreview.Count
+                ? $"+{essaisFaits.Count - donePreview.Count}"
+                : string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(doneOverflowText))
+            {
+                donePreview.Add(doneOverflowText);
+            }
+
+            int remainingTotal = essaisEnCours.Count + essaisAFaire.Count;
+            int remainingPreviewLimit = remainingTotal > 6 ? 5 : 6;
+            List<string> remainingPreview = essaisEnCours
                 .Concat(essaisAFaire)
-                .Take(4)
+                .Take(remainingPreviewLimit)
                 .ToList();
+            string remainingOverflowText = remainingTotal > remainingPreview.Count
+                ? $"+{remainingTotal - remainingPreview.Count}"
+                : string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(remainingOverflowText))
+            {
+                remainingPreview.Add(remainingOverflowText);
+            }
 
             return new ProjetEnCoursSummary(
                 numeroProjet: projet.NumeroProjet ?? string.Empty,
@@ -2493,8 +2974,8 @@ namespace MonTableurApp.ViewModels
                 statusSortOrder: GetProjectStatusSortIndex(projet.Statut),
                 essaisFaitsPreview: donePreview,
                 essaisRestantsPreview: remainingPreview,
-                essaisFaitsOverflowText: essaisFaits.Count > donePreview.Count ? $"+{essaisFaits.Count - donePreview.Count}" : string.Empty,
-                essaisRestantsOverflowText: (essaisEnCours.Count + essaisAFaire.Count) > remainingPreview.Count ? $"+{(essaisEnCours.Count + essaisAFaire.Count) - remainingPreview.Count}" : string.Empty);
+                essaisFaitsOverflowText: string.Empty,
+                essaisRestantsOverflowText: string.Empty);
         }
 
         private static string BuildProjetEnCoursPilotageLabel(bool isAttentionRequired, bool isNearlyDone, int essaisEnCoursCount)
@@ -2609,6 +3090,7 @@ namespace MonTableurApp.ViewModels
         public bool TryUpdateAgendaTaskSegmentStartTime(AgendaTaskSegment segment, string rawTime)
         {
             if (!TryGetEditableAgendaSegment(segment, out AgendaWorkDay day, out AgendaTaskItem task) ||
+                !segment.CanEditStartTime ||
                 !TryParseTime(rawTime, out TimeSpan requestedStart) ||
                 !TryGetAgendaDayLayout(day, out TimeSpan startTime, out TimeSpan endTime, out TimeSpan lunchStart, out TimeSpan lunchEnd, out _, out _))
             {
@@ -2617,8 +3099,39 @@ namespace MonTableurApp.ViewModels
 
             TimeSpan adjustedStart = ClampAgendaStartToWorkingRange(requestedStart, startTime, endTime, lunchStart, lunchEnd);
 
-            SaveAgendaUndoSnapshot();
-            task.ScheduledStartMinutes = (int)adjustedStart.TotalMinutes;
+            if (segment.IsSetupSegment)
+            {
+                SaveAgendaUndoSnapshot();
+                task.ScheduledStartMinutes = (int)adjustedStart.TotalMinutes;
+            }
+            else
+            {
+                AgendaWorkDay? anchorDay = AgendaWeekDays.FirstOrDefault(item => item.PlannedTasks.Contains(task));
+                if (anchorDay != day ||
+                    !task.ScheduledStartMinutes.HasValue)
+                {
+                    return false;
+                }
+
+                TimeSpan taskStart = TimeSpan.FromMinutes(task.ScheduledStartMinutes.Value);
+                TimeSpan adjustedExecutionStart = ClampAgendaEndToWorkingRange(requestedStart, startTime, endTime, lunchStart, lunchEnd);
+                if (adjustedExecutionStart <= taskStart)
+                {
+                    return false;
+                }
+
+                double setupDurationHours = GetAgendaWorkingDurationHours(taskStart, adjustedExecutionStart, startTime, endTime, lunchStart, lunchEnd);
+                if (setupDurationHours <= AgendaScheduleEpsilon)
+                {
+                    return false;
+                }
+
+                SaveAgendaUndoSnapshot();
+                task.DureeMiseEnPlaceHeures = setupDurationHours;
+                task.DureeJours = task.DureeHeures / AgendaHoursPerDay;
+                task.HasCustomDureeHeures = true;
+            }
+
             RecalculateAgendaWeek();
             RefreshAgendaCollections();
             return true;
@@ -2627,6 +3140,7 @@ namespace MonTableurApp.ViewModels
         public bool TryUpdateAgendaTaskSegmentEndTime(AgendaTaskSegment segment, string rawTime)
         {
             if (!TryGetEditableAgendaSegment(segment, out AgendaWorkDay day, out AgendaTaskItem task) ||
+                !segment.CanEditEndTime ||
                 !TryParseTime(segment.StartTimeText, out TimeSpan segmentStart) ||
                 !TryParseTime(rawTime, out TimeSpan requestedEnd) ||
                 requestedEnd <= segmentStart ||
@@ -2648,8 +3162,16 @@ namespace MonTableurApp.ViewModels
             }
 
             SaveAgendaUndoSnapshot();
-            task.DureeHeures = durationHours;
-            task.DureeJours = durationHours / AgendaHoursPerDay;
+            if (segment.IsSetupSegment)
+            {
+                task.DureeMiseEnPlaceHeures = durationHours;
+            }
+            else
+            {
+                task.DureeEssaiHeures = durationHours;
+            }
+
+            task.DureeJours = task.DureeHeures / AgendaHoursPerDay;
             task.HasCustomDureeHeures = true;
             RecalculateAgendaWeek();
             RefreshAgendaCollections();
@@ -2759,50 +3281,77 @@ namespace MonTableurApp.ViewModels
 
         private void RefreshAgendaTasks()
         {
-            Dictionary<string, AgendaTaskItem> existingTasks = AgendaBacklogTasks
-                .Concat(AgendaWeekDays.SelectMany(day => day.PlannedTasks))
-                .ToDictionary(task => task.TaskKey, StringComparer.OrdinalIgnoreCase);
-
+            Dictionary<string, AgendaTaskItem> existingTasks;
             HashSet<string> validKeys = new(StringComparer.OrdinalIgnoreCase);
+            bool wasRestoringAgendaState = isRestoringAgendaState;
+            isRestoringAgendaState = true;
 
-            foreach (Projet projet in Projets)
+            try
             {
-                if (projet.EstArchive)
-                {
-                    continue;
-                }
+                EnsureAgendaTaskUniqueness();
+                existingTasks = BuildAgendaTasksByKey();
 
-                foreach (EssaiSuivi essai in projet.Essais.Where(ShouldAppearInAgenda))
+                foreach (Projet projet in Projets)
                 {
-                    string key = BuildAgendaTaskKey(projet, essai);
-                    validKeys.Add(key);
-
-                    if (!existingTasks.TryGetValue(key, out AgendaTaskItem? task))
+                    if (projet.EstArchive)
                     {
-                        task = new AgendaTaskItem { TaskKey = key };
-                        AgendaBacklogTasks.Add(task);
+                        continue;
                     }
 
-                    double dureeHeures = EssaisDefinitions.FirstOrDefault(item =>
-                        NormalizeText(item.Nom) == NormalizeText(essai.NomEssai))?.DureeHeures ?? GetDefaultEssaiDurationHours(essai.NomEssai);
-
-                    task.NumeroProjet = projet.NumeroProjet ?? string.Empty;
-                    task.NomProduit = projet.NomProduit ?? string.Empty;
-                    task.NomEssai = essai.NomEssai ?? string.Empty;
-                    if (!task.HasCustomDureeHeures)
+                    foreach (EssaiSuivi essai in projet.Essais.Where(ShouldAppearInAgenda))
                     {
-                        task.DureeHeures = dureeHeures;
-                        task.DureeJours = dureeHeures / AgendaHoursPerDay;
+                        EssaiPlanningValues planning = GetEffectiveEssaiPlanning(essai);
+                        double dureeMiseEnPlaceHeures = planning.DureeMiseEnPlaceHeures;
+                        double dureeEssaiHeures = planning.DureeEssaiHeures;
+                        int nombrePassages = Math.Max(1, essai.NombrePassages);
+                        double dureeRepriseHeures = planning.DureeRepriseHeures;
+                        bool estArrierePlan = planning.EstArrierePlan;
+
+                        for (int passageIndex = 1; passageIndex <= nombrePassages; passageIndex++)
+                        {
+                            string key = BuildAgendaTaskKey(projet, essai, passageIndex, nombrePassages);
+                            validKeys.Add(key);
+
+                            if (!existingTasks.TryGetValue(key, out AgendaTaskItem? task))
+                            {
+                                task = new AgendaTaskItem { TaskKey = key };
+                                existingTasks[key] = task;
+                                AgendaBacklogTasks.Add(task);
+                            }
+
+                            double passageSetupDuration = passageIndex == 1
+                                ? dureeMiseEnPlaceHeures
+                                : dureeRepriseHeures;
+
+                            task.NumeroProjet = projet.NumeroProjet ?? string.Empty;
+                            task.NomProduit = projet.NomProduit ?? string.Empty;
+                            task.NomEssai = nombrePassages > 1
+                                ? $"{essai.NomEssai} {passageIndex}/{nombrePassages}"
+                                : essai.NomEssai ?? string.Empty;
+                            task.EstArrierePlan = estArrierePlan;
+                            task.NombrePassages = 1;
+                            task.DureeRepriseHeures = 0;
+                            if (!task.HasCustomDureeHeures)
+                            {
+                                task.DureeMiseEnPlaceHeures = passageSetupDuration;
+                                task.DureeEssaiHeures = dureeEssaiHeures;
+                                task.DureeJours = task.DureeHeures / AgendaHoursPerDay;
+                            }
+                        }
                     }
                 }
-            }
 
-            foreach (AgendaTaskItem obsolete in existingTasks.Values.Where(task => !validKeys.Contains(task.TaskKey)).ToList())
+                foreach (AgendaTaskItem obsolete in existingTasks.Values.Where(task => !validKeys.Contains(task.TaskKey)).ToList())
+                {
+                    RemoveAgendaTaskFromAllBuckets(obsolete);
+                }
+
+                EnsureAgendaBacklogConsistency();
+            }
+            finally
             {
-                RemoveAgendaTaskFromAllBuckets(obsolete);
+                isRestoringAgendaState = wasRestoringAgendaState;
             }
-
-            EnsureAgendaBacklogConsistency();
 
             RecalculateAgendaWeek();
 
@@ -2839,8 +3388,12 @@ namespace MonTableurApp.ViewModels
                     null,
                     null,
                     null,
-                    task.DureeHeures,
+                    task.DureeMiseEnPlaceHeures,
+                    task.DureeEssaiHeures,
+                    task.NombrePassages,
+                    task.DureeRepriseHeures,
                     task.DureeJours,
+                    task.EstArrierePlan,
                     task.HasCustomDureeHeures));
             }
 
@@ -2855,8 +3408,12 @@ namespace MonTableurApp.ViewModels
                         dayIndex,
                         task.ScheduledStartMinutes,
                         orderIndex,
-                        task.DureeHeures,
+                        task.DureeMiseEnPlaceHeures,
+                        task.DureeEssaiHeures,
+                        task.NombrePassages,
+                        task.DureeRepriseHeures,
                         task.DureeJours,
+                        task.EstArrierePlan,
                         task.HasCustomDureeHeures));
                 }
             }
@@ -2866,9 +3423,8 @@ namespace MonTableurApp.ViewModels
 
         private void RestoreAgendaSnapshot(AgendaUndoSnapshot snapshot)
         {
-            Dictionary<string, AgendaTaskItem> tasksByKey = AgendaBacklogTasks
-                .Concat(AgendaWeekDays.SelectMany(day => day.PlannedTasks))
-                .ToDictionary(task => task.TaskKey, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, AgendaTaskItem> tasksByKey = BuildAgendaTasksByKey();
+            HashSet<string> restoredKeys = new(StringComparer.OrdinalIgnoreCase);
 
             isRestoringAgendaState = true;
 
@@ -2885,7 +3441,8 @@ namespace MonTableurApp.ViewModels
                              .OrderBy(item => item.DayIndex ?? int.MaxValue)
                              .ThenBy(item => item.OrderIndex ?? int.MaxValue))
                 {
-                    if (!tasksByKey.TryGetValue(placement.TaskKey, out AgendaTaskItem? task))
+                    if (!restoredKeys.Add(placement.TaskKey) ||
+                        !tasksByKey.TryGetValue(placement.TaskKey, out AgendaTaskItem? task))
                     {
                         continue;
                     }
@@ -2894,16 +3451,24 @@ namespace MonTableurApp.ViewModels
                         placement.DayIndex.Value >= 0 &&
                         placement.DayIndex.Value < AgendaWeekDays.Count)
                     {
-                        task.DureeHeures = placement.DureeHeures;
+                        task.DureeMiseEnPlaceHeures = placement.DureeMiseEnPlaceHeures;
+                        task.DureeEssaiHeures = placement.DureeEssaiHeures;
+                        task.NombrePassages = placement.NombrePassages;
+                        task.DureeRepriseHeures = placement.DureeRepriseHeures;
                         task.DureeJours = placement.DureeJours;
+                        task.EstArrierePlan = placement.EstArrierePlan;
                         task.HasCustomDureeHeures = placement.HasCustomDureeHeures;
                         task.ScheduledStartMinutes = placement.ScheduledStartMinutes;
                         AgendaWeekDays[placement.DayIndex.Value].PlannedTasks.Add(task);
                     }
                     else
                     {
-                        task.DureeHeures = placement.DureeHeures;
+                        task.DureeMiseEnPlaceHeures = placement.DureeMiseEnPlaceHeures;
+                        task.DureeEssaiHeures = placement.DureeEssaiHeures;
+                        task.NombrePassages = placement.NombrePassages;
+                        task.DureeRepriseHeures = placement.DureeRepriseHeures;
                         task.DureeJours = placement.DureeJours;
+                        task.EstArrierePlan = placement.EstArrierePlan;
                         task.HasCustomDureeHeures = placement.HasCustomDureeHeures;
                         ResetAgendaTaskLayout(task);
                         AgendaBacklogTasks.Add(task);
@@ -3045,6 +3610,14 @@ namespace MonTableurApp.ViewModels
             return $"{projet.NumeroProjet}|{projet.NomProduit}|{essai.NomEssai}";
         }
 
+        private static string BuildAgendaTaskKey(Projet projet, EssaiSuivi essai, int passageIndex, int passageCount)
+        {
+            string baseKey = BuildAgendaTaskKey(projet, essai);
+            return passageCount <= 1
+                ? baseKey
+                : $"{baseKey}|passage:{passageIndex}";
+        }
+
         private void RemoveAgendaTaskFromAllBuckets(AgendaTaskItem task)
         {
             foreach (AgendaTaskItem backlogTask in AgendaBacklogTasks
@@ -3069,6 +3642,51 @@ namespace MonTableurApp.ViewModels
         {
             return ReferenceEquals(left, right) ||
                    string.Equals(left.TaskKey, right.TaskKey, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private Dictionary<string, AgendaTaskItem> BuildAgendaTasksByKey()
+        {
+            var result = new Dictionary<string, AgendaTaskItem>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (AgendaTaskItem task in AgendaWeekDays.SelectMany(day => day.PlannedTasks).Concat(AgendaBacklogTasks))
+            {
+                if (string.IsNullOrWhiteSpace(task.TaskKey) || result.ContainsKey(task.TaskKey))
+                {
+                    continue;
+                }
+
+                result.Add(task.TaskKey, task);
+            }
+
+            return result;
+        }
+
+        private void EnsureAgendaTaskUniqueness()
+        {
+            var plannedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (AgendaWorkDay day in AgendaWeekDays)
+            {
+                foreach (AgendaTaskItem task in day.PlannedTasks.ToList())
+                {
+                    if (string.IsNullOrWhiteSpace(task.TaskKey) || !plannedKeys.Add(task.TaskKey))
+                    {
+                        day.PlannedTasks.Remove(task);
+                    }
+                }
+            }
+
+            var backlogKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (AgendaTaskItem task in AgendaBacklogTasks.ToList())
+            {
+                if (string.IsNullOrWhiteSpace(task.TaskKey) ||
+                    plannedKeys.Contains(task.TaskKey) ||
+                    !backlogKeys.Add(task.TaskKey))
+                {
+                    AgendaBacklogTasks.Remove(task);
+                }
+            }
         }
 
         private void EnsureAgendaBacklogConsistency()
@@ -3127,6 +3745,11 @@ namespace MonTableurApp.ViewModels
                     PlaceTaskAcrossWeek(dayIndex, task, occupiedRangesByDay);
                 }
             }
+
+            foreach (AgendaWorkDay day in AgendaWeekDays)
+            {
+                ArrangeOverlappingAgendaSegments(day);
+            }
         }
 
         private void PlaceTaskAcrossWeek(
@@ -3134,11 +3757,115 @@ namespace MonTableurApp.ViewModels
             AgendaTaskItem task,
             IDictionary<AgendaWorkDay, List<AgendaTimeRange>> occupiedRangesByDay)
         {
-            double remainingHours = task.DureeHeures;
-            bool firstSegment = true;
-            AgendaTaskSegment? lastSegment = null;
-
             ResetAgendaTaskVisualLayout(task);
+
+            TimeSpan? requestedStart = task.ScheduledStartMinutes.HasValue
+                ? TimeSpan.FromMinutes(task.ScheduledStartMinutes.Value)
+                : null;
+
+            AgendaPhasePlacementResult currentResult = PlaceTaskPhaseAcrossWeek(
+                startDayIndex,
+                requestedStart,
+                task,
+                task.DureeMiseEnPlaceHeures,
+                "Mise en place",
+                isSetupPhase: true,
+                isBackgroundExecution: false,
+                occupiesTime: true,
+                passageIndex: 0,
+                passageCount: task.NombrePassages,
+                canEditTimeValues: true,
+                occupiedRangesByDay: occupiedRangesByDay);
+
+            AgendaTaskSegment? lastSegment = currentResult.LastSegment;
+
+            if (currentResult.RemainingHours > AgendaScheduleEpsilon)
+            {
+                MarkAgendaTaskOverflow(task, lastSegment);
+            }
+            else
+            {
+                for (int passageIndex = 1; passageIndex <= task.NombrePassages; passageIndex++)
+                {
+                    currentResult = PlaceTaskPhaseAcrossWeek(
+                        currentResult.NextDayIndex,
+                        currentResult.NextSearchStart,
+                        task,
+                        task.DureeEssaiHeures,
+                        task.NombrePassages > 1 ? $"Essai {passageIndex}/{task.NombrePassages}" : "Essai",
+                        isSetupPhase: false,
+                        isBackgroundExecution: task.EstArrierePlan,
+                        occupiesTime: !task.EstArrierePlan,
+                        passageIndex: passageIndex,
+                        passageCount: task.NombrePassages,
+                        canEditTimeValues: task.NombrePassages == 1,
+                        occupiedRangesByDay: occupiedRangesByDay);
+
+                    lastSegment = currentResult.LastSegment ?? lastSegment;
+                    if (currentResult.RemainingHours > AgendaScheduleEpsilon)
+                    {
+                        MarkAgendaTaskOverflow(task, lastSegment);
+                        break;
+                    }
+
+                    if (passageIndex >= task.NombrePassages ||
+                        task.DureeRepriseHeures <= AgendaScheduleEpsilon)
+                    {
+                        continue;
+                    }
+
+                    currentResult = PlaceTaskPhaseAcrossWeek(
+                        currentResult.NextDayIndex,
+                        currentResult.NextSearchStart,
+                        task,
+                        task.DureeRepriseHeures,
+                        $"Reprise {passageIndex + 1}/{task.NombrePassages}",
+                        isSetupPhase: true,
+                        isBackgroundExecution: false,
+                        occupiesTime: true,
+                        passageIndex: passageIndex + 1,
+                        passageCount: task.NombrePassages,
+                        canEditTimeValues: false,
+                        occupiedRangesByDay: occupiedRangesByDay);
+
+                    lastSegment = currentResult.LastSegment ?? lastSegment;
+                    if (currentResult.RemainingHours > AgendaScheduleEpsilon)
+                    {
+                        MarkAgendaTaskOverflow(task, lastSegment);
+                        break;
+                    }
+                }
+            }
+
+            if (lastSegment is null)
+            {
+                task.TimeRangeLabel = "Journée non travaillée";
+                task.IsOverflow = true;
+                task.TimelineTop = 0;
+                task.BlockHeight = 52;
+                task.TimelineMargin = new Thickness(10, 0, 10, 0);
+            }
+        }
+
+        private AgendaPhasePlacementResult PlaceTaskPhaseAcrossWeek(
+            int startDayIndex,
+            TimeSpan? requestedStart,
+            AgendaTaskItem task,
+            double phaseHours,
+            string phaseLabel,
+            bool isSetupPhase,
+            bool isBackgroundExecution,
+            bool occupiesTime,
+            int passageIndex,
+            int passageCount,
+            bool canEditTimeValues,
+            IDictionary<AgendaWorkDay, List<AgendaTimeRange>> occupiedRangesByDay)
+        {
+            double remainingHours = phaseHours;
+            bool firstPhaseSegment = true;
+            AgendaTaskSegment? lastSegment = null;
+            int nextDayIndex = startDayIndex;
+            TimeSpan? nextSearchStart = requestedStart;
 
             for (int currentDayIndex = startDayIndex; currentDayIndex < AgendaWeekDays.Count && remainingHours > AgendaScheduleEpsilon; currentDayIndex++)
             {
@@ -3154,17 +3881,19 @@ namespace MonTableurApp.ViewModels
                     continue;
                 }
 
-                TimeSpan searchStart = firstSegment && currentDayIndex == startDayIndex && task.ScheduledStartMinutes.HasValue
-                    ? TimeSpan.FromMinutes(task.ScheduledStartMinutes.Value)
+                TimeSpan searchStart = currentDayIndex == startDayIndex && requestedStart.HasValue
+                    ? requestedStart.Value
                     : startTime;
 
-                foreach (AgendaTimeRange availableRange in GetAvailableAgendaRanges(
-                             startTime,
-                             endTime,
-                             lunchStart,
-                             lunchEnd,
-                             searchStart,
-                             occupiedRangesByDay[currentDay]))
+                IEnumerable<AgendaTimeRange> availableRanges = GetAvailableAgendaRanges(
+                    startTime,
+                    endTime,
+                    lunchStart,
+                    lunchEnd,
+                    searchStart,
+                    occupiesTime ? occupiedRangesByDay[currentDay] : Enumerable.Empty<AgendaTimeRange>());
+
+                foreach (AgendaTimeRange availableRange in availableRanges)
                 {
                     double availableHours = (availableRange.End - availableRange.Start).TotalHours;
                     if (availableHours <= AgendaScheduleEpsilon)
@@ -3176,29 +3905,60 @@ namespace MonTableurApp.ViewModels
                     TimeSpan segmentStart = availableRange.Start;
                     TimeSpan segmentEnd = segmentStart.Add(TimeSpan.FromHours(segmentHours));
                     double timelineTop = Math.Max(0, (segmentStart - displayStart).TotalHours * AgendaHourSlotHeight);
-                    double blockHeight = Math.Max(30, ((segmentEnd - segmentStart).TotalHours * AgendaHourSlotHeight) - 4);
+                    double blockHeight = Math.Max(42, ((segmentEnd - segmentStart).TotalHours * AgendaHourSlotHeight) - 4);
+                    bool isRepriseSegment = phaseLabel.StartsWith("Reprise", StringComparison.OrdinalIgnoreCase);
+                    string segmentTitle = task.NomEssai;
+                    if (passageCount > 1 && passageIndex > 0)
+                    {
+                        segmentTitle += $" {passageIndex}/{passageCount}";
+                    }
+
+                    if (!firstPhaseSegment)
+                    {
+                        segmentTitle += " (suite)";
+                    }
+
+                    string phasePrefix = isBackgroundExecution
+                        ? "Fond"
+                        : isSetupPhase && !isRepriseSegment
+                            ? "Mise"
+                            : phaseLabel;
 
                     lastSegment = new AgendaTaskSegment
                     {
                         SourceTask = task,
                         SourceDay = currentDay,
-                        NomEssai = firstSegment ? task.NomEssai : $"{task.NomEssai} (suite)",
+                        NomEssai = segmentTitle,
                         NumeroProjet = task.NumeroProjet,
                         NomProduit = task.NomProduit,
-                        DureeLabel = AgendaDurationFormatter.Format(segmentHours, segmentHours / AgendaHoursPerDay),
+                        PhaseLabel = phaseLabel,
+                        DureeLabel = $"{phasePrefix} - {AgendaDurationFormatter.Format(segmentHours, segmentHours / AgendaHoursPerDay)}",
                         TimeRangeLabel = $"{segmentStart:hh\\:mm} - {segmentEnd:hh\\:mm}",
                         StartTimeText = $"{segmentStart:hh\\:mm}",
                         EndTimeText = $"{segmentEnd:hh\\:mm}",
                         IsOverflow = false,
                         BlockHeight = blockHeight,
+                        TimelineTop = timelineTop,
                         TimelineMargin = new Thickness(10, timelineTop, 10, 0),
-                        IsContinuation = !firstSegment
+                        StartMinutes = (int)segmentStart.TotalMinutes,
+                        EndMinutes = (int)segmentEnd.TotalMinutes,
+                        IsContinuation = !firstPhaseSegment,
+                        IsSetupSegment = isSetupPhase,
+                        IsExecutionSegment = !isSetupPhase,
+                        IsBackgroundExecution = isBackgroundExecution,
+                        IsRepriseSegment = isRepriseSegment,
+                        PassageIndex = Math.Max(1, passageIndex),
+                        PassageCount = Math.Max(1, passageCount),
+                        CanEditTimeValues = canEditTimeValues
                     };
 
                     currentDay.DisplaySegments.Add(lastSegment);
-                    AddAgendaOccupiedRange(occupiedRangesByDay[currentDay], new AgendaTimeRange(segmentStart, segmentEnd));
+                    if (occupiesTime)
+                    {
+                        AddAgendaOccupiedRange(occupiedRangesByDay[currentDay], new AgendaTimeRange(segmentStart, segmentEnd));
+                    }
 
-                    if (firstSegment)
+                    if (string.IsNullOrWhiteSpace(task.TimeRangeLabel))
                     {
                         task.TimeRangeLabel = lastSegment.TimeRangeLabel;
                         task.IsOverflow = false;
@@ -3208,32 +3968,94 @@ namespace MonTableurApp.ViewModels
                     }
 
                     remainingHours -= segmentHours;
-                    firstSegment = false;
+                    firstPhaseSegment = false;
+                    nextDayIndex = currentDayIndex;
+                    nextSearchStart = segmentEnd;
 
                     if (remainingHours <= AgendaScheduleEpsilon)
                     {
-                        break;
+                        return new AgendaPhasePlacementResult(
+                            nextDayIndex,
+                            nextSearchStart,
+                            0,
+                            lastSegment);
                     }
                 }
+
+                nextDayIndex = currentDayIndex + 1;
+                nextSearchStart = null;
             }
 
-            if (remainingHours > AgendaScheduleEpsilon)
+            return new AgendaPhasePlacementResult(
+                Math.Min(nextDayIndex, AgendaWeekDays.Count - 1),
+                nextSearchStart,
+                remainingHours,
+                lastSegment);
+        }
+
+        private static void ArrangeOverlappingAgendaSegments(AgendaWorkDay day)
+        {
+            List<AgendaTaskSegment> orderedSegments = day.DisplaySegments
+                .OrderBy(segment => segment.StartMinutes)
+                .ThenBy(segment => segment.EndMinutes)
+                .ThenBy(segment => segment.IsBackgroundExecution)
+                .ToList();
+
+            var activeSegments = new List<AgendaTaskSegment>();
+            var currentCluster = new List<AgendaTaskSegment>();
+            int clusterEnd = -1;
+            int maxClusterColumns = 1;
+
+            foreach (AgendaTaskSegment segment in orderedSegments)
             {
-                if (lastSegment != null)
+                if (currentCluster.Count > 0 && segment.StartMinutes >= clusterEnd)
                 {
-                    lastSegment.IsOverflow = true;
+                    ApplyAgendaSegmentColumnCount(currentCluster, maxClusterColumns);
+                    activeSegments.Clear();
+                    currentCluster.Clear();
+                    clusterEnd = -1;
+                    maxClusterColumns = 1;
                 }
 
-                task.IsOverflow = true;
+                activeSegments.RemoveAll(active => active.EndMinutes <= segment.StartMinutes);
+
+                int columnIndex = 0;
+                while (activeSegments.Any(active => active.ColumnIndex == columnIndex))
+                {
+                    columnIndex++;
+                }
+
+                segment.ColumnIndex = columnIndex;
+                activeSegments.Add(segment);
+                currentCluster.Add(segment);
+                clusterEnd = Math.Max(clusterEnd, segment.EndMinutes);
+                maxClusterColumns = Math.Max(maxClusterColumns, activeSegments.Count);
+                maxClusterColumns = Math.Max(maxClusterColumns, columnIndex + 1);
             }
-            else if (firstSegment)
+
+            if (currentCluster.Count > 0)
             {
-                task.TimeRangeLabel = "Journée non travaillée";
-                task.IsOverflow = true;
-                task.TimelineTop = 0;
-                task.BlockHeight = 52;
-                task.TimelineMargin = new Thickness(10, 0, 10, 0);
+                ApplyAgendaSegmentColumnCount(currentCluster, maxClusterColumns);
             }
+        }
+
+        private static void ApplyAgendaSegmentColumnCount(IEnumerable<AgendaTaskSegment> segments, int columnCount)
+        {
+            int normalizedColumnCount = Math.Max(1, columnCount);
+            foreach (AgendaTaskSegment segment in segments)
+            {
+                segment.ColumnCount = normalizedColumnCount;
+            }
+        }
+
+        private static void MarkAgendaTaskOverflow(AgendaTaskItem task, AgendaTaskSegment? lastSegment)
+        {
+            if (lastSegment != null)
+            {
+                lastSegment.IsOverflow = true;
+            }
+
+            task.IsOverflow = true;
         }
 
         private static void ResetAgendaTaskVisualLayout(AgendaTaskItem task)
@@ -3511,7 +4333,7 @@ namespace MonTableurApp.ViewModels
             ranges.Add(newRange);
         }
 
-        private static void UpdateAgendaNonWorkingBlocks(
+        private void UpdateAgendaNonWorkingBlocks(
             AgendaWorkDay day,
             TimeSpan startTime,
             TimeSpan endTime,
@@ -3536,7 +4358,7 @@ namespace MonTableurApp.ViewModels
             AddAgendaNonWorkingBlock(day, displayStart, endTime, displayEnd, string.Empty);
         }
 
-        private static void AddAgendaNonWorkingBlock(
+        private void AddAgendaNonWorkingBlock(
             AgendaWorkDay day,
             TimeSpan displayStart,
             TimeSpan rangeStart,
@@ -3553,12 +4375,19 @@ namespace MonTableurApp.ViewModels
 
             double timelineTop = Math.Max(0, (blockStart - displayStart).TotalHours * AgendaHourSlotHeight);
             double blockHeight = Math.Max(8, ((blockEnd - blockStart).TotalHours * AgendaHourSlotHeight) - 1);
+            bool touchesTop = blockStart <= AgendaDisplayStartTime;
+            bool touchesBottom = blockEnd >= AgendaDisplayEndTime;
 
             day.NonWorkingTimeBlocks.Add(new AgendaTimeBlock
             {
                 Label = label,
                 BlockHeight = blockHeight,
-                TimelineMargin = new Thickness(0, timelineTop, 0, 0)
+                TimelineMargin = new Thickness(0, timelineTop, 0, 0),
+                CornerRadius = new CornerRadius(
+                    touchesTop ? 18 : 0,
+                    touchesTop ? 18 : 0,
+                    touchesBottom ? 18 : 0,
+                    touchesBottom ? 18 : 0)
             });
         }
 
@@ -3578,7 +4407,7 @@ namespace MonTableurApp.ViewModels
                    TimeSpan.TryParse(value, CultureInfo.GetCultureInfo("fr-FR"), out time);
         }
 
-        private static void PopulateHourSlots(AgendaWorkDay day, TimeSpan start, TimeSpan end)
+        private void PopulateHourSlots(AgendaWorkDay day, TimeSpan start, TimeSpan end)
         {
             day.HourSlots.Clear();
 
@@ -3617,6 +4446,7 @@ namespace MonTableurApp.ViewModels
             OnPropertyChanged(nameof(AgendaPlannedTaskCount));
             OnPropertyChanged(nameof(AgendaOverflowTaskCount));
             OnPropertyChanged(nameof(AgendaPlannedDurationLabel));
+            OnPropertyChanged(nameof(AgendaHourSlotHeight));
             OnPropertyChanged(nameof(AgendaDisplayHourMarkers));
             OnPropertyChanged(nameof(AgendaDisplayGridSlots));
             OnPropertyChanged(nameof(AgendaTimelineHeight));
@@ -3871,13 +4701,23 @@ namespace MonTableurApp.ViewModels
 
         private readonly record struct AgendaTimeRange(TimeSpan Start, TimeSpan End);
 
+        private sealed record AgendaPhasePlacementResult(
+            int NextDayIndex,
+            TimeSpan? NextSearchStart,
+            double RemainingHours,
+            AgendaTaskSegment? LastSegment);
+
         private sealed record AgendaTaskPlacementSnapshot(
             string TaskKey,
             int? DayIndex,
             int? ScheduledStartMinutes,
             int? OrderIndex,
-            double DureeHeures,
+            double DureeMiseEnPlaceHeures,
+            double DureeEssaiHeures,
+            int NombrePassages,
+            double DureeRepriseHeures,
             double DureeJours,
+            bool EstArrierePlan,
             bool HasCustomDureeHeures);
 
         private sealed record AgendaUndoSnapshot(IReadOnlyList<AgendaTaskPlacementSnapshot> Placements);
@@ -3907,6 +4747,8 @@ namespace MonTableurApp.ViewModels
 
         private sealed class ReferencePropertiesSettings
         {
+            public int Version { get; set; }
+
             public List<string>? Clients { get; set; }
 
             public List<string>? Demandeurs { get; set; }
@@ -3926,23 +4768,55 @@ namespace MonTableurApp.ViewModels
 
             public string? Categorie { get; set; }
 
-            public double DureeHeures { get; set; }
+            public double? DureeHeures { get; set; }
+
+            public double? DureeMiseEnPlaceHeures { get; set; }
+
+            public double? DureeEssaiHeures { get; set; }
+
+            public int? NombrePassages { get; set; }
+
+            public double? DureeRepriseHeures { get; set; }
+
+            public bool? EstArrierePlan { get; set; }
 
             public List<string>? Statuts { get; set; }
         }
+
+        public sealed record EssaiPlanningValues(
+            double DureeMiseEnPlaceHeures,
+            double DureeEssaiHeures,
+            double DureeRepriseHeures,
+            bool EstArrierePlan);
 
         public sealed class EssaiDefinitionItem : INotifyPropertyChanged
         {
             private string nom;
             private string categorie;
-            private double dureeHeures;
+            private double dureeMiseEnPlaceHeures;
+            private double dureeEssaiHeures;
+            private double dureeRepriseHeures;
+            private int nombrePassages = 1;
+            private bool estArrierePlan;
             private List<string> statuts;
 
-            public EssaiDefinitionItem(string nom, string categorie, double dureeHeures, List<string> statuts)
+            public EssaiDefinitionItem(
+                string nom,
+                string categorie,
+                double dureeMiseEnPlaceHeures,
+                double dureeEssaiHeures,
+                int nombrePassages,
+                double dureeRepriseHeures,
+                bool estArrierePlan,
+                List<string> statuts)
             {
                 this.nom = nom;
                 this.categorie = categorie;
-                this.dureeHeures = dureeHeures;
+                this.dureeMiseEnPlaceHeures = dureeMiseEnPlaceHeures;
+                this.dureeEssaiHeures = dureeEssaiHeures;
+                this.nombrePassages = Math.Min(MaxEssaiRepetitions, Math.Max(1, nombrePassages));
+                this.dureeRepriseHeures = Math.Max(0, dureeRepriseHeures);
+                this.estArrierePlan = estArrierePlan;
                 this.statuts = statuts;
             }
 
@@ -3980,16 +4854,89 @@ namespace MonTableurApp.ViewModels
 
             public double DureeHeures
             {
-                get => dureeHeures;
+                get => DureeMiseEnPlaceHeures +
+                       (DureeEssaiHeures * NombrePassages) +
+                       (DureeRepriseHeures * Math.Max(0, NombrePassages - 1));
                 set
                 {
-                    if (Math.Abs(dureeHeures - value) < 0.001)
+                    DureeEssaiHeures = value;
+                }
+            }
+
+            public double DureeMiseEnPlaceHeures
+            {
+                get => dureeMiseEnPlaceHeures;
+                set
+                {
+                    if (Math.Abs(dureeMiseEnPlaceHeures - value) < 0.001)
                     {
                         return;
                     }
 
-                    dureeHeures = value;
-                    OnPropertyChanged(nameof(DureeHeures));
+                    dureeMiseEnPlaceHeures = value;
+                    NotifyDurationPropertiesChanged();
+                }
+            }
+
+            public int NombrePassages
+            {
+                get => nombrePassages;
+                set
+                {
+                    int normalizedValue = Math.Min(MaxEssaiRepetitions, Math.Max(1, value));
+                    if (nombrePassages == normalizedValue)
+                    {
+                        return;
+                    }
+
+                    nombrePassages = normalizedValue;
+                    NotifyDurationPropertiesChanged();
+                }
+            }
+
+            public double DureeRepriseHeures
+            {
+                get => dureeRepriseHeures;
+                set
+                {
+                    double normalizedValue = Math.Max(0, value);
+                    if (Math.Abs(dureeRepriseHeures - normalizedValue) < 0.001)
+                    {
+                        return;
+                    }
+
+                    dureeRepriseHeures = normalizedValue;
+                    NotifyDurationPropertiesChanged();
+                }
+            }
+
+            public double DureeEssaiHeures
+            {
+                get => dureeEssaiHeures;
+                set
+                {
+                    if (Math.Abs(dureeEssaiHeures - value) < 0.001)
+                    {
+                        return;
+                    }
+
+                    dureeEssaiHeures = value;
+                    NotifyDurationPropertiesChanged();
+                }
+            }
+
+            public bool EstArrierePlan
+            {
+                get => estArrierePlan;
+                set
+                {
+                    if (estArrierePlan == value)
+                    {
+                        return;
+                    }
+
+                    estArrierePlan = value;
+                    OnPropertyChanged(nameof(EstArrierePlan));
                     OnPropertyChanged(nameof(DureeLabel));
                 }
             }
@@ -4005,13 +4952,41 @@ namespace MonTableurApp.ViewModels
                 }
             }
 
-            public string DureeLabel => AgendaDurationFormatter.Format(DureeHeures, DureeHeures / AgendaHoursPerDay);
+            public string DureeLabel
+            {
+                get
+                {
+                    string setupLabel = AgendaDurationFormatter.Format(DureeMiseEnPlaceHeures, DureeMiseEnPlaceHeures / AgendaHoursPerDay);
+                    string testLabel = AgendaDurationFormatter.Format(DureeEssaiHeures, DureeEssaiHeures / AgendaHoursPerDay);
+                    string label = EstArrierePlan
+                        ? $"Mise {setupLabel} - Essai {testLabel} - fond"
+                        : $"Mise {setupLabel} - Essai {testLabel}";
+
+                    if (NombrePassages > 1)
+                    {
+                        string repriseLabel = AgendaDurationFormatter.Format(DureeRepriseHeures, DureeRepriseHeures / AgendaHoursPerDay);
+                        label += $" - x{NombrePassages} - Reprise {repriseLabel}";
+                    }
+
+                    return label;
+                }
+            }
 
             public string StatutsTexte => string.Join(" ; ", Statuts);
 
             private void OnPropertyChanged(string propertyName)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+
+            private void NotifyDurationPropertiesChanged()
+            {
+                OnPropertyChanged(nameof(DureeMiseEnPlaceHeures));
+                OnPropertyChanged(nameof(DureeEssaiHeures));
+                OnPropertyChanged(nameof(NombrePassages));
+                OnPropertyChanged(nameof(DureeRepriseHeures));
+                OnPropertyChanged(nameof(DureeHeures));
+                OnPropertyChanged(nameof(DureeLabel));
             }
         }
 

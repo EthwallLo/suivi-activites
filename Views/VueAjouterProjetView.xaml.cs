@@ -124,7 +124,7 @@ namespace MonTableurApp.Views
                 NumeroProjet = numeroProjet,
                 NomProduit = nomProduit,
                 FamilleProduit = FamilleProduitComboBox.SelectedItem as string,
-                ReferenceProduit = ReferenceProduitTextBox.Text.Trim(),
+                ReferenceProduit = Projet.NormalizeReferenceProduitList(ReferenceProduitTextBox.Text),
                 Client = ClientComboBox.SelectedItem as string,
                 Demandeur = DemandeurComboBox.SelectedItem as string,
                 TypeActivite = TypeActiviteComboBox.SelectedItem as string,

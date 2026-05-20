@@ -11,5 +11,7 @@ namespace MonTableurApp.Models
         public double BlockHeight { get; set; }
 
         public Thickness TimelineMargin { get; set; } = new(0, 0, 0, 0);
+
+        public CornerRadius CornerRadius { get; set; } = new(0);
     }
 }

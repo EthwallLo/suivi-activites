@@ -1,10 +1,14 @@
 ﻿<UserControl x:Class="MonTableurApp.Views.VueAgendaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:MonTableurApp.Views"
              Focusable="True"
              PreviewKeyDown="VueAgendaView_PreviewKeyDown">
 
     <UserControl.Resources>
+        <views:AgendaSegmentLeftConverter x:Key="AgendaSegmentLeftConverter"/>
+        <views:AgendaSegmentWidthConverter x:Key="AgendaSegmentWidthConverter"/>
+
         <Style x:Key="SectionCardStyle" TargetType="Border">
             <Setter Property="Background" Value="#FFFFFF"/>
             <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
@@ -26,9 +30,23 @@
             <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SummaryCardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="Padding" Value="9,7"/>
+            <Setter Property="Margin" Value="0"/>
             <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Opacity" Value="1"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBackgroundExecution}" Value="True">
+                    <Setter Property="Opacity" Value="0.66"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompact}" Value="True">
+                    <Setter Property="Padding" Value="7,5"/>
+                    <Setter Property="CornerRadius" Value="12"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsTiny}" Value="True">
+                    <Setter Property="Padding" Value="6,4"/>
+                    <Setter Property="CornerRadius" Value="10"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
@@ -59,6 +77,15 @@
             <Setter Property="Padding" Value="7,3"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="AgendaHeaderTimeTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource RoundedTextBoxStyle}">
+            <Setter Property="Width" Value="58"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="InvisibleRepeatButtonStyle" TargetType="RepeatButton">
@@ -241,7 +268,6 @@
         </Style>
 
         <Style x:Key="HourStripeStyle" TargetType="Border">
-            <Setter Property="Height" Value="48"/>
             <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,1,0,0"/>
             <Setter Property="Background" Value="#FFFCFE"/>
@@ -252,6 +278,7 @@
             <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,1,0,1"/>
+            <Setter Property="CornerRadius" Value="{Binding CornerRadius}"/>
             <Setter Property="ClipToBounds" Value="True"/>
         </Style>
 
@@ -514,9 +541,11 @@
                         </WrapPanel>
                     </Grid>
 
-                    <ScrollViewer Grid.Row="2"
+                    <ScrollViewer x:Name="AgendaTimelineScrollViewer"
+                                  Grid.Row="2"
                                   HorizontalScrollBarVisibility="Disabled"
-                                  VerticalScrollBarVisibility="Auto">
+                                  VerticalScrollBarVisibility="Auto"
+                                  SizeChanged="AgendaTimeline_SizeChanged">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -531,7 +560,9 @@
                         <Border Grid.Column="0"
                                 Background="Transparent"/>
 
-                        <ItemsControl Grid.Column="1"
+                        <ItemsControl x:Name="AgendaDayHeaders"
+                                      Grid.Column="1"
+                                      SizeChanged="AgendaTimeline_SizeChanged"
                                       ItemsSource="{Binding AgendaWeekDays}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -541,49 +572,64 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Margin="0,0,10,0"
-                                            Padding="12"
+                                            Padding="10"
                                             Background="#FBFDFF"
                                             BorderBrush="{DynamicResource DataGridSurfaceBorderBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="20">
-                                        <StackPanel>
+                                            CornerRadius="16">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
                                             <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding DayLabel}"
-                                                               FontSize="16"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                                    <TextBlock Text="{Binding DateLabel}"
-                                                               Margin="0,3,0,0"
-                                                               FontSize="12"
-                                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                </StackPanel>
+                                                <TextBlock Text="{Binding DayLabel}"
+                                                           FontSize="16"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                <StackPanel Grid.Column="1"
-                                                            HorizontalAlignment="Right">
+                                                <Border Grid.Column="1"
+                                                        Padding="7,3"
+                                                        Background="{DynamicResource SummaryCardBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource SummaryCardBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="10"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Top">
+                                                    <TextBlock FontSize="10"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource SummaryValueBrush}">
+                                                        <Run Text="{Binding PlannedTasks.Count, Mode=OneWay}"/>
+                                                        <Run Text=" essai(s)"/>
+                                                    </TextBlock>
+                                                </Border>
+
+                                                <WrapPanel Grid.Row="1"
+                                                           Grid.ColumnSpan="2"
+                                                           Margin="0,1,0,0"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DateLabel}"
+                                                               Margin="0,0,8,0"
+                                                               FontSize="12"
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                                               VerticalAlignment="Center"/>
                                                     <Border Padding="7,3"
-                                                            Background="{DynamicResource SummaryCardBackgroundBrush}"
-                                                            BorderBrush="{DynamicResource SummaryCardBorderBrush}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="10">
-                                                        <TextBlock FontSize="10"
-                                                                   FontWeight="SemiBold"
-                                                                   Foreground="{DynamicResource SummaryValueBrush}">
-                                                            <Run Text="{Binding PlannedTasks.Count, Mode=OneWay}"/>
-                                                            <Run Text=" essai(s)"/>
-                                                        </TextBlock>
-                                                    </Border>
-                                                    <Border Margin="0,5,0,0"
-                                                            Padding="7,3"
                                                             Background="{DynamicResource SummaryMintBackgroundBrush}"
                                                             BorderBrush="{DynamicResource SummaryMintBorderBrush}"
                                                             BorderThickness="1"
-                                                            CornerRadius="10">
+                                                            CornerRadius="10"
+                                                            VerticalAlignment="Center">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -599,91 +645,81 @@
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
                                                     </Border>
-                                                </StackPanel>
+                                                </WrapPanel>
                                             </Grid>
 
-                                            <CheckBox Content="Jour travaillé"
-                                                      Margin="0,10,0,0"
-                                                      IsChecked="{Binding IsWorkingDay, Mode=TwoWay}"
-                                                      Style="{StaticResource AgendaCheckBoxStyle}"
-                                                      FontSize="12"
-                                                      FontWeight="SemiBold"
-                                                      Foreground="{DynamicResource PrimaryTitleBrush}"/>
-
-                                            <Grid Margin="0,10,0,0">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
+                                            <Grid Grid.Row="1"
+                                                  Margin="0,8,0,0">
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBlock Text="Début"
-                                                           Margin="2,0,4,4"
-                                                           FontSize="10"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                <TextBlock Grid.Column="1"
-                                                           Text="Fin"
-                                                           Margin="6,0,2,4"
-                                                           FontSize="10"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <CheckBox Content="Travaillé"
+                                                          Margin="0,0,8,0"
+                                                          IsChecked="{Binding IsWorkingDay, Mode=TwoWay}"
+                                                          Style="{StaticResource AgendaCheckBoxStyle}"
+                                                          FontSize="11"
+                                                          FontWeight="SemiBold"
+                                                          Foreground="{DynamicResource PrimaryTitleBrush}"
+                                                          VerticalAlignment="Center"/>
 
-                                                <TextBox Grid.Row="1"
-                                                         Margin="0,0,4,0"
-                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                <TextBox Grid.Column="2"
+                                                         Style="{StaticResource AgendaHeaderTimeTextBoxStyle}"
+                                                         IsEnabled="{Binding IsWorkingDay}"
                                                          Text="{Binding StartTimeText, UpdateSourceTrigger=PropertyChanged}"/>
-                                                <TextBox Grid.Row="1"
-                                                         Grid.Column="1"
-                                                         Margin="4,0,0,0"
-                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                <TextBlock Grid.Column="3"
+                                                           Text="-"
+                                                           Margin="5,0"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="4"
+                                                         Style="{StaticResource AgendaHeaderTimeTextBoxStyle}"
+                                                         IsEnabled="{Binding IsWorkingDay}"
                                                          Text="{Binding EndTimeText, UpdateSourceTrigger=PropertyChanged}"/>
                                             </Grid>
 
-                                            <CheckBox Content="Pause midi"
-                                                      Margin="0,10,0,0"
-                                                      IsChecked="{Binding IsLunchBreakEnabled, Mode=TwoWay}"
-                                                      Style="{StaticResource AgendaCheckBoxStyle}"
-                                                      FontSize="12"
-                                                      FontWeight="SemiBold"
-                                                      Foreground="{DynamicResource PrimaryTitleBrush}"/>
-
-                                            <Grid Margin="0,8,0,0">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
+                                            <Grid Grid.Row="2"
+                                                  Margin="0,6,0,0">
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBlock Text="De"
-                                                           Margin="2,0,4,4"
-                                                           FontSize="10"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                <TextBlock Grid.Column="1"
-                                                           Text="À"
-                                                           Margin="6,0,2,4"
-                                                           FontSize="10"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <CheckBox Content="Pause"
+                                                          Margin="0,0,8,0"
+                                                          IsChecked="{Binding IsLunchBreakEnabled, Mode=TwoWay}"
+                                                          Style="{StaticResource AgendaCheckBoxStyle}"
+                                                          FontSize="11"
+                                                          FontWeight="SemiBold"
+                                                          Foreground="{DynamicResource PrimaryTitleBrush}"
+                                                          VerticalAlignment="Center"/>
 
-                                                <TextBox Grid.Row="1"
-                                                         Margin="0,0,4,0"
-                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                <TextBox Grid.Column="2"
+                                                         Style="{StaticResource AgendaHeaderTimeTextBoxStyle}"
+                                                         IsEnabled="{Binding IsLunchBreakEnabled}"
                                                          Text="{Binding LunchStartText, UpdateSourceTrigger=PropertyChanged}"/>
-                                                <TextBox Grid.Row="1"
-                                                         Grid.Column="1"
-                                                         Margin="4,0,0,0"
-                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                <TextBlock Grid.Column="3"
+                                                           Text="-"
+                                                           Margin="5,0"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBox Grid.Column="4"
+                                                         Style="{StaticResource AgendaHeaderTimeTextBoxStyle}"
+                                                         IsEnabled="{Binding IsLunchBreakEnabled}"
                                                          Text="{Binding LunchEndText, UpdateSourceTrigger=PropertyChanged}"/>
                                             </Grid>
-                                        </StackPanel>
+                                        </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -743,7 +779,8 @@
                                             <ItemsControl ItemsSource="{Binding DataContext.AgendaDisplayGridSlots, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Border Style="{StaticResource HourStripeStyle}"/>
+                                                        <Border Height="{Binding DataContext.AgendaHourSlotHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                Style="{StaticResource HourStripeStyle}"/>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
@@ -812,71 +849,110 @@
                                                           Panel.ZIndex="2">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
-                                                        <Grid/>
+                                                        <Canvas/>
                                                     </ItemsPanelTemplate>
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemContainerStyle>
                                                     <Style TargetType="ContentPresenter">
-                                                        <Setter Property="VerticalAlignment" Value="Top"/>
+                                                        <Setter Property="Canvas.Top" Value="{Binding TimelineTop}"/>
+                                                        <Setter Property="Canvas.Left">
+                                                            <Setter.Value>
+                                                                <MultiBinding Converter="{StaticResource AgendaSegmentLeftConverter}">
+                                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                                    <Binding Path="ColumnIndex"/>
+                                                                    <Binding Path="ColumnCount"/>
+                                                                </MultiBinding>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Setter Property="Width">
+                                                            <Setter.Value>
+                                                                <MultiBinding Converter="{StaticResource AgendaSegmentWidthConverter}">
+                                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                                    <Binding Path="ColumnCount"/>
+                                                                </MultiBinding>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
                                                     </Style>
                                                 </ItemsControl.ItemContainerStyle>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border Style="{StaticResource TimelineTaskCardStyle}"
-                                                                Margin="{Binding TimelineMargin}"
-                                                                Height="{Binding BlockHeight}">
+                                                                Height="{Binding BlockHeight}"
+                                                                HorizontalAlignment="Stretch">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="6"/>
+                                                                    <ColumnDefinition Width="5"/>
                                                                     <ColumnDefinition Width="*"/>
                                                                 </Grid.ColumnDefinitions>
 
                                                                 <Border Background="{DynamicResource InfoCardAccentBrush}"
-                                                                        CornerRadius="16,0,0,16"/>
+                                                                        CornerRadius="12,0,0,12"/>
 
-                                                                <StackPanel Grid.Column="1"
-                                                                            Margin="8,0,0,0">
+                                                                <Grid Grid.Column="1"
+                                                                      Margin="7,0,0,0">
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+
                                                                     <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" MinWidth="0"/>
                                                                             <ColumnDefinition Width="Auto"/>
-                                                                            <ColumnDefinition Width="Auto"/>
                                                                         </Grid.ColumnDefinitions>
                                                                         <TextBlock Text="{Binding NomEssai}"
-                                                                                   FontSize="12"
                                                                                    FontWeight="SemiBold"
                                                                                    Foreground="{DynamicResource PrimaryTitleBrush}"
-                                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                                   TextTrimming="CharacterEllipsis">
+                                                                            <TextBlock.Style>
+                                                                                <Style TargetType="TextBlock">
+                                                                                    <Setter Property="FontSize" Value="12"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding IsCompact}" Value="True">
+                                                                                            <Setter Property="FontSize" Value="11"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </TextBlock.Style>
+                                                                        </TextBlock>
                                                                         <Border Grid.Column="1"
-                                                                                Margin="8,0,0,0"
-                                                                                Padding="7,3"
+                                                                                Margin="6,0,0,0"
+                                                                                Padding="6,2"
                                                                                 Background="{DynamicResource SummaryWarmBackgroundBrush}"
                                                                                 BorderBrush="{DynamicResource SummaryWarmBorderBrush}"
                                                                                 BorderThickness="1"
-                                                                                CornerRadius="10"
+                                                                                CornerRadius="9"
                                                                                 VerticalAlignment="Top">
+                                                                            <Border.Style>
+                                                                                <Style TargetType="Border">
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding IsTiny}" Value="True">
+                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </Border.Style>
                                                                             <TextBlock Text="{Binding DureeLabel}"
                                                                                        FontSize="10"
                                                                                        FontWeight="SemiBold"
-                                                                                       Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
+                                                                                       Foreground="{DynamicResource SummaryWarmForegroundBrush}"
+                                                                                       TextTrimming="CharacterEllipsis"/>
                                                                         </Border>
-                                                                        <Button Grid.Column="2"
-                                                                                Content="Retirer"
-                                                                                Margin="8,0,0,0"
-                                                                                VerticalAlignment="Top"
-                                                                                ToolTip="Remettre dans À planifier"
-                                                                                Style="{StaticResource MiniAgendaButtonStyle}"
-                                                                                Click="RetirerEssaiAgenda_Click"/>
                                                                     </Grid>
 
-                                                                    <StackPanel Margin="0,4,0,0"
+                                                                    <StackPanel Grid.Row="1"
+                                                                                Margin="0,3,0,0"
                                                                                 Orientation="Horizontal">
                                                                         <Grid>
-                                                                            <Border Padding="7,3"
+                                                                            <Border Padding="6,2"
                                                                                     Background="{DynamicResource SearchInputBackgroundBrush}"
                                                                                     BorderBrush="{DynamicResource SearchInputBorderBrush}"
                                                                                     BorderThickness="1"
-                                                                                    CornerRadius="10"
+                                                                                    CornerRadius="9"
                                                                                     Cursor="IBeam"
                                                                                     MouseLeftButtonDown="SegmentStartTime_MouseLeftButtonDown">
                                                                                 <Border.Style>
@@ -890,7 +966,7 @@
                                                                                     </Style>
                                                                                 </Border.Style>
                                                                                 <TextBlock Text="{Binding StartTimeText}"
-                                                                                           FontSize="11"
+                                                                                           FontSize="10.5"
                                                                                            FontWeight="SemiBold"
                                                                                            Foreground="{DynamicResource SummaryValueBrush}"/>
                                                                             </Border>
@@ -912,18 +988,18 @@
                                                                         </Grid>
 
                                                                         <TextBlock Text="-"
-                                                                                   Margin="5,0"
-                                                                                   FontSize="11"
+                                                                                   Margin="4,0"
+                                                                                   FontSize="10.5"
                                                                                    FontWeight="SemiBold"
                                                                                    Foreground="{DynamicResource SecondaryTextBrush}"
                                                                                    VerticalAlignment="Center"/>
 
                                                                         <Grid>
-                                                                            <Border Padding="7,3"
+                                                                            <Border Padding="6,2"
                                                                                     Background="{DynamicResource SearchInputBackgroundBrush}"
                                                                                     BorderBrush="{DynamicResource SearchInputBorderBrush}"
                                                                                     BorderThickness="1"
-                                                                                    CornerRadius="10"
+                                                                                    CornerRadius="9"
                                                                                     Cursor="IBeam"
                                                                                     MouseLeftButtonDown="SegmentEndTime_MouseLeftButtonDown">
                                                                                 <Border.Style>
@@ -937,7 +1013,7 @@
                                                                                     </Style>
                                                                                 </Border.Style>
                                                                                 <TextBlock Text="{Binding EndTimeText}"
-                                                                                           FontSize="11"
+                                                                                           FontSize="10.5"
                                                                                            FontWeight="SemiBold"
                                                                                            Foreground="{DynamicResource SummaryValueBrush}"/>
                                                                             </Border>
@@ -958,17 +1034,32 @@
                                                                             </TextBox>
                                                                         </Grid>
                                                                     </StackPanel>
-                                                                    <TextBlock Text="{Binding NomProduit}"
-                                                                               Margin="0,3,0,0"
-                                                                               FontSize="10"
-                                                                               Foreground="{DynamicResource SecondaryTextBrush}"
-                                                                               TextTrimming="CharacterEllipsis"/>
-                                                                    <TextBlock Text="{Binding NumeroProjet}"
-                                                                               Margin="0,1,0,0"
-                                                                               FontSize="10"
-                                                                               Foreground="{DynamicResource SecondaryTextBrush}"
-                                                                               TextTrimming="CharacterEllipsis"/>
-                                                                    <TextBlock Text="Dépasse la semaine"
+
+                                                                    <StackPanel Grid.Row="2"
+                                                                                Margin="0,3,0,0">
+                                                                        <StackPanel.Style>
+                                                                            <Style TargetType="StackPanel">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding IsCompact}" Value="True">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </StackPanel.Style>
+                                                                        <TextBlock Text="{Binding NomProduit}"
+                                                                                   FontSize="10"
+                                                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                        <TextBlock Text="{Binding NumeroProjet}"
+                                                                                   Margin="0,1,0,0"
+                                                                                   FontSize="10"
+                                                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                    </StackPanel>
+
+                                                                    <TextBlock Grid.Row="3"
+                                                                               Text="Dépasse la semaine"
                                                                                Margin="0,3,0,0"
                                                                                FontSize="10"
                                                                                Foreground="#D65C72">
@@ -979,11 +1070,14 @@
                                                                                     <DataTrigger Binding="{Binding IsOverflow}" Value="True">
                                                                                         <Setter Property="Visibility" Value="Visible"/>
                                                                                     </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding IsTiny}" Value="True">
+                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                    </DataTrigger>
                                                                                 </Style.Triggers>
                                                                             </Style>
                                                                         </TextBlock.Style>
                                                                     </TextBlock>
-                                                                </StackPanel>
+                                                                </Grid>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>

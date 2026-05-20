@@ -1,6 +1,9 @@
+using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using MonTableurApp.Models;
 using MonTableurApp.ViewModels;
@@ -182,7 +185,8 @@ namespace MonTableurApp.Views
             if (e.ClickCount < 2 ||
                 sender is not FrameworkElement element ||
                 element.DataContext is not AgendaTaskSegment segment ||
-                !segment.CanEditTimes)
+                (editStartTime && !segment.CanEditStartTime) ||
+                (!editStartTime && !segment.CanEditEndTime))
             {
                 return;
             }
@@ -255,6 +259,28 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void AgendaTimeline_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateAgendaTimelineHeight();
+        }
+
+        private void UpdateAgendaTimelineHeight()
+        {
+            if (DataContext is not MainViewModel viewModel ||
+                AgendaTimelineScrollViewer is null ||
+                AgendaDayHeaders is null)
+            {
+                return;
+            }
+
+            double visibleHeight = AgendaTimelineScrollViewer.ViewportHeight > 0
+                ? AgendaTimelineScrollViewer.ViewportHeight
+                : AgendaTimelineScrollViewer.ActualHeight;
+
+            double availableTimelineHeight = visibleHeight - AgendaDayHeaders.ActualHeight - 16;
+            viewModel.UpdateAgendaTimelineViewportHeight(availableTimelineHeight);
+        }
+
         private void VueAgendaView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Z || Keyboard.Modifiers != ModifierKeys.Control)
@@ -315,6 +341,86 @@ namespace MonTableurApp.Views
             }
 
             return null;
+        }
+    }
+
+    public sealed class AgendaSegmentLeftConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            double totalWidth = AgendaSegmentSizeCalculator.ReadDouble(values, 0);
+            int columnIndex = AgendaSegmentSizeCalculator.ReadInt(values, 1);
+            int columnCount = AgendaSegmentSizeCalculator.ReadInt(values, 2, 1);
+            double segmentWidth = AgendaSegmentSizeCalculator.GetSegmentWidth(totalWidth, columnCount);
+
+            return AgendaSegmentSizeCalculator.SideMargin + columnIndex * (segmentWidth + AgendaSegmentSizeCalculator.ColumnGap);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public sealed class AgendaSegmentWidthConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            double totalWidth = AgendaSegmentSizeCalculator.ReadDouble(values, 0);
+            int columnCount = AgendaSegmentSizeCalculator.ReadInt(values, 1, 1);
+
+            return AgendaSegmentSizeCalculator.GetSegmentWidth(totalWidth, columnCount);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    internal static class AgendaSegmentSizeCalculator
+    {
+        public const double SideMargin = 8;
+        public const double ColumnGap = 5;
+
+        private const double MinimumWidth = 44;
+
+        public static double GetSegmentWidth(double totalWidth, int columnCount)
+        {
+            int normalizedColumnCount = Math.Max(1, columnCount);
+            double availableWidth = Math.Max(0, totalWidth - (SideMargin * 2) - (ColumnGap * (normalizedColumnCount - 1)));
+
+            if (availableWidth <= 0)
+            {
+                return MinimumWidth;
+            }
+
+            return Math.Max(MinimumWidth, availableWidth / normalizedColumnCount);
+        }
+
+        public static double ReadDouble(object[] values, int index)
+        {
+            if (index >= values.Length || values[index] is not double value || double.IsNaN(value))
+            {
+                return 0;
+            }
+
+            return value;
+        }
+
+        public static int ReadInt(object[] values, int index, int fallback = 0)
+        {
+            if (index >= values.Length)
+            {
+                return fallback;
+            }
+
+            return values[index] switch
+            {
+                int intValue => intValue,
+                double doubleValue => (int)doubleValue,
+                _ => fallback
+            };
         }
     }
 }

@@ -12,7 +12,7 @@ namespace MonTableurApp.Models
         private string lunchStartText = "13:00";
         private string lunchEndText = "13:30";
         private string endTimeText = "16:00";
-        private double timelineHeight = 576;
+        private double timelineHeight = 528;
         private string endHourLabel = "16:00";
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -59,8 +59,20 @@ namespace MonTableurApp.Models
         public string? ReferenceProduit
         {
             get => referenceProduit;
-            set { referenceProduit = value; OnPropertyChanged(nameof(ReferenceProduit)); }
+            set
+            {
+                referenceProduit = value;
+                OnPropertyChanged(nameof(ReferenceProduit));
+                OnPropertyChanged(nameof(ReferencesProduitDisponibles));
+                OnPropertyChanged(nameof(HasReferencesProduit));
+            }
         }
+
+        [JsonIgnore]
+        public IReadOnlyList<string> ReferencesProduitDisponibles => SplitReferencesProduit(ReferenceProduit);
+
+        [JsonIgnore]
+        public bool HasReferencesProduit => ReferencesProduitDisponibles.Count > 0;
 
         private string? client;
         public string? Client
@@ -419,6 +431,24 @@ namespace MonTableurApp.Models
         private static string FormatDate(DateTime? value)
         {
             return value?.ToString(DateFormat, DateCulture) ?? string.Empty;
+        }
+
+        public static string NormalizeReferenceProduitList(string? value)
+        {
+            return string.Join(", ", SplitReferencesProduit(value));
+        }
+
+        private static IReadOnlyList<string> SplitReferencesProduit(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return Array.Empty<string>();
+            }
+
+            return value
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
     }
 }

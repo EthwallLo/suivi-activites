@@ -814,8 +814,9 @@
                                        Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
                             <StackPanel Margin="0,18,0,0">
-                                <TextBlock Text="Référence produit" Style="{StaticResource EditorLabelStyle}"/>
+                                <TextBlock Text="Référence(s) produit" Style="{StaticResource EditorLabelStyle}"/>
                                 <TextBox Text="{Binding EditableProjet.ReferenceProduit, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Saisir une ou plusieurs références séparées par une virgule."
                                          Style="{StaticResource EditorTextBoxStyle}"/>
                             </StackPanel>
 

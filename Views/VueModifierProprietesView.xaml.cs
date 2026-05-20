@@ -39,9 +39,18 @@ namespace MonTableurApp.Views
                 return;
             }
 
+            LoadEssaiForm(essai);
+        }
+
+        private void LoadEssaiForm(MainViewModel.EssaiDefinitionItem essai)
+        {
             EssaiNameTextBox.Text = essai.Nom;
             EssaiCategoryComboBox.SelectedItem = essai.Categorie;
-            EssaiDurationTextBox.Text = essai.DureeHeures.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR"));
+            EssaiSetupDurationTextBox.Text = essai.DureeMiseEnPlaceHeures.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR"));
+            EssaiDurationTextBox.Text = essai.DureeEssaiHeures.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR"));
+            EssaiPassageCountTextBox.Text = essai.NombrePassages.ToString(CultureInfo.GetCultureInfo("fr-FR"));
+            EssaiRecoveryDurationTextBox.Text = essai.DureeRepriseHeures.ToString("0.##", CultureInfo.GetCultureInfo("fr-FR"));
+            EssaiBackgroundCheckBox.IsChecked = essai.EstArrierePlan;
             EssaiStatusesTextBox.Text = string.Join(Environment.NewLine, essai.Statuts);
         }
 
@@ -209,7 +218,8 @@ namespace MonTableurApp.Views
 
         private void AddEssai_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel is not MainViewModel viewModel || !TryReadEssaiForm(out double durationHours, out List<string> statuses))
+            if (ViewModel is not MainViewModel viewModel ||
+                !TryReadEssaiForm(out double setupDurationHours, out double testDurationHours, out int passageCount, out double recoveryDurationHours, out bool isBackground, out List<string> statuses))
             {
                 return;
             }
@@ -217,12 +227,55 @@ namespace MonTableurApp.Views
             if (viewModel.AddEssaiDefinition(
                     EssaiNameTextBox.Text,
                     EssaiCategoryComboBox.SelectedItem as string,
-                    durationHours,
+                    setupDurationHours,
+                    testDurationHours,
+                    passageCount,
+                    recoveryDurationHours,
+                    isBackground,
                     statuses,
                     out MainViewModel.EssaiDefinitionItem? addedItem,
                     out string message))
             {
                 EssaisListBox.SelectedItem = addedItem;
+                if (addedItem != null)
+                {
+                    LoadEssaiForm(addedItem);
+                }
+            }
+
+            SetStatus(message);
+        }
+
+        private void SaveEssai_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel is not MainViewModel viewModel ||
+                !TryReadEssaiForm(out double setupDurationHours, out double testDurationHours, out int passageCount, out double recoveryDurationHours, out bool isBackground, out List<string> statuses))
+            {
+                return;
+            }
+
+            if (viewModel.UpdateEssaiDefinition(
+                    EssaisListBox.SelectedItem as MainViewModel.EssaiDefinitionItem,
+                    EssaiNameTextBox.Text,
+                    EssaiCategoryComboBox.SelectedItem as string,
+                    setupDurationHours,
+                    testDurationHours,
+                    passageCount,
+                    recoveryDurationHours,
+                    isBackground,
+                    statuses,
+                    out MainViewModel.EssaiDefinitionItem? updatedItem,
+                    out string message))
+            {
+                if (updatedItem != null && !ReferenceEquals(EssaisListBox.SelectedItem, updatedItem))
+                {
+                    EssaisListBox.SelectedItem = updatedItem;
+                }
+
+                if (updatedItem != null)
+                {
+                    LoadEssaiForm(updatedItem);
+                }
             }
 
             SetStatus(message);
@@ -230,7 +283,7 @@ namespace MonTableurApp.Views
 
         private void RenameEssai_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel is not MainViewModel viewModel || !TryReadEssaiForm(out double durationHours, out List<string> statuses))
+            if (ViewModel is not MainViewModel viewModel)
             {
                 return;
             }
@@ -238,13 +291,18 @@ namespace MonTableurApp.Views
             if (viewModel.RenameEssaiDefinition(
                     EssaisListBox.SelectedItem as MainViewModel.EssaiDefinitionItem,
                     EssaiNameTextBox.Text,
-                    EssaiCategoryComboBox.SelectedItem as string,
-                    durationHours,
-                    statuses,
                     out MainViewModel.EssaiDefinitionItem? updatedItem,
                     out string message))
             {
-                EssaisListBox.SelectedItem = updatedItem;
+                if (updatedItem != null && !ReferenceEquals(EssaisListBox.SelectedItem, updatedItem))
+                {
+                    EssaisListBox.SelectedItem = updatedItem;
+                }
+
+                if (updatedItem != null)
+                {
+                    LoadEssaiForm(updatedItem);
+                }
             }
 
             SetStatus(message);
@@ -266,7 +324,12 @@ namespace MonTableurApp.Views
             if (viewModel.DeleteEssaiDefinition(selectedEssai, out string message))
             {
                 EssaiNameTextBox.Text = string.Empty;
+                EssaiCategoryComboBox.SelectedItem = null;
+                EssaiSetupDurationTextBox.Text = string.Empty;
                 EssaiDurationTextBox.Text = string.Empty;
+                EssaiPassageCountTextBox.Text = string.Empty;
+                EssaiRecoveryDurationTextBox.Text = string.Empty;
+                EssaiBackgroundCheckBox.IsChecked = false;
                 EssaiStatusesTextBox.Text = string.Empty;
             }
 
@@ -306,9 +369,19 @@ namespace MonTableurApp.Views
             SetStatus(message);
         }
 
-        private bool TryReadEssaiForm(out double durationHours, out List<string> statuses)
+        private bool TryReadEssaiForm(
+            out double setupDurationHours,
+            out double testDurationHours,
+            out int passageCount,
+            out double recoveryDurationHours,
+            out bool isBackground,
+            out List<string> statuses)
         {
-            durationHours = 0;
+            setupDurationHours = 0;
+            testDurationHours = 0;
+            passageCount = 1;
+            recoveryDurationHours = 0;
+            isBackground = EssaiBackgroundCheckBox.IsChecked == true;
             statuses = EssaiStatusesTextBox.Text
                 .Split(new[] { "\r\n", "\n", ";", "," }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(status => status.Trim())
@@ -316,10 +389,50 @@ namespace MonTableurApp.Views
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
+            string rawSetupDuration = (EssaiSetupDurationTextBox.Text ?? string.Empty).Trim().Replace(',', '.');
             string rawDuration = (EssaiDurationTextBox.Text ?? string.Empty).Trim().Replace(',', '.');
-            if (!double.TryParse(rawDuration, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out durationHours))
+            string rawRecoveryDuration = (EssaiRecoveryDurationTextBox.Text ?? string.Empty).Trim().Replace(',', '.');
+            string rawPassageCount = (EssaiPassageCountTextBox.Text ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(rawRecoveryDuration))
             {
-                SetStatus("Indique une durée valide en heures.");
+                rawRecoveryDuration = "0";
+            }
+
+            if (string.IsNullOrWhiteSpace(rawPassageCount))
+            {
+                rawPassageCount = "1";
+            }
+
+            if (!double.TryParse(rawSetupDuration, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out setupDurationHours) ||
+                !double.TryParse(rawDuration, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out testDurationHours) ||
+                !double.TryParse(rawRecoveryDuration, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out recoveryDurationHours) ||
+                !int.TryParse(rawPassageCount, NumberStyles.Integer, CultureInfo.InvariantCulture, out passageCount))
+            {
+                SetStatus("Indique des durees et un nombre de repetitions valides.");
+                return false;
+            }
+
+            if (setupDurationHours < 0 || testDurationHours < 0 || recoveryDurationHours < 0)
+            {
+                SetStatus("Les durees ne peuvent pas etre negatives.");
+                return false;
+            }
+
+            if (passageCount < 1)
+            {
+                SetStatus("Le nombre de repetitions doit etre au moins egal a 1.");
+                return false;
+            }
+
+            if (passageCount > 5)
+            {
+                SetStatus("Le nombre de repetitions ne peut pas depasser 5.");
+                return false;
+            }
+
+            if (setupDurationHours <= 0 && testDurationHours <= 0 && recoveryDurationHours <= 0)
+            {
+                SetStatus("Indique au moins une duree superieure a 0.");
                 return false;
             }
 
@@ -359,6 +472,7 @@ namespace MonTableurApp.Views
             StatusTextBlock.Text = string.IsNullOrWhiteSpace(message)
                 ? "Action terminée."
                 : message;
+            StatusBorder.Visibility = Visibility.Visible;
         }
     }
 }

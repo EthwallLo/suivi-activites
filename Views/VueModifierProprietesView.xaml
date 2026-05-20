@@ -115,6 +115,12 @@
             </Setter>
         </Style>
 
+        <Style x:Key="EssaiDefinitionFieldTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource RoundedTextBoxStyle}">
+            <Setter Property="Height" Value="52"/>
+        </Style>
+
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="Margin" Value="0,0,8,8"/>
@@ -151,11 +157,13 @@
         </Style>
 
         <Style x:Key="CounterBadgeStyle" TargetType="Border">
-            <Setter Property="DockPanel.Dock" Value="Right"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="MinWidth" Value="38"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="10,0"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="15"/>
         </Style>
 
         <Style TargetType="ComboBox">
@@ -512,31 +520,38 @@
 
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="360"/>
+                                    <RowDefinition Height="430"/>
                                 </Grid.RowDefinitions>
 
-                                <DockPanel Grid.ColumnSpan="2"
-                                           LastChildFill="False">
+                                <Grid Grid.ColumnSpan="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
                                     <StackPanel>
                                         <TextBlock Text="Essais"
                                                    FontSize="20"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                        <TextBlock Text="Nom, catégorie, durée et états disponibles"
+                                        <TextBlock Text="Nom, catégorie, mise en place, durée d'essai et états disponibles"
                                                    Margin="0,4,0,0"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     </StackPanel>
-                                    <Border Style="{StaticResource CounterBadgeStyle}"
+                                    <Border Grid.Column="1"
+                                            Style="{StaticResource CounterBadgeStyle}"
                                             Background="{DynamicResource SummaryWarmBackgroundBrush}"
                                             BorderBrush="{DynamicResource SummaryWarmBorderBrush}">
                                         <TextBlock Text="{Binding EssaisDefinitions.Count}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
                                     </Border>
-                                </DockPanel>
+                                </Grid>
 
                                 <ListBox x:Name="EssaisListBox"
                                          Grid.Row="1"
@@ -561,8 +576,10 @@
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding DureeLabel}"
                                                            Margin="12,0,0,0"
+                                                           MaxWidth="220"
                                                            VerticalAlignment="Center"
                                                            FontSize="12"
+                                                           TextWrapping="Wrap"
                                                            Foreground="{DynamicResource SummaryValueBrush}"/>
                                             </Grid>
                                         </DataTemplate>
@@ -576,7 +593,7 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
@@ -586,13 +603,17 @@
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBox x:Name="EssaiNameTextBox"
                                              Grid.Row="1"
-                                             Margin="0,6,0,12"
+                                             Margin="0,6,0,16"
                                              Style="{StaticResource RoundedTextBoxStyle}"/>
 
                                     <Grid Grid.Row="2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="88"/>
+                                            <ColumnDefinition Width="118"/>
+                                            <ColumnDefinition Width="118"/>
+                                            <ColumnDefinition Width="118"/>
+                                            <ColumnDefinition Width="142"/>
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Margin="0,0,10,0">
@@ -601,19 +622,67 @@
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource SecondaryTextBrush}"/>
                                             <ComboBox x:Name="EssaiCategoryComboBox"
-                                                      Margin="0,6,0,12"
-                                                      MinHeight="34"
+                                                      Margin="0,6,0,16"
+                                                      Height="52"
                                                       ItemsSource="{Binding CategoriesEssais}"/>
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock Text="Durée (h)"
+                                        <StackPanel Grid.Column="1"
+                                                    Margin="0,0,10,0">
+                                            <TextBlock Text="Répétitions"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBox x:Name="EssaiPassageCountTextBox"
+                                                     Margin="0,6,0,16"
+                                                     Style="{StaticResource EssaiDefinitionFieldTextBoxStyle}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2"
+                                                    Margin="0,0,10,0">
+                                            <TextBlock Text="Mise en place (h)"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBox x:Name="EssaiSetupDurationTextBox"
+                                                     Margin="0,6,0,16"
+                                                     Style="{StaticResource EssaiDefinitionFieldTextBoxStyle}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="3"
+                                                    Margin="0,0,10,0">
+                                            <TextBlock Text="Essai (h)"
                                                        FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource SecondaryTextBrush}"/>
                                             <TextBox x:Name="EssaiDurationTextBox"
-                                                     Margin="0,6,0,12"
-                                                     Style="{StaticResource RoundedTextBoxStyle}"/>
+                                                     Margin="0,6,0,16"
+                                                     Style="{StaticResource EssaiDefinitionFieldTextBoxStyle}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4"
+                                                    Margin="0,0,10,0">
+                                            <TextBlock Text="Reprise (h)"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBox x:Name="EssaiRecoveryDurationTextBox"
+                                                     Margin="0,6,0,16"
+                                                     Style="{StaticResource EssaiDefinitionFieldTextBoxStyle}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="5"
+                                                    Margin="14,0,0,0">
+                                            <TextBlock Text="Mode"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <CheckBox x:Name="EssaiBackgroundCheckBox"
+                                                      Margin="0,13,0,16"
+                                                      Content="Arrière-plan"
+                                                      FontSize="12"
+                                                      FontWeight="SemiBold"
+                                                      Foreground="{DynamicResource PrimaryTitleBrush}"/>
                                         </StackPanel>
                                     </Grid>
 
@@ -624,7 +693,7 @@
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                                         <TextBox x:Name="EssaiStatusesTextBox"
                                                  Margin="0,6,0,0"
-                                                 MinHeight="120"
+                                                 Height="120"
                                                  AcceptsReturn="True"
                                                  TextWrapping="Wrap"
                                                  VerticalScrollBarVisibility="Auto"
@@ -632,8 +701,9 @@
                                     </StackPanel>
 
                                     <WrapPanel Grid.Row="4"
-                                               Margin="0,14,0,0">
+                                               Margin="0,16,0,0">
                                         <Button Content="Ajouter" Style="{StaticResource ActionButtonStyle}" Click="AddEssai_Click"/>
+                                        <Button Content="Enregistrer" Style="{StaticResource ActionButtonStyle}" Click="SaveEssai_Click"/>
                                         <Button Content="Renommer" Style="{StaticResource ActionButtonStyle}" Click="RenameEssai_Click"/>
                                         <Button Content="Supprimer" Style="{StaticResource ActionButtonStyle}" Click="DeleteEssai_Click"/>
                                     </WrapPanel>
@@ -717,15 +787,16 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <Border Grid.Row="1"
+                <Border x:Name="StatusBorder"
+                        Grid.Row="1"
                         Margin="0,18,0,0"
                         Padding="14,10"
                         Background="{DynamicResource SummaryCardBackgroundBrush}"
                         BorderBrush="{DynamicResource SummaryCardBorderBrush}"
                         BorderThickness="1"
-                        CornerRadius="14">
+                        CornerRadius="14"
+                        Visibility="Collapsed">
                     <TextBlock x:Name="StatusTextBlock"
-                               Text="Sélectionne une valeur pour la modifier, ou saisis une nouvelle valeur."
                                FontSize="13"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource SummaryValueBrush}"

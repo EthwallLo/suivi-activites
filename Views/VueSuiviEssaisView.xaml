@@ -5,6 +5,8 @@
              PreviewKeyDown="VueSuiviEssaisView_PreviewKeyDown">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
         <Style x:Key="InvisibleRepeatButtonStyle" TargetType="RepeatButton">
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="Template">
@@ -372,6 +374,44 @@
 
         <Style x:Key="SmallProductActionButtonStyle" TargetType="Button" BasedOn="{StaticResource BulkEssaiActionButtonStyle}"/>
 
+        <Style x:Key="EssaiConfigButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Background" Value="{DynamicResource SummaryCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTitleBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTip" Value="Configurer les durées de cet essai"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="15">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource MenuButtonHoverBorderBrush}"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding HasCustomPlanning}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource SummaryWarmBackgroundBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource SummaryWarmBorderBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource SummaryWarmForegroundBrush}"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <DataTemplate x:Key="EmptySelectionTemplate">
             <Border Style="{StaticResource SectionCardStyle}"
                     Padding="38">
@@ -717,7 +757,7 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,0,12,12"
-                                                            MinHeight="138"
+                                                            MinHeight="206"
                                                             Padding="14"
                                                             Background="{DynamicResource SearchCardBackgroundBrush}"
                                                             BorderBrush="{DynamicResource SearchCardBorderBrush}"
@@ -728,6 +768,7 @@
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
 
                                                                 <TextBlock Text="{Binding NomEssai}"
@@ -736,7 +777,17 @@
                                                                            FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                                <Ellipse Grid.Column="1"
+                                                                <Button Grid.Column="1"
+                                                                        Style="{StaticResource EssaiConfigButtonStyle}"
+                                                                        Click="ConfigurerEssaiPlanning_Click">
+                                                                    <TextBlock Text="&#xE713;"
+                                                                               FontFamily="Segoe MDL2 Assets"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold"
+                                                                               VerticalAlignment="Center"/>
+                                                                </Button>
+
+                                                                <Ellipse Grid.Column="2"
                                                                          Width="12"
                                                                          Height="12"
                                                                          Margin="10,2,0,0"
@@ -763,6 +814,53 @@
                                                                            FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource SummaryValueBrush}"
                                                                            VerticalAlignment="Center"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0"
+                                                                  Visibility="{Binding AfficheNombrePassages, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="86"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <TextBlock Text="Répétitions"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                           VerticalAlignment="Center"/>
+
+                                                                <ComboBox Grid.Column="1"
+                                                                          ItemsSource="{Binding NombrePassagesDisponibles}"
+                                                                          SelectedItem="{Binding NombrePassages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0">
+                                                                <Grid.Style>
+                                                                    <Style TargetType="Grid">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DataContext.SelectedProjetEssais.HasReferencesProduit, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Grid.Style>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <TextBlock Text="Référence utilisée"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                                                <ComboBox Grid.Row="1"
+                                                                          Margin="0,6,0,0"
+                                                                          ItemsSource="{Binding DataContext.SelectedProjetEssais.ReferencesProduitDisponibles, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          SelectedItem="{Binding ReferenceProduitUtilisee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
                                                             </Grid>
 
                                                             <Grid Margin="0,14,0,0">
@@ -820,7 +918,7 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,0,12,12"
-                                                            MinHeight="138"
+                                                            MinHeight="206"
                                                             Padding="14"
                                                             Background="{DynamicResource SearchCardBackgroundBrush}"
                                                             BorderBrush="{DynamicResource SearchCardBorderBrush}"
@@ -831,6 +929,7 @@
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
 
                                                                 <TextBlock Text="{Binding NomEssai}"
@@ -839,7 +938,17 @@
                                                                            FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                                <Ellipse Grid.Column="1"
+                                                                <Button Grid.Column="1"
+                                                                        Style="{StaticResource EssaiConfigButtonStyle}"
+                                                                        Click="ConfigurerEssaiPlanning_Click">
+                                                                    <TextBlock Text="&#xE713;"
+                                                                               FontFamily="Segoe MDL2 Assets"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold"
+                                                                               VerticalAlignment="Center"/>
+                                                                </Button>
+
+                                                                <Ellipse Grid.Column="2"
                                                                          Width="12"
                                                                          Height="12"
                                                                          Margin="10,2,0,0"
@@ -866,6 +975,53 @@
                                                                            FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource SummaryValueBrush}"
                                                                            VerticalAlignment="Center"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0"
+                                                                  Visibility="{Binding AfficheNombrePassages, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="86"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <TextBlock Text="Répétitions"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                           VerticalAlignment="Center"/>
+
+                                                                <ComboBox Grid.Column="1"
+                                                                          ItemsSource="{Binding NombrePassagesDisponibles}"
+                                                                          SelectedItem="{Binding NombrePassages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0">
+                                                                <Grid.Style>
+                                                                    <Style TargetType="Grid">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DataContext.SelectedProjetEssais.HasReferencesProduit, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Grid.Style>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <TextBlock Text="Référence utilisée"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                                                <ComboBox Grid.Row="1"
+                                                                          Margin="0,6,0,0"
+                                                                          ItemsSource="{Binding DataContext.SelectedProjetEssais.ReferencesProduitDisponibles, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          SelectedItem="{Binding ReferenceProduitUtilisee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
                                                             </Grid>
 
                                                             <Grid Margin="0,14,0,0">
@@ -923,7 +1079,7 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Margin="0,0,12,12"
-                                                            MinHeight="138"
+                                                            MinHeight="206"
                                                             Padding="14"
                                                             Background="{DynamicResource SearchCardBackgroundBrush}"
                                                             BorderBrush="{DynamicResource SearchCardBorderBrush}"
@@ -934,6 +1090,7 @@
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
 
                                                                 <TextBlock Text="{Binding NomEssai}"
@@ -942,7 +1099,17 @@
                                                                            FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource PrimaryTitleBrush}"/>
 
-                                                                <Ellipse Grid.Column="1"
+                                                                <Button Grid.Column="1"
+                                                                        Style="{StaticResource EssaiConfigButtonStyle}"
+                                                                        Click="ConfigurerEssaiPlanning_Click">
+                                                                    <TextBlock Text="&#xE713;"
+                                                                               FontFamily="Segoe MDL2 Assets"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold"
+                                                                               VerticalAlignment="Center"/>
+                                                                </Button>
+
+                                                                <Ellipse Grid.Column="2"
                                                                          Width="12"
                                                                          Height="12"
                                                                          Margin="10,2,0,0"
@@ -969,6 +1136,53 @@
                                                                            FontWeight="SemiBold"
                                                                            Foreground="{DynamicResource SummaryValueBrush}"
                                                                            VerticalAlignment="Center"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0"
+                                                                  Visibility="{Binding AfficheNombrePassages, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="86"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <TextBlock Text="Répétitions"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                           VerticalAlignment="Center"/>
+
+                                                                <ComboBox Grid.Column="1"
+                                                                          ItemsSource="{Binding NombrePassagesDisponibles}"
+                                                                          SelectedItem="{Binding NombrePassages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+                                                            </Grid>
+
+                                                            <Grid Margin="0,12,0,0">
+                                                                <Grid.Style>
+                                                                    <Style TargetType="Grid">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DataContext.SelectedProjetEssais.HasReferencesProduit, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Grid.Style>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <TextBlock Text="Référence utilisée"
+                                                                           FontSize="12"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                                                <ComboBox Grid.Row="1"
+                                                                          Margin="0,6,0,0"
+                                                                          ItemsSource="{Binding DataContext.SelectedProjetEssais.ReferencesProduitDisponibles, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          SelectedItem="{Binding ReferenceProduitUtilisee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                          Style="{StaticResource EssaiStatusComboBoxStyle}"/>
                                                             </Grid>
 
                                                             <Grid Margin="0,14,0,0">

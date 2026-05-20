@@ -758,9 +758,10 @@
                         <StackPanel Grid.Row="2"
                                     Grid.Column="2"
                                     Margin="0,18,0,0">
-                            <TextBlock Text="Référence produit"
+                            <TextBlock Text="Référence(s) produit"
                                        Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox x:Name="ReferenceProduitTextBox"
+                                     ToolTip="Saisir une ou plusieurs références séparées par une virgule."
                                      Style="{StaticResource SingleLineRoundedTextBoxStyle}"/>
                         </StackPanel>
 
