@@ -207,6 +207,7 @@ namespace MonTableurApp.ViewModels
         private int essaisSelectionOk;
         private int essaisSelectionNok;
         private bool showDoneOkEssais = true;
+        private bool showNonConcernedEssais = true;
         private string? selectedEssaisDefaultFamille;
         private IReadOnlyList<ProjetEnCoursSummary> projetsEnCoursDashboard = Array.Empty<ProjetEnCoursSummary>();
         private int projetsEnCoursDashboardCount;
@@ -516,6 +517,10 @@ namespace MonTableurApp.ViewModels
         public bool ShowDoneOkEssais => showDoneOkEssais;
 
         public string ToggleDoneOkEssaisLabel => showDoneOkEssais ? "Masquer les essais terminés" : "Afficher les essais terminés";
+
+        public bool ShowNonConcernedEssais => showNonConcernedEssais;
+
+        public string ToggleNonConcernedEssaisLabel => showNonConcernedEssais ? "Masquer les essais non concernés" : "Afficher les essais non concernés";
 
         public string? SelectedEssaisDefaultFamille
         {
@@ -2340,6 +2345,12 @@ namespace MonTableurApp.ViewModels
                 return;
             }
 
+            if (e.PropertyName == nameof(EssaiSuivi.Commentaire))
+            {
+                Sauvegarder();
+                return;
+            }
+
             if (sender is EssaiSuivi essai)
             {
                 Projet? projet = Projets.FirstOrDefault(item => item.Essais.Contains(essai));
@@ -2469,6 +2480,14 @@ namespace MonTableurApp.ViewModels
             showDoneOkEssais = !showDoneOkEssais;
             OnPropertyChanged(nameof(ShowDoneOkEssais));
             OnPropertyChanged(nameof(ToggleDoneOkEssaisLabel));
+            RefreshEssaiCollections();
+        }
+
+        public void ToggleNonConcernedEssaisVisibility()
+        {
+            showNonConcernedEssais = !showNonConcernedEssais;
+            OnPropertyChanged(nameof(ShowNonConcernedEssais));
+            OnPropertyChanged(nameof(ToggleNonConcernedEssaisLabel));
             RefreshEssaiCollections();
         }
 
@@ -2698,6 +2717,11 @@ namespace MonTableurApp.ViewModels
         private bool MatchesEssaiFilter(EssaiSuivi essai)
         {
             if (!showDoneOkEssais && IsEssaiDoneAndOk(essai))
+            {
+                return false;
+            }
+
+            if (!showNonConcernedEssais && !essai.EstConcerne)
             {
                 return false;
             }

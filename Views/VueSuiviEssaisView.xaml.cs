@@ -103,6 +103,14 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void ToggleNonConcernedEssaisVisibility_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel viewModel)
+            {
+                viewModel.ToggleNonConcernedEssaisVisibility();
+            }
+        }
+
         private void ConfigurerEssaiPlanning_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is not MainViewModel viewModel ||

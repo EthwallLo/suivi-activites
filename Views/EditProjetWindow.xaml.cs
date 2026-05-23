@@ -73,6 +73,40 @@ namespace MonTableurApp.Views
             Close();
         }
 
+        private void ToggleArchive_Click(object sender, RoutedEventArgs e)
+        {
+            if (!EditableProjet.EstArchive && !EditableProjet.PeutArchiver)
+            {
+                MessageBox.Show(
+                    "Seuls les projets terminés peuvent être archivés.",
+                    "Archivage",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            string nomProjet = string.IsNullOrWhiteSpace(EditableProjet.NomProduit)
+                ? EditableProjet.NumeroProjet ?? "ce projet"
+                : EditableProjet.NomProduit;
+
+            string message = EditableProjet.EstArchive
+                ? $"Désarchiver \"{nomProjet}\" et le remettre dans les vues de travail ?"
+                : $"Archiver le projet terminé \"{nomProjet}\" ?";
+
+            MessageBoxResult result = MessageBox.Show(
+                message,
+                "Archivage",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            EditableProjet.EstArchive = !EditableProjet.EstArchive;
+        }
+
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

@@ -1527,18 +1527,6 @@
                                         ElementStyle="{StaticResource CenteredTextColumnElementStyle}"
                                         EditingElementStyle="{StaticResource CenteredTextColumnEditingStyle}"
                                         Width="1.7*"/>
-                    <DataGridTemplateColumn Header="Archive"
-                                            Width="1.05*"
-                                            IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding LibelleActionArchive}"
-                                        ToolTip="{Binding InfoActionArchive}"
-                                        Style="{StaticResource ArchiveCellButtonStyle}"
-                                        Click="ToggleArchiveProjet_Click"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

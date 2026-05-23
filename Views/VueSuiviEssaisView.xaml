@@ -620,7 +620,6 @@
                                 </StackPanel>
                             </Button>
 
-                            
                             <Border Style="{StaticResource MetricPillStyle}">
                                 <StackPanel>
                                     <TextBlock Text="Total des essais"
@@ -717,13 +716,20 @@
                                            Foreground="{DynamicResource PrimaryTitleBrush}"/>
                             </StackPanel>
 
-                            <Button Grid.Column="1"
-                                    HorizontalAlignment="Right"
-                                    Style="{StaticResource ProductManageButtonStyle}"
-                                    Click="ToggleDoneOkEssaisVisibility_Click">
-                                <TextBlock Text="{Binding DataContext.ToggleDoneOkEssaisLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                           FontWeight="SemiBold"/>
-                            </Button>
+                            <WrapPanel Grid.Column="1"
+                                       HorizontalAlignment="Right">
+                                <Button Style="{StaticResource ProductManageButtonStyle}"
+                                        Margin="0,0,8,0"
+                                        Click="ToggleNonConcernedEssaisVisibility_Click">
+                                    <TextBlock Text="{Binding DataContext.ToggleNonConcernedEssaisLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               FontWeight="SemiBold"/>
+                                </Button>
+                                <Button Style="{StaticResource ProductManageButtonStyle}"
+                                        Click="ToggleDoneOkEssaisVisibility_Click">
+                                    <TextBlock Text="{Binding DataContext.ToggleDoneOkEssaisLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               FontWeight="SemiBold"/>
+                                </Button>
+                            </WrapPanel>
                         </Grid>
 
                         <Grid Grid.Row="1"
@@ -849,6 +855,7 @@
                                                                 <Grid.RowDefinitions>
                                                                     <RowDefinition Height="Auto"/>
                                                                     <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
                                                                 </Grid.RowDefinitions>
 
                                                                 <TextBlock Text="Référence utilisée"
@@ -861,6 +868,12 @@
                                                                           ItemsSource="{Binding DataContext.SelectedProjetEssais.ReferencesProduitDisponibles, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                           SelectedItem="{Binding ReferenceProduitUtilisee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                           Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                                <TextBox Grid.Row="2"
+                                                                         Margin="0,8,0,0"
+                                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                                         Text="{Binding Commentaire, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                         ToolTip="Commentaire de l'essai"/>
                                                             </Grid>
 
                                                             <Grid Margin="0,14,0,0">
@@ -1010,6 +1023,7 @@
                                                                 <Grid.RowDefinitions>
                                                                     <RowDefinition Height="Auto"/>
                                                                     <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
                                                                 </Grid.RowDefinitions>
 
                                                                 <TextBlock Text="Référence utilisée"
@@ -1022,6 +1036,12 @@
                                                                           ItemsSource="{Binding DataContext.SelectedProjetEssais.ReferencesProduitDisponibles, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                           SelectedItem="{Binding ReferenceProduitUtilisee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                           Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                                <TextBox Grid.Row="2"
+                                                                         Margin="0,8,0,0"
+                                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                                         Text="{Binding Commentaire, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                         ToolTip="Commentaire de l'essai"/>
                                                             </Grid>
 
                                                             <Grid Margin="0,14,0,0">
@@ -1171,6 +1191,7 @@
                                                                 <Grid.RowDefinitions>
                                                                     <RowDefinition Height="Auto"/>
                                                                     <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
                                                                 </Grid.RowDefinitions>
 
                                                                 <TextBlock Text="Référence utilisée"
@@ -1183,6 +1204,12 @@
                                                                           ItemsSource="{Binding DataContext.SelectedProjetEssais.ReferencesProduitDisponibles, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                           SelectedItem="{Binding ReferenceProduitUtilisee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                           Style="{StaticResource EssaiStatusComboBoxStyle}"/>
+
+                                                                <TextBox Grid.Row="2"
+                                                                         Margin="0,8,0,0"
+                                                                         Style="{StaticResource RoundedTextBoxStyle}"
+                                                                         Text="{Binding Commentaire, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                         ToolTip="Commentaire de l'essai"/>
                                                             </Grid>
 
                                                             <Grid Margin="0,14,0,0">

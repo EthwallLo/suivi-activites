@@ -115,41 +115,6 @@
             </Setter>
         </Style>
 
-        <Style x:Key="ThemeSwitchButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="14,10"/>
-            <Setter Property="Margin" Value="10,0,0,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ThemeBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="16">
-                            <ContentPresenter Margin="{TemplateBinding Padding}"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ThemeBorder" Property="Background" Value="{DynamicResource MenuButtonHoverBackgroundBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ThemeBorder" Property="Background" Value="{DynamicResource MenuButtonPressedBackgroundBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource MenuButtonForegroundBrush}"/>
             <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
@@ -209,43 +174,16 @@
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border x:Name="LogoChip"
-                                Width="84"
-                                Height="84"
-                                Background="{DynamicResource LogoChipBackgroundBrush}"
-                                CornerRadius="26"
-                                BorderBrush="{DynamicResource LogoChipBorderBrush}"
-                                BorderThickness="1"
-                                HorizontalAlignment="Left">
-                            <Image x:Name="LogoImage"
-                                   Source="logg.png"
-                                   Width="64"
-                                   Height="64"
-                                   Stretch="Uniform"
-                                   RenderOptions.BitmapScalingMode="Fant"
-                                   SnapsToDevicePixels="True"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                        </Border>
-
-                        <StackPanel x:Name="UserGreetingPanel"
-                                    Grid.Column="1"
-                                    Margin="16,10,0,0"
-                                    VerticalAlignment="Top">
-                            <TextBlock Text="Bienvenue,"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       FontSize="13"
-                                       FontWeight="SemiBold"/>
-                            <TextBlock Text="Quentin"
-                                       Margin="0,3,0,0"
-                                       Foreground="{DynamicResource PrimaryTitleBrush}"
-                                       FontSize="19"
-                                       FontWeight="SemiBold"/>
-                        </StackPanel>
+                        <TextBlock x:Name="AppTitleText"
+                                   Text="Suivi des&#x0a;activités"
+                                   Foreground="{DynamicResource PrimaryTitleBrush}"
+                                   FontSize="29"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"/>
 
                         <Button x:Name="SidebarToggleButton"
                                 Grid.Column="1"
@@ -256,19 +194,11 @@
                                 ToolTip="Réduire le bandeau de navigation"
                                 Click="SidebarToggle_Click"/>
                     </Grid>
-
-                    <TextBlock x:Name="AppTitleText"
-                               Text="Suivi des&#x0a;activités"
-                               Margin="0,22,0,0"
-                               Foreground="{DynamicResource PrimaryTitleBrush}"
-                               FontSize="29"
-                               FontWeight="SemiBold"
-                               TextWrapping="Wrap"/>
                 </StackPanel>
 
                 <StackPanel x:Name="NavigationPanel"
                             Grid.Row="1"
-                            Margin="0,38,0,0">
+                            Margin="0,18,0,0">
                     <Button Content="Vue générale"
                             x:Name="VueGeneraleButton"
                             Style="{StaticResource MenuButtonStyle}"
@@ -289,6 +219,10 @@
                             x:Name="AgendaButton"
                             Style="{StaticResource MenuButtonStyle}"
                             Click="Agenda_Click"/>
+                    <Button Content="Projets archivés"
+                            x:Name="ArchivesButton"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="Archives_Click"/>
                     <Button Content="Modifier des propriétés"
                             x:Name="ModifierProprietesButton"
                             Style="{StaticResource MenuButtonStyle}"
@@ -327,15 +261,10 @@
                             BorderThickness="1"
                             CornerRadius="18"
                             VerticalAlignment="Center">
-                        <TextBlock Text="Vers. 1.0"
+                        <TextBlock Text="Vers. 1.1"
                                    Foreground="{DynamicResource VersionBadgeForegroundBrush}"
                                    FontWeight="SemiBold"/>
                     </Border>
-
-                    <Button x:Name="ThemeToggleButton"
-                            Content="Blue pastel kawaii"
-                            Style="{StaticResource ThemeSwitchButtonStyle}"
-                            Click="ThemeToggle_Click"/>
                 </StackPanel>
             </Grid>
 

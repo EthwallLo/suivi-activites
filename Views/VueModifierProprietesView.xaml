@@ -158,12 +158,13 @@
 
         <Style x:Key="CounterBadgeStyle" TargetType="Border">
             <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="MinWidth" Value="38"/>
-            <Setter Property="Height" Value="30"/>
+            <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="16,0,0,0"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="CornerRadius" Value="16"/>
         </Style>
 
         <Style TargetType="ComboBox">
@@ -382,20 +383,28 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <DockPanel LastChildFill="False">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
                                         <TextBlock Text="Clients"
                                                    FontSize="20"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                        <Border Style="{StaticResource CounterBadgeStyle}"
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource CounterBadgeStyle}"
                                                 Background="{DynamicResource SummaryMintBackgroundBrush}"
                                                 BorderBrush="{DynamicResource SummaryMintBorderBrush}">
                                             <TextBlock Text="{Binding Clients.Count}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
                                                        FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
                                         </Border>
-                                    </DockPanel>
+                                    </Grid>
 
                                     <ListBox x:Name="ClientsListBox"
                                              Grid.Row="1"
@@ -428,20 +437,28 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <DockPanel LastChildFill="False">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
                                         <TextBlock Text="Demandeurs"
                                                    FontSize="20"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                        <Border Style="{StaticResource CounterBadgeStyle}"
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource CounterBadgeStyle}"
                                                 Background="{DynamicResource SummaryWarmBackgroundBrush}"
                                                 BorderBrush="{DynamicResource SummaryWarmBorderBrush}">
                                             <TextBlock Text="{Binding Demandeurs.Count}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
                                                        FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource SummaryWarmForegroundBrush}"/>
                                         </Border>
-                                    </DockPanel>
+                                    </Grid>
 
                                     <ListBox x:Name="DemandeursListBox"
                                              Grid.Row="1"
@@ -474,20 +491,27 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <DockPanel LastChildFill="False">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
                                         <TextBlock Text="Familles de câbles"
                                                    FontSize="20"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource PrimaryTitleBrush}"/>
-                                        <Border Style="{StaticResource CounterBadgeStyle}"
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource CounterBadgeStyle}"
                                                 Background="{DynamicResource SummaryMintBackgroundBrush}"
                                                 BorderBrush="{DynamicResource SummaryMintBorderBrush}">
                                             <TextBlock Text="{Binding FamillesProduit.Count}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
                                                        FontSize="12"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource SummaryMintForegroundBrush}"/>
                                         </Border>
-                                    </DockPanel>
+                                    </Grid>
 
                                     <ListBox x:Name="FamillesListBox"
                                              Grid.Row="1"

@@ -14,6 +14,7 @@ namespace MonTableurApp.Models
         private string? nomEssai;
         private string? statut;
         private string? resultatTraitement;
+        private string? commentaire;
         private string? categorie;
         private string? referenceProduitUtilisee;
         private int nombrePassages;
@@ -100,6 +101,21 @@ namespace MonTableurApp.Models
                 OnPropertyChanged(nameof(ResultatTraitement));
                 OnPropertyChanged(nameof(AfficheIndicateurEtat));
                 OnPropertyChanged(nameof(CouleurIndicateurEtat));
+            }
+        }
+
+        public string? Commentaire
+        {
+            get => commentaire;
+            set
+            {
+                if (commentaire == value)
+                {
+                    return;
+                }
+
+                commentaire = value;
+                OnPropertyChanged(nameof(Commentaire));
             }
         }
 

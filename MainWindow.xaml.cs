@@ -10,8 +10,6 @@ namespace MonTableurApp
 {
     public partial class MainWindow : Window
     {
-        private const string ThemeRose = "rose";
-        private const string ThemeBlue = "blue";
         private const double SidebarExpandedWidth = 315;
         private const double SidebarCollapsedWidth = 144;
         private static readonly string ThemeSettingsPath = Path.Combine(AppContext.BaseDirectory, "ui-settings.json");
@@ -23,7 +21,7 @@ namespace MonTableurApp
         private readonly VueModifierProprietesView vueModifierProprietes;
         private readonly VueEnCoursView vueEnCours;
         private readonly VueAgendaView vueAgenda;
-        private bool isBlueTheme;
+        private readonly VueArchivesView vueArchives;
         private bool isSidebarCollapsed;
 
         public MainWindow()
@@ -36,10 +34,10 @@ namespace MonTableurApp
             vueModifierProprietes = new VueModifierProprietesView { DataContext = viewModel };
             vueEnCours = new VueEnCoursView { DataContext = viewModel };
             vueAgenda = new VueAgendaView { DataContext = viewModel };
+            vueArchives = new VueArchivesView { DataContext = viewModel };
 
-            isBlueTheme = LoadSavedTheme() == ThemeBlue;
             isSidebarCollapsed = LoadSavedSidebarCollapsed();
-            ApplyCurrentTheme();
+            ApplyApplicationTheme();
             ApplySidebarState();
             ApplySavedWindowPlacement();
             AfficherVueGenerale();
@@ -76,10 +74,9 @@ namespace MonTableurApp
             AfficherVueAgenda();
         }
 
-        private void ThemeToggle_Click(object sender, RoutedEventArgs e)
+        private void Archives_Click(object sender, RoutedEventArgs e)
         {
-            isBlueTheme = !isBlueTheme;
-            ApplyCurrentTheme();
+            AfficherVueArchives();
         }
 
         private void SidebarToggle_Click(object sender, RoutedEventArgs e)
@@ -145,6 +142,14 @@ namespace MonTableurApp
                 AgendaButton);
         }
 
+        private void AfficherVueArchives()
+        {
+            ShowView(
+                vueArchives,
+                "Afficher les projets archivés",
+                ArchivesButton);
+        }
+
         private void ShowView(UserControl view, string title, Button activeButton)
         {
             PageTitleText.Text = title;
@@ -165,6 +170,7 @@ namespace MonTableurApp
             ModifierProprietesButton.Tag = null;
             EnCoursButton.Tag = null;
             AgendaButton.Tag = null;
+            ArchivesButton.Tag = null;
             activeButton.Tag = "Active";
         }
 
@@ -173,16 +179,8 @@ namespace MonTableurApp
             SidebarColumn.Width = new GridLength(isSidebarCollapsed ? SidebarCollapsedWidth : SidebarExpandedWidth);
             SidebarBorder.Margin = isSidebarCollapsed ? new Thickness(12) : new Thickness(18);
             SidebarInnerGrid.Margin = isSidebarCollapsed ? new Thickness(14) : new Thickness(28);
-            NavigationPanel.Margin = isSidebarCollapsed ? new Thickness(0, 22, 0, 0) : new Thickness(0, 38, 0, 0);
-
-            UserGreetingPanel.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
+            NavigationPanel.Margin = isSidebarCollapsed ? new Thickness(0, 14, 0, 0) : new Thickness(0, 18, 0, 0);
             AppTitleText.Visibility = isSidebarCollapsed ? Visibility.Collapsed : Visibility.Visible;
-
-            LogoChip.Width = isSidebarCollapsed ? 54 : 84;
-            LogoChip.Height = isSidebarCollapsed ? 54 : 84;
-            LogoChip.CornerRadius = isSidebarCollapsed ? new CornerRadius(18) : new CornerRadius(26);
-            LogoImage.Width = isSidebarCollapsed ? 42 : 64;
-            LogoImage.Height = isSidebarCollapsed ? 42 : 64;
 
             SidebarToggleButton.Width = isSidebarCollapsed ? 34 : 42;
             SidebarToggleButton.Height = isSidebarCollapsed ? 32 : 36;
@@ -196,6 +194,7 @@ namespace MonTableurApp
             SetNavigationButtonLabel(AjouterProjetButton, "Ajouter un projet", "+");
             SetNavigationButtonLabel(EnCoursButton, "En cours", "C");
             SetNavigationButtonLabel(AgendaButton, "Agenda", "A");
+            SetNavigationButtonLabel(ArchivesButton, "Projets archivés", "P");
             SetNavigationButtonLabel(ModifierProprietesButton, "Modifier des propriétés", "M");
         }
 
@@ -205,26 +204,6 @@ namespace MonTableurApp
             button.ToolTip = isSidebarCollapsed ? fullLabel : null;
             button.HorizontalContentAlignment = isSidebarCollapsed ? HorizontalAlignment.Center : HorizontalAlignment.Left;
             button.Padding = isSidebarCollapsed ? new Thickness(6, 12, 6, 14) : new Thickness(10, 12, 10, 14);
-        }
-
-        private void ApplyCurrentTheme()
-        {
-            if (isBlueTheme)
-            {
-                ApplyBlueTheme();
-                ThemeToggleButton.Content = "Rose";
-            }
-            else
-            {
-                ApplyRoseTheme();
-                ThemeToggleButton.Content = "Bleu";
-            }
-        }
-
-        private static string LoadSavedTheme()
-        {
-            ThemeSettings? settings = LoadThemeSettings();
-            return settings?.Theme == ThemeBlue ? ThemeBlue : ThemeRose;
         }
 
         private static bool LoadSavedSidebarCollapsed()
@@ -317,7 +296,6 @@ namespace MonTableurApp
 
             var settings = new ThemeSettings
             {
-                Theme = isBlueTheme ? ThemeBlue : ThemeRose,
                 SidebarCollapsed = isSidebarCollapsed,
                 WindowLeft = normalBounds.Left,
                 WindowTop = normalBounds.Top,
@@ -332,144 +310,74 @@ namespace MonTableurApp
             File.WriteAllText(ThemeSettingsPath, json);
         }
 
-        private static void ApplyRoseTheme()
+        private static void ApplyApplicationTheme()
         {
             ResourceDictionary resources = Application.Current.Resources;
 
-            resources["WindowBackgroundBrush"] = CreateGradient("#FFF7FC", "#FFF0F7", "#FFF8EF");
-            resources["SidebarBrush"] = CreateGradient("#FFD7E8", "#F6D8FF");
-            resources["SidebarBorderBrush"] = CreateBrush("#F5B7D7");
-            resources["LogoChipBackgroundBrush"] = CreateBrush("#FFF9FD");
-            resources["LogoChipBorderBrush"] = CreateBrush("#F4B5D6");
-            resources["PrimaryTitleBrush"] = CreateBrush("#8B4B7C");
-            resources["SecondaryTextBrush"] = CreateBrush("#9B758A");
+            resources["WindowBackgroundBrush"] = CreateGradient("#F4F8FC", "#EEF3F9", "#E6EDF6");
+            resources["SidebarBrush"] = CreateGradient("#E8F0F8", "#DBE7F2");
+            resources["SidebarBorderBrush"] = CreateBrush("#C3D3E3");
+            resources["LogoChipBackgroundBrush"] = CreateBrush("#FFFFFF");
+            resources["LogoChipBorderBrush"] = CreateBrush("#D0DCE9");
+            resources["PrimaryTitleBrush"] = CreateBrush("#1F3B5B");
+            resources["SecondaryTextBrush"] = CreateBrush("#5E7590");
 
-            resources["MenuButtonBackgroundBrush"] = CreateBrush("#FFFDFE");
-            resources["MenuButtonBorderBrush"] = CreateBrush("#F6BAD8");
-            resources["MenuButtonForegroundBrush"] = CreateBrush("#7B4D73");
-            resources["MenuButtonHoverBackgroundBrush"] = CreateBrush("#FFF0F8");
-            resources["MenuButtonHoverBorderBrush"] = CreateBrush("#EFA6CC");
-            resources["MenuButtonPressedBackgroundBrush"] = CreateBrush("#FFE7F4");
+            resources["MenuButtonBackgroundBrush"] = CreateBrush("#FFFFFF");
+            resources["MenuButtonBorderBrush"] = CreateBrush("#C5D6E6");
+            resources["MenuButtonForegroundBrush"] = CreateBrush("#274969");
+            resources["MenuButtonHoverBackgroundBrush"] = CreateBrush("#E7F0F9");
+            resources["MenuButtonHoverBorderBrush"] = CreateBrush("#6E92B7");
+            resources["MenuButtonPressedBackgroundBrush"] = CreateBrush("#D9E6F3");
 
-            resources["VersionBadgeBackgroundBrush"] = CreateBrush("#FFF4D9");
-            resources["VersionBadgeBorderBrush"] = CreateBrush("#F5D59A");
-            resources["VersionBadgeForegroundBrush"] = CreateBrush("#B78641");
+            resources["VersionBadgeBackgroundBrush"] = CreateBrush("#E9F0F7");
+            resources["VersionBadgeBorderBrush"] = CreateBrush("#C6D4E2");
+            resources["VersionBadgeForegroundBrush"] = CreateBrush("#31516F");
 
-            resources["ThemeButtonBackgroundBrush"] = CreateBrush("#FFFDFE");
-            resources["ThemeButtonBorderBrush"] = CreateBrush("#E7CEE4");
-            resources["ThemeButtonForegroundBrush"] = CreateBrush("#7B4D73");
+            resources["ThemeButtonBackgroundBrush"] = CreateBrush("#FFFFFF");
+            resources["ThemeButtonBorderBrush"] = CreateBrush("#C8D5E3");
+            resources["ThemeButtonForegroundBrush"] = CreateBrush("#274969");
 
-            resources["InfoCardBackgroundBrush"] = CreateBrush("#FFF6FB");
-            resources["InfoCardBorderBrush"] = CreateBrush("#F5BCD9");
-            resources["InfoCardAccentBrush"] = CreateBrush("#E28AB9");
+            resources["InfoCardBackgroundBrush"] = CreateBrush("#EAF2FA");
+            resources["InfoCardBorderBrush"] = CreateBrush("#C5D6E7");
+            resources["InfoCardAccentBrush"] = CreateBrush("#3E709E");
 
-            resources["ContentBackgroundBrush"] = CreateBrush("#FFFCFE");
-            resources["ContentBorderBrush"] = CreateBrush("#F4D4E5");
+            resources["ContentBackgroundBrush"] = CreateBrush("#FDFEFF");
+            resources["ContentBorderBrush"] = CreateBrush("#D0DCE8");
 
-            resources["SummaryCardBackgroundBrush"] = CreateBrush("#FFF2F8");
-            resources["SummaryCardBorderBrush"] = CreateBrush("#F5C8DD");
-            resources["SummaryLabelBrush"] = CreateBrush("#A07A94");
-            resources["SummaryValueBrush"] = CreateBrush("#8A4E78");
+            resources["SummaryCardBackgroundBrush"] = CreateBrush("#F2F7FC");
+            resources["SummaryCardBorderBrush"] = CreateBrush("#CBD9E7");
+            resources["SummaryLabelBrush"] = CreateBrush("#60768F");
+            resources["SummaryValueBrush"] = CreateBrush("#2B4C6C");
 
-            resources["SummaryWarmBackgroundBrush"] = CreateBrush("#FFF4D8");
-            resources["SummaryWarmBorderBrush"] = CreateBrush("#F1D89B");
-            resources["SummaryWarmForegroundBrush"] = CreateBrush("#A8712A");
+            resources["SummaryWarmBackgroundBrush"] = CreateBrush("#EDF3F9");
+            resources["SummaryWarmBorderBrush"] = CreateBrush("#CBD8E5");
+            resources["SummaryWarmForegroundBrush"] = CreateBrush("#426483");
 
-            resources["SummaryMintBackgroundBrush"] = CreateBrush("#EAF8F5");
-            resources["SummaryMintBorderBrush"] = CreateBrush("#B8E4D9");
-            resources["SummaryMintForegroundBrush"] = CreateBrush("#3D897A");
+            resources["SummaryMintBackgroundBrush"] = CreateBrush("#EAF5F7");
+            resources["SummaryMintBorderBrush"] = CreateBrush("#C2D8DE");
+            resources["SummaryMintForegroundBrush"] = CreateBrush("#2F6D7B");
 
-            resources["SummaryLavenderBackgroundBrush"] = CreateBrush("#F0EEFF");
-            resources["SummaryLavenderBorderBrush"] = CreateBrush("#D3CEF8");
-            resources["SummaryLavenderForegroundBrush"] = CreateBrush("#625AB1");
+            resources["SummaryLavenderBackgroundBrush"] = CreateBrush("#EEF2F9");
+            resources["SummaryLavenderBorderBrush"] = CreateBrush("#CCD5E6");
+            resources["SummaryLavenderForegroundBrush"] = CreateBrush("#4E6683");
 
-            resources["SearchCardBackgroundBrush"] = CreateBrush("#FFF9FC");
-            resources["SearchCardBorderBrush"] = CreateBrush("#F5C8DD");
+            resources["SearchCardBackgroundBrush"] = CreateBrush("#F6FAFD");
+            resources["SearchCardBorderBrush"] = CreateBrush("#CFDBE7");
             resources["SearchInputBackgroundBrush"] = CreateBrush("#FFFFFF");
-            resources["SearchInputBorderBrush"] = CreateBrush("#EFC3DA");
-            resources["SearchInputForegroundBrush"] = CreateBrush("#7A5B72");
+            resources["SearchInputBorderBrush"] = CreateBrush("#C4D4E4");
+            resources["SearchInputForegroundBrush"] = CreateBrush("#2F4E6E");
 
-            resources["DataGridHeaderBrush"] = CreateBrush("#FFE6F1");
-            resources["DataGridHeaderForegroundBrush"] = CreateBrush("#8D4D79");
-            resources["DataGridRowHoverBrush"] = CreateBrush("#FFF5FA");
-            resources["DataGridRowSelectedBrush"] = CreateBrush("#FFEAF3");
-            resources["DataGridSelectionForegroundBrush"] = CreateBrush("#6E4967");
-            resources["DataGridAltRowBrush"] = CreateBrush("#FFF9FC");
-            resources["DataGridSurfaceBorderBrush"] = CreateBrush("#F3D9E7");
+            resources["DataGridHeaderBrush"] = CreateBrush("#E4EDF7");
+            resources["DataGridHeaderForegroundBrush"] = CreateBrush("#2D4D6E");
+            resources["DataGridRowHoverBrush"] = CreateBrush("#EDF4FB");
+            resources["DataGridRowSelectedBrush"] = CreateBrush("#DDE9F7");
+            resources["DataGridSelectionForegroundBrush"] = CreateBrush("#264562");
+            resources["DataGridAltRowBrush"] = CreateBrush("#F9FBFE");
+            resources["DataGridSurfaceBorderBrush"] = CreateBrush("#CCD9E6");
 
-            resources["ScrollTrackBrush"] = CreateBrush("#F7DDEB");
-            resources["ScrollThumbBrush"] = CreateBrush("#E9A8CC");
-            resources["ScrollThumbHoverBrush"] = CreateBrush("#D98FB8");
-        }
-
-        private static void ApplyBlueTheme()
-        {
-            ResourceDictionary resources = Application.Current.Resources;
-
-            resources["WindowBackgroundBrush"] = CreateGradient("#F2F8FF", "#E7F1FF", "#F4F1FF");
-            resources["SidebarBrush"] = CreateGradient("#CFE4FF", "#D4D8FF", "#E7DBFF");
-            resources["SidebarBorderBrush"] = CreateBrush("#9CBDF0");
-            resources["LogoChipBackgroundBrush"] = CreateBrush("#FDFEFF");
-            resources["LogoChipBorderBrush"] = CreateBrush("#A8C8F3");
-            resources["PrimaryTitleBrush"] = CreateBrush("#3F5FA6");
-            resources["SecondaryTextBrush"] = CreateBrush("#657FB3");
-
-            resources["MenuButtonBackgroundBrush"] = CreateBrush("#FCFEFF");
-            resources["MenuButtonBorderBrush"] = CreateBrush("#B9D1F7");
-            resources["MenuButtonForegroundBrush"] = CreateBrush("#4865A7");
-            resources["MenuButtonHoverBackgroundBrush"] = CreateBrush("#E6F0FF");
-            resources["MenuButtonHoverBorderBrush"] = CreateBrush("#7EA5E8");
-            resources["MenuButtonPressedBackgroundBrush"] = CreateBrush("#D6E7FF");
-
-            resources["VersionBadgeBackgroundBrush"] = CreateBrush("#EAF1FF");
-            resources["VersionBadgeBorderBrush"] = CreateBrush("#ABC5EE");
-            resources["VersionBadgeForegroundBrush"] = CreateBrush("#5474BC");
-
-            resources["ThemeButtonBackgroundBrush"] = CreateBrush("#FCFEFF");
-            resources["ThemeButtonBorderBrush"] = CreateBrush("#BFD2F5");
-            resources["ThemeButtonForegroundBrush"] = CreateBrush("#4763A5");
-
-            resources["InfoCardBackgroundBrush"] = CreateBrush("#F2F7FF");
-            resources["InfoCardBorderBrush"] = CreateBrush("#B9D0F3");
-            resources["InfoCardAccentBrush"] = CreateBrush("#5F8DE5");
-
-            resources["ContentBackgroundBrush"] = CreateBrush("#FCFEFF");
-            resources["ContentBorderBrush"] = CreateBrush("#C7D9F5");
-
-            resources["SummaryCardBackgroundBrush"] = CreateBrush("#EEF5FF");
-            resources["SummaryCardBorderBrush"] = CreateBrush("#BED1F1");
-            resources["SummaryLabelBrush"] = CreateBrush("#6F84B2");
-            resources["SummaryValueBrush"] = CreateBrush("#4265AF");
-
-            resources["SummaryWarmBackgroundBrush"] = CreateBrush("#E5F2FF");
-            resources["SummaryWarmBorderBrush"] = CreateBrush("#AED0F6");
-            resources["SummaryWarmForegroundBrush"] = CreateBrush("#4470BA");
-
-            resources["SummaryMintBackgroundBrush"] = CreateBrush("#E5FAFF");
-            resources["SummaryMintBorderBrush"] = CreateBrush("#A7DDF2");
-            resources["SummaryMintForegroundBrush"] = CreateBrush("#2F86A6");
-
-            resources["SummaryLavenderBackgroundBrush"] = CreateBrush("#ECEBFF");
-            resources["SummaryLavenderBorderBrush"] = CreateBrush("#BFC4F7");
-            resources["SummaryLavenderForegroundBrush"] = CreateBrush("#5864C8");
-
-            resources["SearchCardBackgroundBrush"] = CreateBrush("#F5F9FF");
-            resources["SearchCardBorderBrush"] = CreateBrush("#BED1F1");
-            resources["SearchInputBackgroundBrush"] = CreateBrush("#FFFFFF");
-            resources["SearchInputBorderBrush"] = CreateBrush("#B7CEF3");
-            resources["SearchInputForegroundBrush"] = CreateBrush("#506C9F");
-
-            resources["DataGridHeaderBrush"] = CreateBrush("#DAEBFF");
-            resources["DataGridHeaderForegroundBrush"] = CreateBrush("#4666AA");
-            resources["DataGridRowHoverBrush"] = CreateBrush("#EFF5FF");
-            resources["DataGridRowSelectedBrush"] = CreateBrush("#DCEBFF");
-            resources["DataGridSelectionForegroundBrush"] = CreateBrush("#3D5793");
-            resources["DataGridAltRowBrush"] = CreateBrush("#F7FAFF");
-            resources["DataGridSurfaceBorderBrush"] = CreateBrush("#C8D8F0");
-
-            resources["ScrollTrackBrush"] = CreateBrush("#D6E3F8");
-            resources["ScrollThumbBrush"] = CreateBrush("#7EA5E8");
-            resources["ScrollThumbHoverBrush"] = CreateBrush("#5E88D7");
+            resources["ScrollTrackBrush"] = CreateBrush("#D4E0EB");
+            resources["ScrollThumbBrush"] = CreateBrush("#7898B8");
+            resources["ScrollThumbHoverBrush"] = CreateBrush("#5C7E9F");
         }
 
         private static SolidColorBrush CreateBrush(string color)
@@ -502,8 +410,6 @@ namespace MonTableurApp
 
         private sealed class ThemeSettings
         {
-            public string Theme { get; set; } = ThemeRose;
-
             public bool SidebarCollapsed { get; set; }
 
             public double? WindowLeft { get; set; }
