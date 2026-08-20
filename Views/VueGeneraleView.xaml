@@ -191,6 +191,20 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="ColumnHeaderGripperStyle" TargetType="Thumb">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Background="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource DataGridHeaderBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource DataGridHeaderForegroundBrush}"/>
@@ -215,6 +229,19 @@
                                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                   RecognizesAccessKey="True"/>
                             </Border>
+
+                            <Border Width="1"
+                                    Margin="0,8,0,8"
+                                    HorizontalAlignment="Right"
+                                    Background="{DynamicResource SearchInputBorderBrush}"
+                                    IsHitTestVisible="False"/>
+
+                            <Thumb x:Name="PART_LeftHeaderGripper"
+                                   HorizontalAlignment="Left"
+                                   Style="{StaticResource ColumnHeaderGripperStyle}"/>
+                            <Thumb x:Name="PART_RightHeaderGripper"
+                                   HorizontalAlignment="Right"
+                                   Style="{StaticResource ColumnHeaderGripperStyle}"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
