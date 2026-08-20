@@ -196,38 +196,49 @@
                     </Grid>
                 </StackPanel>
 
-                <StackPanel x:Name="NavigationPanel"
-                            Grid.Row="1"
-                            Margin="0,18,0,0">
-                    <Button Content="Vue générale"
-                            x:Name="VueGeneraleButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="VueGenerale_Click"/>
-                    <Button Content="Suivi des essais"
-                            x:Name="SuiviEssaisButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="SuiviEssais_Click"/>
-                    <Button Content="Ajouter un projet"
-                            x:Name="AjouterProjetButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="AjouterProjet_Click"/>
-                    <Button Content="En cours"
-                            x:Name="EnCoursButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="EnCours_Click"/>
-                    <Button Content="Agenda"
-                            x:Name="AgendaButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="Agenda_Click"/>
-                    <Button Content="Projets archivés"
-                            x:Name="ArchivesButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="Archives_Click"/>
-                    <Button Content="Modifier des propriétés"
-                            x:Name="ModifierProprietesButton"
-                            Style="{StaticResource MenuButtonStyle}"
-                            Click="ModifierProprietes_Click"/>
-                </StackPanel>
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="NavigationPanel"
+                                Margin="0,18,0,0">
+                        <Button Content="Vue générale"
+                                x:Name="VueGeneraleButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="VueGenerale_Click"/>
+                        <Button Content="Suivi des essais"
+                                x:Name="SuiviEssaisButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="SuiviEssais_Click"/>
+                        <Button Content="Ajouter un projet"
+                                x:Name="AjouterProjetButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="AjouterProjet_Click"/>
+                        <Button Content="En cours"
+                                x:Name="EnCoursButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="EnCours_Click"/>
+                        <Button Content="Agenda"
+                                x:Name="AgendaButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="Agenda_Click"/>
+                        <Button Content="Projets archivés"
+                                x:Name="ArchivesButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="Archives_Click"/>
+                        <Button Content="Modifier des propriétés"
+                                x:Name="ModifierProprietesButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="ModifierProprietes_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Button x:Name="OutilsButton"
+                        Grid.Row="2"
+                        Content="Outils"
+                        Margin="0,2,0,0"
+                        AutomationProperties.Name="Outils"
+                        Style="{StaticResource MenuButtonStyle}"
+                        Click="Outils_Click"/>
             </Grid>
         </Border>
 
@@ -261,7 +272,7 @@
                             BorderThickness="1"
                             CornerRadius="18"
                             VerticalAlignment="Center">
-                        <TextBlock Text="Vers. 1.1"
+                        <TextBlock Text="Vers. 1.3"
                                    Foreground="{DynamicResource VersionBadgeForegroundBrush}"
                                    FontWeight="SemiBold"/>
                     </Border>

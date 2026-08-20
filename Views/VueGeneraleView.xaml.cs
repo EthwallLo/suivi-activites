@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Data;
 using System.Windows.Threading;
 using System.IO;
 using Microsoft.Win32;
@@ -15,13 +16,9 @@ namespace MonTableurApp.Views
 {
     public partial class VueGeneraleView : UserControl
     {
-        private Window? hostWindow;
-
         public VueGeneraleView()
         {
             InitializeComponent();
-            Loaded += VueGeneraleView_Loaded;
-            Unloaded += VueGeneraleView_Unloaded;
         }
 
         private void TousProjets_Click(object sender, RoutedEventArgs e)
@@ -327,87 +324,6 @@ namespace MonTableurApp.Views
             e.Handled = true;
         }
 
-        private void VueGeneraleView_Loaded(object sender, RoutedEventArgs e)
-        {
-            Window? window = Window.GetWindow(this);
-            if (window is null || ReferenceEquals(window, hostWindow))
-            {
-                return;
-            }
-
-            if (hostWindow is not null)
-            {
-                hostWindow.RemoveHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(HostWindow_PreviewMouseLeftButtonDown));
-            }
-
-            hostWindow = window;
-            hostWindow.AddHandler(
-                PreviewMouseLeftButtonDownEvent,
-                new MouseButtonEventHandler(HostWindow_PreviewMouseLeftButtonDown),
-                true);
-        }
-
-        private void VueGeneraleView_Unloaded(object sender, RoutedEventArgs e)
-        {
-            if (hostWindow is null)
-            {
-                return;
-            }
-
-            hostWindow.RemoveHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(HostWindow_PreviewMouseLeftButtonDown));
-            hostWindow = null;
-        }
-
-        private void HostWindow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            DependencyObject? source = e.OriginalSource as DependencyObject;
-
-            ComboBox? activeComboBox = FindOpenComboBox(ProjetsDataGrid);
-            Popup? clickedPopup = FindVisualParent<Popup>(source);
-            ComboBoxItem? clickedComboBoxItem = FindVisualParent<ComboBoxItem>(source);
-            ComboBox? clickedComboBox = FindVisualParent<ComboBox>(source) ?? clickedPopup?.PlacementTarget as ComboBox;
-            bool clickInsideActiveDropdown =
-                activeComboBox is not null
-                && (clickedComboBoxItem is not null
-                    || ReferenceEquals(clickedPopup?.PlacementTarget, activeComboBox));
-
-            if (clickInsideActiveDropdown)
-            {
-                return;
-            }
-
-            if (activeComboBox is not null)
-            {
-                activeComboBox.IsDropDownOpen = false;
-                ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
-                ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
-
-                if (clickedComboBox is not null || clickedComboBoxItem is not null)
-                {
-                    return;
-                }
-            }
-            else if (clickedComboBox is not null || clickedComboBoxItem is not null)
-            {
-                return;
-            }
-
-            DataGrid? clickedGrid = FindVisualParent<DataGrid>(source);
-            if (clickedGrid == ProjetsDataGrid)
-            {
-                DataGridCell? clickedCell = FindVisualParent<DataGridCell>(source);
-
-                if (clickedCell is null)
-                {
-                    ClearGridSelection();
-                }
-
-                return;
-            }
-
-            ClearGridSelection();
-        }
-
         private void ProjetsDataGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
         {
             if (!IsSingleClickComboColumn(e.Column))
@@ -436,37 +352,28 @@ namespace MonTableurApp.Views
             }
         }
 
+        private void GridComboBox_DropDownClosed(object sender, EventArgs e)
+        {
+            if (sender is not ComboBox comboBox)
+            {
+                return;
+            }
+
+            comboBox.Dispatcher.BeginInvoke(() =>
+            {
+                BindingExpression? bindingExpression = comboBox.GetBindingExpression(ComboBox.SelectedItemProperty);
+                bindingExpression?.UpdateSource();
+                ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+                ProjetsDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            }, DispatcherPriority.Background);
+        }
+
         private bool IsSingleClickComboColumn(DataGridColumn? column)
         {
             return column == ClientColumn
                 || column == DemandeurColumn
                 || column == TypeActiviteColumn
                 || column == StatutColumn;
-        }
-
-        private static ComboBox? FindOpenComboBox(DependencyObject? parent)
-        {
-            if (parent is null)
-            {
-                return null;
-            }
-
-            if (parent is ComboBox comboBox && comboBox.IsDropDownOpen)
-            {
-                return comboBox;
-            }
-
-            int childCount = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childCount; i++)
-            {
-                ComboBox? result = FindOpenComboBox(VisualTreeHelper.GetChild(parent, i));
-                if (result is not null)
-                {
-                    return result;
-                }
-            }
-
-            return null;
         }
 
         private void ClearGridSelection()

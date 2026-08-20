@@ -270,7 +270,7 @@
         <Style x:Key="HourStripeStyle" TargetType="Border">
             <Setter Property="BorderBrush" Value="{DynamicResource DataGridSurfaceBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,1,0,0"/>
-            <Setter Property="Background" Value="#FFFCFE"/>
+            <Setter Property="Background" Value="{DynamicResource SearchCardBackgroundBrush}"/>
         </Style>
 
         <Style x:Key="NonWorkingTimeBlockStyle" TargetType="Border">

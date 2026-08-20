@@ -12,6 +12,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Threading;
 using MonTableurApp.Models;
 
 namespace MonTableurApp.ViewModels
@@ -188,8 +189,10 @@ namespace MonTableurApp.ViewModels
 
         private string? searchNomProduit;
         private string? searchNomProduitEssais;
+        private string? searchNomProduitArchives;
         private string? agendaSearchText;
         private SearchFieldOption? selectedProjetSearchField;
+        private SearchFieldOption? selectedArchivedProjetSearchField;
         private SearchFieldOption? selectedProjetEssaisSortOption;
         private bool isProjetEssaisSortDescending;
         private string activeQuickFilter = QuickFilterAll;
@@ -199,6 +202,7 @@ namespace MonTableurApp.ViewModels
         private int rapportsEnCours;
         private int projetsFaits;
         private int projetsArchives;
+        private int projetsArchivesAffiches;
         private Projet? selectedProjetEssais;
         private int essaisSelectionATraiter;
         private int essaisSelectionEnCours;
@@ -224,12 +228,15 @@ namespace MonTableurApp.ViewModels
         private readonly Stack<ProjectTableUndoSnapshot> projectTableUndoSnapshots = new();
         private bool isRestoringAgendaState;
         private bool isRefreshingEssaiDefinitionMetadata;
+        private bool isProjectViewsRefreshPending;
+        private bool shouldEnsureSelectedProjetEssaisAfterRefresh;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<Projet> Projets { get; }
         public ICollectionView ProjetsView { get; }
         public ICollectionView ProjetsEssaisView { get; }
+        public ICollectionView ProjetsArchivesView { get; }
 
         public ObservableCollection<string> Clients { get; }
         public ObservableCollection<string> Demandeurs { get; }
@@ -298,6 +305,40 @@ namespace MonTableurApp.ViewModels
                 ProjetsEssaisView.Refresh();
                 OnPropertyChanged(nameof(SearchNomProduitEssais));
                 EnsureSelectedProjetEssais();
+            }
+        }
+
+        public string? SearchNomProduitArchives
+        {
+            get => searchNomProduitArchives;
+            set
+            {
+                if (searchNomProduitArchives == value)
+                {
+                    return;
+                }
+
+                searchNomProduitArchives = value;
+                ProjetsArchivesView.Refresh();
+                OnPropertyChanged(nameof(SearchNomProduitArchives));
+                RefreshArchivedProjectsStatistics();
+            }
+        }
+
+        public SearchFieldOption? SelectedArchivedProjetSearchField
+        {
+            get => selectedArchivedProjetSearchField;
+            set
+            {
+                if (ReferenceEquals(selectedArchivedProjetSearchField, value))
+                {
+                    return;
+                }
+
+                selectedArchivedProjetSearchField = value;
+                ProjetsArchivesView.Refresh();
+                OnPropertyChanged(nameof(SelectedArchivedProjetSearchField));
+                RefreshArchivedProjectsStatistics();
             }
         }
 
@@ -421,6 +462,21 @@ namespace MonTableurApp.ViewModels
 
                 projetsArchives = value;
                 OnPropertyChanged(nameof(ProjetsArchives));
+            }
+        }
+
+        public int ProjetsArchivesAffiches
+        {
+            get => projetsArchivesAffiches;
+            private set
+            {
+                if (projetsArchivesAffiches == value)
+                {
+                    return;
+                }
+
+                projetsArchivesAffiches = value;
+                OnPropertyChanged(nameof(ProjetsArchivesAffiches));
             }
         }
 
@@ -1455,6 +1511,7 @@ namespace MonTableurApp.ViewModels
                 new("NumeroProjet", "Projet")
             };
             selectedProjetSearchField = ProjetSearchFields[0];
+            selectedArchivedProjetSearchField = ProjetSearchFields[0];
             ProjetEssaisSortOptions = new List<SearchFieldOption>
             {
                 new(EssaisSortAlphabetical, "A-Z"),
@@ -1480,6 +1537,9 @@ namespace MonTableurApp.ViewModels
             ProjetsEssaisView.Filter = FilterProjetEssais;
             ApplyProjetEssaisSorting();
 
+            ProjetsArchivesView = new CollectionViewSource { Source = Projets }.View;
+            ProjetsArchivesView.Filter = FilterProjetArchive;
+
             Projets.CollectionChanged += Projets_CollectionChanged;
 
             foreach (Projet projet in Projets)
@@ -1488,6 +1548,7 @@ namespace MonTableurApp.ViewModels
             }
 
             RefreshStatistics();
+            RefreshArchivedProjectsStatistics();
             EnsureSelectedProjetEssais();
             RefreshEnCoursDashboard();
             RefreshAgendaTasks();
@@ -2024,6 +2085,7 @@ namespace MonTableurApp.ViewModels
 
                 ProjetsView.Refresh();
                 ProjetsEssaisView.Refresh();
+                ProjetsArchivesView.Refresh();
                 RefreshSelectedProjectStatistics();
             }
 
@@ -2053,8 +2115,10 @@ namespace MonTableurApp.ViewModels
             Sauvegarder();
             ProjetsView.Refresh();
             ProjetsEssaisView.Refresh();
+            ProjetsArchivesView.Refresh();
             EnsureSelectedProjetEssais();
             RefreshStatistics();
+            RefreshArchivedProjectsStatistics();
             RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
         }
@@ -2190,6 +2254,21 @@ namespace MonTableurApp.ViewModels
             return MatchesQuickFilter(projet);
         }
 
+        private bool FilterProjetArchive(object obj)
+        {
+            if (obj is not Projet projet)
+            {
+                return false;
+            }
+
+            if (!projet.EstArchive)
+            {
+                return false;
+            }
+
+            return MatchesProjectSearch(projet, SearchNomProduitArchives, SelectedArchivedProjetSearchField);
+        }
+
         private bool FilterProjetEssais(object obj)
         {
             if (obj is not Projet projet)
@@ -2233,8 +2312,10 @@ namespace MonTableurApp.ViewModels
 
             ProjetsView.Refresh();
             ProjetsEssaisView.Refresh();
+            ProjetsArchivesView.Refresh();
             Sauvegarder();
             RefreshStatistics();
+            RefreshArchivedProjectsStatistics();
             EnsureSelectedProjetEssais();
             RefreshAgendaTasks();
         }
@@ -2282,15 +2363,53 @@ namespace MonTableurApp.ViewModels
                     EnsureEssaisReferenceProduit(projet);
                 }
 
-                ProjetsView.Refresh();
-                ProjetsEssaisView.Refresh();
-                EnsureSelectedProjetEssais();
+                ScheduleProjectViewsRefresh(ensureSelectedProjetEssais: true);
             }
 
             Sauvegarder();
             RefreshStatistics();
+            RefreshArchivedProjectsStatistics();
             RefreshSelectedProjectStatistics();
             RefreshAgendaTasks();
+        }
+
+        private void ScheduleProjectViewsRefresh(bool ensureSelectedProjetEssais)
+        {
+            shouldEnsureSelectedProjetEssaisAfterRefresh |= ensureSelectedProjetEssais;
+
+            if (isProjectViewsRefreshPending)
+            {
+                return;
+            }
+
+            Dispatcher? dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null)
+            {
+                RefreshProjectViewsNow(shouldEnsureSelectedProjetEssaisAfterRefresh);
+                shouldEnsureSelectedProjetEssaisAfterRefresh = false;
+                return;
+            }
+
+            isProjectViewsRefreshPending = true;
+            dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+            {
+                bool ensureSelection = shouldEnsureSelectedProjetEssaisAfterRefresh;
+                shouldEnsureSelectedProjetEssaisAfterRefresh = false;
+                isProjectViewsRefreshPending = false;
+                RefreshProjectViewsNow(ensureSelection);
+            }));
+        }
+
+        private void RefreshProjectViewsNow(bool ensureSelectedProjetEssais)
+        {
+            ProjetsView.Refresh();
+            ProjetsEssaisView.Refresh();
+            ProjetsArchivesView.Refresh();
+
+            if (ensureSelectedProjetEssais)
+            {
+                EnsureSelectedProjetEssais();
+            }
         }
 
         private void AttacherEssai(EssaiSuivi essai)
@@ -2332,8 +2451,10 @@ namespace MonTableurApp.ViewModels
 
             Sauvegarder();
             ProjetsEssaisView.Refresh();
+            ProjetsArchivesView.Refresh();
             EnsureSelectedProjetEssais();
             RefreshSelectedProjectStatistics();
+            RefreshArchivedProjectsStatistics();
             RefreshAgendaTasks();
         }
 
@@ -2362,8 +2483,10 @@ namespace MonTableurApp.ViewModels
 
             Sauvegarder();
             ProjetsEssaisView.Refresh();
+            ProjetsArchivesView.Refresh();
             EnsureSelectedProjetEssais();
             RefreshSelectedProjectStatistics();
+            RefreshArchivedProjectsStatistics();
             RefreshAgendaTasks();
         }
 
@@ -2390,6 +2513,11 @@ namespace MonTableurApp.ViewModels
             OnPropertyChanged(nameof(IsDoneFilterActive));
             OnPropertyChanged(nameof(IsArchivedFilterActive));
             RefreshEnCoursDashboard();
+        }
+
+        private void RefreshArchivedProjectsStatistics()
+        {
+            ProjetsArchivesAffiches = ProjetsArchivesView.Cast<Projet>().Count();
         }
 
         private void RefreshSelectedProjectStatistics()
@@ -2504,6 +2632,7 @@ namespace MonTableurApp.ViewModels
 
             ProjetsView.Refresh();
             RefreshStatistics();
+            RefreshArchivedProjectsStatistics();
         }
 
         private void SetEssaiFilter(string filter)
@@ -2540,14 +2669,19 @@ namespace MonTableurApp.ViewModels
 
         private bool MatchesSearch(Projet projet)
         {
-            if (string.IsNullOrWhiteSpace(SearchNomProduit))
+            return MatchesProjectSearch(projet, SearchNomProduit, SelectedProjetSearchField);
+        }
+
+        private static bool MatchesProjectSearch(Projet projet, string? searchTerm, SearchFieldOption? searchField)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
             {
                 return true;
             }
 
-            string searchValue = NormalizeText(SearchNomProduit);
+            string searchValue = NormalizeText(searchTerm);
 
-            return SelectedProjetSearchField?.Key switch
+            return searchField?.Key switch
             {
                 "NumeroProjet" => NormalizeText(projet.NumeroProjet).Contains(searchValue),
                 "Client" => NormalizeText(projet.Client).Contains(searchValue),

@@ -1,0 +1,299 @@
+<UserControl x:Class="MonTableurApp.Views.VueOutilsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinWidth="360">
+    <UserControl.Resources>
+        <Style x:Key="ToolCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SearchCardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="24"/>
+        </Style>
+
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,7"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource SummaryLabelBrush}"/>
+        </Style>
+
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource SearchInputForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SearchInputBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SearchInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="MinHeight" Value="46"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="InputBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="InputBorder" Property="BorderBrush" Value="{DynamicResource InfoCardAccentBrush}"/>
+                                <Setter TargetName="InputBorder" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="15">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.86"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.42"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryActionButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource ActionButtonStyle}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource InfoCardAccentBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InfoCardAccentBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="10">
+            <Border MaxWidth="980"
+                    Padding="28"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Style="{StaticResource ToolCardStyle}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="58"
+                                Height="58"
+                                Margin="0,0,18,0"
+                                Background="{DynamicResource SummaryLavenderBackgroundBrush}"
+                                BorderBrush="{DynamicResource SummaryLavenderBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="18">
+                            <TextBlock Text="123"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Segoe UI"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource SummaryLavenderForegroundBrush}"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="Générateur de nombres aléatoires"
+                                       FontSize="23"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap"
+                                       AutomationProperties.HeadingLevel="Level2"
+                                       Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Height="1"
+                            Margin="0,24,0,22"
+                            Background="{DynamicResource SearchCardBorderBrush}"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Nombre de valeurs"
+                                       Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBox x:Name="NumberCountTextBox"
+                                     Text="10"
+                                     ToolTip="Entre 1 et 10 000"
+                                     AutomationProperties.Name="Nombre de valeurs à générer"
+                                     Style="{StaticResource RoundedTextBoxStyle}"
+                                     KeyDown="ParameterTextBox_KeyDown"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Valeur minimale"
+                                       Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBox x:Name="MinimumTextBox"
+                                     Text="1"
+                                     ToolTip="Borne minimale incluse"
+                                     AutomationProperties.Name="Valeur minimale incluse"
+                                     Style="{StaticResource RoundedTextBoxStyle}"
+                                     KeyDown="ParameterTextBox_KeyDown"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="Valeur maximale"
+                                       Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBox x:Name="MaximumTextBox"
+                                     Text="100"
+                                     ToolTip="Borne maximale incluse"
+                                     AutomationProperties.Name="Valeur maximale incluse"
+                                     Style="{StaticResource RoundedTextBoxStyle}"
+                                     KeyDown="ParameterTextBox_KeyDown"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="GenerateButton"
+                                Content="Générer les nombres"
+                                AutomationProperties.Name="Générer les nombres aléatoires"
+                                Style="{StaticResource PrimaryActionButtonStyle}"
+                                Click="Generate_Click"/>
+
+                        <TextBlock Grid.Column="1"
+                                   Margin="16,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Text="Bornes incluses · répétitions possibles · 10 000 valeurs maximum"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    </Grid>
+
+                    <TextBlock x:Name="ValidationTextBlock"
+                               Margin="0,12,0,0"
+                               AutomationProperties.LiveSetting="Assertive"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SummaryWarmForegroundBrush}"
+                               Visibility="Collapsed"/>
+
+                    <TextBlock x:Name="StatusTextBlock"
+                               Margin="0,12,0,0"
+                               AutomationProperties.LiveSetting="Polite"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SummaryMintForegroundBrush}"
+                               Visibility="Collapsed"/>
+
+                    <Border Margin="0,24,0,0"
+                            Padding="20"
+                            Background="{DynamicResource SearchInputBackgroundBrush}"
+                            BorderBrush="{DynamicResource SearchInputBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="20">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Résultat"
+                                               FontSize="17"
+                                               FontWeight="SemiBold"
+                                               AutomationProperties.HeadingLevel="Level3"
+                                               Foreground="{DynamicResource PrimaryTitleBrush}"/>
+                                    <TextBlock x:Name="ResultSummaryTextBlock"
+                                               Margin="0,3,12,0"
+                                               Text="Aucun nombre généré"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               AutomationProperties.LiveSetting="Polite"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1"
+                                            Margin="0,12,0,0"
+                                            Orientation="Horizontal">
+                                    <Button x:Name="CopyButton"
+                                            Content="Copier"
+                                            Margin="0,0,10,0"
+                                            IsEnabled="False"
+                                            AutomationProperties.Name="Copier les nombres dans le presse-papiers"
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Click="Copy_Click"/>
+                                    <Button x:Name="ExportCsvButton"
+                                            Content="Télécharger le CSV"
+                                            IsEnabled="False"
+                                            AutomationProperties.Name="Télécharger les nombres au format CSV"
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Click="ExportCsv_Click"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBox x:Name="ResultsTextBox"
+                                     Height="220"
+                                     Margin="0,16,0,0"
+                                     Padding="14"
+                                     IsReadOnly="True"
+                                     AcceptsReturn="True"
+                                     TextWrapping="NoWrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas"
+                                     FontSize="14"
+                                     Foreground="{DynamicResource SearchInputForegroundBrush}"
+                                     Background="{DynamicResource SearchCardBackgroundBrush}"
+                                     BorderBrush="{DynamicResource SearchCardBorderBrush}"
+                                     BorderThickness="1"
+                                     AutomationProperties.Name="Nombres générés"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

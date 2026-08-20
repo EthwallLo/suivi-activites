@@ -1280,7 +1280,8 @@
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.Clients, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                           Style="{StaticResource GridComboBoxStyle}"
-                                          SelectedItem="{Binding Client, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                          DropDownClosed="GridComboBox_DropDownClosed"
+                                          SelectedItem="{Binding Client, Mode=TwoWay, UpdateSourceTrigger=Explicit}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -1306,7 +1307,8 @@
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.Demandeurs, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                           Style="{StaticResource GridComboBoxStyle}"
-                                          SelectedItem="{Binding Demandeur, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                          DropDownClosed="GridComboBox_DropDownClosed"
+                                          SelectedItem="{Binding Demandeur, Mode=TwoWay, UpdateSourceTrigger=Explicit}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -1332,7 +1334,8 @@
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.TypesActivite, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                           Style="{StaticResource GridComboBoxStyle}"
-                                          SelectedItem="{Binding TypeActivite, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                          DropDownClosed="GridComboBox_DropDownClosed"
+                                          SelectedItem="{Binding TypeActivite, Mode=TwoWay, UpdateSourceTrigger=Explicit}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -1391,7 +1394,8 @@
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding DataContext.Statuts, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                           Style="{StaticResource GridComboBoxStyle}"
-                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                          DropDownClosed="GridComboBox_DropDownClosed"
+                                          SelectedItem="{Binding Statut, Mode=TwoWay, UpdateSourceTrigger=Explicit}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>

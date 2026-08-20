@@ -22,6 +22,7 @@ namespace MonTableurApp
         private readonly VueEnCoursView vueEnCours;
         private readonly VueAgendaView vueAgenda;
         private readonly VueArchivesView vueArchives;
+        private readonly VueOutilsView vueOutils;
         private bool isSidebarCollapsed;
 
         public MainWindow()
@@ -35,6 +36,7 @@ namespace MonTableurApp
             vueEnCours = new VueEnCoursView { DataContext = viewModel };
             vueAgenda = new VueAgendaView { DataContext = viewModel };
             vueArchives = new VueArchivesView { DataContext = viewModel };
+            vueOutils = new VueOutilsView { DataContext = viewModel };
 
             isSidebarCollapsed = LoadSavedSidebarCollapsed();
             ApplyApplicationTheme();
@@ -77,6 +79,11 @@ namespace MonTableurApp
         private void Archives_Click(object sender, RoutedEventArgs e)
         {
             AfficherVueArchives();
+        }
+
+        private void Outils_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherVueOutils();
         }
 
         private void SidebarToggle_Click(object sender, RoutedEventArgs e)
@@ -150,6 +157,14 @@ namespace MonTableurApp
                 ArchivesButton);
         }
 
+        private void AfficherVueOutils()
+        {
+            ShowView(
+                vueOutils,
+                "Outils",
+                OutilsButton);
+        }
+
         private void ShowView(UserControl view, string title, Button activeButton)
         {
             PageTitleText.Text = title;
@@ -171,6 +186,7 @@ namespace MonTableurApp
             EnCoursButton.Tag = null;
             AgendaButton.Tag = null;
             ArchivesButton.Tag = null;
+            OutilsButton.Tag = null;
             activeButton.Tag = "Active";
         }
 
@@ -196,6 +212,7 @@ namespace MonTableurApp
             SetNavigationButtonLabel(AgendaButton, "Agenda", "A");
             SetNavigationButtonLabel(ArchivesButton, "Projets archivés", "P");
             SetNavigationButtonLabel(ModifierProprietesButton, "Modifier des propriétés", "M");
+            SetNavigationButtonLabel(OutilsButton, "Outils", "O");
         }
 
         private void SetNavigationButtonLabel(Button button, string fullLabel, string compactLabel)
